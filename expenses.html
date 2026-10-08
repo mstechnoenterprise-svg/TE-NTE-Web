@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expenses — TE & NTE Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    .summary-report-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .summary-kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .summary-kpi-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 10px;
+      text-align: center;
+    }
+
+    .summary-kpi-val {
+      font-size: 18px;
+      font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .summary-kpi-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .summary-print-header {
+      display: block;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .summary-print-header h2 {
+      color: var(--text-primary) !important;
+    }
+
+    .summary-print-header p,
+    .summary-print-header div {
+      color: var(--text-muted) !important;
+    }
+
+    select.form-control {
+      cursor: pointer;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    select.form-control option {
+      padding: 8px 12px;
+      font-size: 13px;
+      white-space: normal;
+    }
+
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+
+      /* Hide ALL main layout, cards, and page elements completely */
+      .app-layout,
+      .sidebar,
+      .top-header,
+      .main-content,
+      .page-wrapper,
+      .no-print,
+      .orb,
+      .bg-animated,
+      .breadcrumb,
+      .page-header,
+      .grid,
+      .card,
+      #addModal,
+      .modal-backdrop,
+      .toast-container {
+        display: none !important;
+      }
+
+      #expSummaryModal {
+        position: static !important;
+        display: block !important;
+        background: #fff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        z-index: 9999 !important;
+      }
+
+      #expSummaryModal .modal {
+        max-width: 100% !important;
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        transform: none !important;
+      }
+
+      #expSummaryModal .modal-header,
+      #expSummaryModal .modal-footer,
+      .screen-only {
+        display: none !important;
+      }
+
+      .summary-print-header {
+        display: block !important;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #333;
+      }
+
+      .summary-print-header h2 {
+        color: #0f172a !important;
+      }
+
+      .summary-print-header p,
+      .summary-print-header div {
+        color: #475569 !important;
+      }
+
+      #expSummaryModalBody {
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        max-height: none !important;
+        color: #000 !important;
+      }
+
+      #expSummaryModalBody * {
+        color: #000 !important;
+      }
+
+      .summary-report-card {
+        background: #fff !important;
+        border: 1px solid #ccc !important;
+        color: #000 !important;
+        break-inside: avoid;
+      }
+
+      .summary-kpi-box {
+        background: #f8f8f8 !important;
+        border: 1px solid #ddd !important;
+      }
+
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
+
+      th,
+      td {
+        border: 1px solid #ccc !important;
+        padding: 6px 8px !important;
+        font-size: 11px !important;
+      }
+
+      th {
+        background: #eee !important;
+        font-weight: bold !important;
+      }
+
+      .badge {
+        border: 1px solid #999 !important;
+        background: #f0f0f0 !important;
+        color: #000 !important;
+      }
+
+      .print-sign-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        margin-top: 40px !important;
+        padding-top: 20px !important;
+        break-inside: avoid;
+      }
+
+      .print-sign-box {
+        text-align: center !important;
+        width: 180px !important;
+        border-top: 1px solid #333 !important;
+        font-size: 11px !important;
+        color: #000 !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-animated"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <div class="main-content" id="mainContent">
+      <header class="top-header" id="topHeader">
+        <button class="header-toggle" id="sidebarToggle"><i class="ri-menu-line"></i></button>
+        <div class="header-title">
+          <h1 id="headerTitle">Expenses</h1>
+          <p id="headerSubtitle">Track all company expenses</p>
+        </div>
+        <div class="header-actions">
+          <div class="header-btn header-btn-settings" id="settingsBtn" title="Settings"><i
+              class="ri-settings-3-line"></i><span class="header-btn-label">Settings</span></div>
+        </div>
+      </header>
+      <div class="page-wrapper">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb animate-in" id="pageBreadcrumb"></nav>
+
+
+        <div class="page-header animate-in">
+          <div class="page-header-left">
+            <h2><i class="ri-wallet-3-line"></i> Expenses</h2>
+            <p>Company & Agent expense tracker</p>
+          </div>
+          <div class="flex gap-8">
+            <button class="btn btn-outline" id="expSummaryBtn" onclick="openExpenseSummary()"><i
+                class="ri-file-chart-line"></i> Expenses Summary</button>
+            <button class="btn btn-primary" id="addBtn" style="display:none"><i class="ri-add-line"></i> Add
+              Expense</button>
+          </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="grid grid-4 mb-24 animate-in anim-delay-1">
+          <div class="kpi-card">
+            <div class="kpi-icon red"><i class="ri-wallet-3-line"></i></div>
+            <div class="kpi-value" id="totalExp">৳0</div>
+            <div class="kpi-label">Total Expenses</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon"><i class="ri-calendar-2-line"></i></div>
+            <div class="kpi-value" id="thisMonth">৳0</div>
+            <div class="kpi-label">This Month</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon blue"><i class="ri-bar-chart-2-line"></i></div>
+            <div class="kpi-value" id="avgExp">৳0</div>
+            <div class="kpi-label">Avg per Entry</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon green"><i class="ri-list-check"></i></div>
+            <div class="kpi-value" id="expCount">0</div>
+            <div class="kpi-label">Total Entries</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-2 mb-24 animate-in anim-delay-2">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="ri-donut-chart-line"></i> By Category</div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container"><canvas id="catChart"></canvas></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="ri-bar-chart-line"></i> Monthly Trend</div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container"><canvas id="monthChart"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters + Table -->
+        <div class="card animate-in anim-delay-3">
+          <div class="card-header">
+            <div class="card-title"><i class="ri-table-line"></i> Expense Records <span id="recCount"
+                style="font-size:12px;color:var(--text-muted);font-weight:400"></span></div>
+            <div class="flex gap-8 items-center" style="flex-wrap:wrap">
+              <select class="form-control" id="agentFilter"
+                style="min-width:180px; max-width:280px; width:auto; height:38px; padding:6px 12px; font-size:13px;"
+                title="Filter by Agent">
+                <option value="">All Agents</option>
+              </select>
+              <select class="form-control" id="catFilter"
+                style="min-width:280px; max-width:520px; width:auto; height:38px; padding:6px 12px; font-size:13px;"
+                title="Filter by Category">
+                <option value="">All Categories</option>
+              </select>
+              <div class="search-input-wrap" style="min-width:200px; flex:1;"><i class="ri-search-line"></i><input
+                  type="search" class="form-control" id="searchInp" placeholder="Search..."
+                  style="height:38px; padding:6px 12px 6px 36px; font-size:13px;"></div>
+            </div>
+          </div>
+          <div class="table-wrapper" style="border:none;border-radius:0">
+            <table>
+              <thead>
+                <tr>
+                  <th>Agent &amp; Code</th>
+                  <th>ID</th>
+                  <th>Date</th>
+                  <th>RECEIVED BY</th>
+                  <th>Category</th>
+                  <th style="text-align:right;">Amount</th>
+                  <th>Description</th>
+                  <th>Paid By</th>
+                  <th id="actH" style="display:none; text-align:center;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr>
+                  <td colspan="9" class="text-center text-muted" style="padding:30px">Loading...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal" style="max-width:520px; width:95vw;">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle"><i class="ri-add-circle-line"></i> Add Expense</div>
+        <div class="modal-close"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editId">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Agent *</label>
+            <select id="entAgent" class="form-control" required>
+              <option value="">-- Select Agent --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" id="entDate" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select id="entCat" class="form-control" required>
+              <option value="Premised_Rent (BB_Col_194)">Premised_Rent (BB_Col_194)</option>
+              <option value="Staff_Salary (Excluding Owner's Salary) (BB_Col_195)">Staff_Salary (Excluding Owner's
+                Salary) (BB_Col_195)</option>
+              <option value="Expense_due_to_Utility_Bill_(Electricity/Internet/Mobile) (BB_Col_196)">
+                Expense_due_to_Utility_Bill_(Electricity/Internet/Mobile) (BB_Col_196)</option>
+              <option value="Entertainment_Cost (BB_Col_197)">Entertainment_Cost (BB_Col_197)</option>
+              <option value="Stationary_Cost (BB_Col_198)">Stationary_Cost (BB_Col_198)</option>
+              <option value="Transport/conveyance/courier_Cost (BB_Col_199)">Transport/conveyance/courier_Cost
+                (BB_Col_199)</option>
+              <option value="Maintenance_Cost (BB_Col_200)">Maintenance_Cost (BB_Col_200)</option>
+              <option value="Expenses_due_to_marketing (BB_Col_201)">Expenses_due_to_marketing (BB_Col_201)</option>
+              <option value="Miscellaneous_Expenses (BB_Col_202)">Miscellaneous_Expenses (BB_Col_202)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount *</label>
+            <input type="number" id="entAmount" class="form-control" placeholder="0.00" step="0.01" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">RECEIVED BY</label>
+            <input type="text" id="entReceivedBy" class="form-control" placeholder="Recipient / Receiver Name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Paid By</label>
+            <input type="text" id="entPaidBy" class="form-control" placeholder="e.g. Admin">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="entDesc" class="form-control" rows="2" placeholder="Optional description / notes"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost modal-close">Cancel</button>
+        <button class="btn btn-primary" id="saveBtn"><i class="ri-save-line"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expenses Summary Modal (Print & Download PDF) -->
+  <div class="modal-overlay" id="expSummaryModal">
+    <div class="modal" style="max-width:960px; width:95vw; max-height:92vh; display:flex; flex-direction:column;">
+      <div class="modal-header no-print" style="padding:16px 20px; border-bottom:1px solid var(--border)">
+        <div class="modal-title"
+          style="font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+          <i class="ri-file-chart-line" style="color:var(--gold); font-size:20px;"></i>
+          <span id="summaryModalTitle">Expenses Statement &amp; Summary</span>
+        </div>
+        <div class="modal-close" onclick="Modal.close('expSummaryModal')"><i class="ri-close-line"></i></div>
+      </div>
+
+      <!-- Controls Bar (Screen Only) -->
+      <div class="screen-only"
+        style="padding:14px 20px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <!-- Left: Agent & Category Filters -->
+          <div class="flex gap-10 items-center flex-wrap">
+            <div class="flex gap-6 items-center">
+              <label
+                style="font-size:12px; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-store-2-line" style="color:var(--gold)"></i> Agent:
+              </label>
+              <select id="summaryAgentFilter" class="form-control"
+                style="min-width:200px; max-width:320px; width:auto; height:38px; padding:6px 12px; font-size:13px;"
+                onchange="onSummaryFilterChange()" title="Select Agent">
+                <option value="">All Agents (সকল এজেন্ট)</option>
+              </select>
+            </div>
+            <div class="flex gap-6 items-center">
+              <label
+                style="font-size:12px; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-folder-line" style="color:var(--gold)"></i> Category:
+              </label>
+              <select id="summaryCatFilter" class="form-control"
+                style="min-width:300px; max-width:520px; width:auto; height:38px; padding:6px 12px; font-size:13px;"
+                onchange="onSummaryFilterChange()" title="Select Category">
+                <option value="">All Categories (সকল ক্যাটাগরি)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Date Range Filter & Quick Presets -->
+        <div
+          style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding-top:10px; border-top:1px dashed var(--border);">
+          <div class="flex gap-8 items-center flex-wrap">
+            <span
+              style="font-size:12px; font-weight:600; color:var(--text-primary); display:flex; align-items:center; gap:4px;">
+              <i class="ri-calendar-line" style="color:var(--gold);"></i> Date Range:
+            </span>
+            <div class="flex gap-6 items-center">
+              <input type="date" id="summaryDateFrom" class="form-control"
+                style="height:32px; font-size:12px; max-width:145px;" onchange="onSummaryDateChange()">
+              <span style="color:var(--text-muted); font-size:12px;">to</span>
+              <input type="date" id="summaryDateTo" class="form-control"
+                style="height:32px; font-size:12px; max-width:145px;" onchange="onSummaryDateChange()">
+            </div>
+          </div>
+          <div class="flex gap-6 items-center flex-wrap">
+            <button class="btn btn-ghost btn-sm" onclick="setSummaryDatePreset('30d')"
+              style="height:30px; font-size:11px; padding:0 10px;">Last 30 Days (৩০ দিন)</button>
+            <button class="btn btn-ghost btn-sm" onclick="setSummaryDatePreset('6m')"
+              style="height:30px; font-size:11px; padding:0 10px;">Last 6 Months (৬ মাস)</button>
+            <button class="btn btn-ghost btn-sm" onclick="setSummaryDatePreset('1y')"
+              style="height:30px; font-size:11px; padding:0 10px;">Last 1 Year (১ বছর)</button>
+            <button class="btn btn-ghost btn-sm" onclick="setSummaryDatePreset('all')"
+              style="height:30px; font-size:11px; padding:0 10px;">All Time (সব সময়)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-body" id="expSummaryModalBody" style="overflow-y:auto; padding:20px; flex:1;">
+        <!-- Dynamic Summary Statement Content rendered by JS -->
+      </div>
+
+      <div class="modal-footer no-print"
+        style="justify-content:space-between; padding:12px 20px; border-top:1px solid var(--border);">
+        <div id="summaryFooterMeta" style="font-size:12px; color:var(--text-muted);">
+          MS Techno Enterprise • Expense Management System
+        </div>
+        <div class="flex gap-8">
+          <button class="btn btn-outline btn-sm" onclick="printExpenseSummary()" title="Print Summary Report">
+            <i class="ri-printer-line"></i> Print (প্রিন্ট)
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="downloadExpenseSummaryPDF()" title="Download PDF Report">
+            <i class="ri-file-pdf-line"></i> Download PDF (পিডিএফ ডাউনলোড)
+          </button>
+          <button class="btn btn-ghost btn-sm modal-close" onclick="Modal.close('expSummaryModal')">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const user = App.init('expenses', 'Expenses', 'Company expense tracker');
+    UIEnhancements.setBreadcrumb('pageBreadcrumb', [{ label: 'Expenses' }]);
+    if (!user) throw new Error();
+    const isAdmin = user.role === 'admin' || user.role === 'sub-admin';
+    const canEdit = isAdmin || Auth.canEdit('expenses');
+    Chart.defaults.color = '#9ba8cc'; Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+    const STANDARD_BB_CATEGORIES = [
+      "Premised_Rent (BB_Col_194)",
+      "Staff_Salary (Excluding Owner's Salary) (BB_Col_195)",
+      "Expense_due_to_Utility_Bill_(Electricity/Internet/Mobile) (BB_Col_196)",
+      "Entertainment_Cost (BB_Col_197)",
+      "Stationary_Cost (BB_Col_198)",
+      "Transport/conveyance/courier_Cost (BB_Col_199)",
+      "Maintenance_Cost (BB_Col_200)",
+      "Expenses_due_to_marketing (BB_Col_201)",
+      "Miscellaneous_Expenses (BB_Col_202)"
+    ];
+
+    let allData = [], filteredData = [];
+    const PER_PAGE = 15; let page = 1;
+    let catChart, monthChart;
+
+    const COLORS = ['#f5a623', '#4fc3f7', '#10b981', '#8b5cf6', '#ef4444', '#f59e0b', '#3b82f6', '#ec4899', '#14b8a6', '#a855f7', '#06b6d4'];
+
+    // Load accessible agents
+    const agents = Auth.getAccessibleAgents(DB.getAgents());
+
+    function initAgentDropdowns() {
+      const modalAgentSel = document.getElementById('entAgent');
+      const filterAgentSel = document.getElementById('agentFilter');
+
+      modalAgentSel.innerHTML = '<option value="">-- Select Agent * --</option>';
+      filterAgentSel.innerHTML = '<option value="">All Agents</option>';
+
+      agents.forEach(a => {
+        const text = `${a.name}${a.outletCode ? ' (' + a.outletCode + ')' : ''}`;
+        modalAgentSel.innerHTML += `<option value="${a.id}">${text}</option>`;
+        filterAgentSel.innerHTML += `<option value="${a.id}">${text}</option>`;
+      });
+      filterAgentSel.title = filterAgentSel.options[filterAgentSel.selectedIndex]?.text || '';
+    }
+
+    function load() {
+      initAgentDropdowns();
+      allData = DB.getExpenses().sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      // Populate category filter with standard BB categories + any existing categories
+      const existingCats = allData.map(e => e.category).filter(Boolean);
+      const combinedCats = [...new Set([...STANDARD_BB_CATEGORIES, ...existingCats])];
+      const sel = document.getElementById('catFilter');
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">All Categories</option>';
+      combinedCats.forEach(c => sel.innerHTML += `<option value="${c}" ${c === cur ? 'selected' : ''}>${c}</option>`);
+      sel.title = sel.options[sel.selectedIndex]?.text || '';
+
+      applyFilters();
+      renderCharts();
+    }
+
+    function getExpenseId(r) {
+      if (r.expenseId) return r.expenseId;
+      if (r.id) {
+        if (r.id.startsWith('EXP-')) return r.id;
+        return 'EXP-' + r.id.slice(-6).toUpperCase();
+      }
+      return 'EXP-000000';
+    }
+
+    function formatDateTimeDay(r) {
+      let dateObj = null;
+      if (r.createdAt) {
+        const t = new Date(r.createdAt);
+        if (!isNaN(t.getTime())) dateObj = t;
+      }
+      if (!dateObj && r.date) {
+        const t = new Date(r.date + 'T12:00:00');
+        if (!isNaN(t.getTime())) dateObj = t;
+      }
+      const dateStr = dateObj ? dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : (r.date || '—');
+      const dayStr = dateObj ? dateObj.toLocaleDateString('en-GB', { weekday: 'short' }) : '';
+      const timeStr = (r.createdAt && !isNaN(new Date(r.createdAt).getTime()))
+        ? new Date(r.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+        : (r.time || '10:00 AM');
+      return { dateStr, dayStr, timeStr };
+    }
+
+    function applyFilters() {
+      let d = [...allData];
+      const agentFilter = document.getElementById('agentFilter')?.value;
+      const cat = document.getElementById('catFilter').value;
+      const search = document.getElementById('searchInp').value.toLowerCase();
+
+      if (agentFilter) d = d.filter(e => e.agentId === agentFilter);
+      if (cat) d = d.filter(e => e.category === cat);
+      if (search) d = d.filter(e =>
+        (e.description || '').toLowerCase().includes(search) ||
+        (e.category || '').toLowerCase().includes(search) ||
+        (e.paidBy || '').toLowerCase().includes(search) ||
+        (e.receivedBy || '').toLowerCase().includes(search) ||
+        (getExpenseId(e)).toLowerCase().includes(search) ||
+        (e.agentName || '').toLowerCase().includes(search)
+      );
+
+      filteredData = d;
+      page = 1;
+
+      const total = d.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+      const now = new Date();
+      const thisM = d.filter(e => new Date(e.date).getMonth() === now.getMonth() && new Date(e.date).getFullYear() === now.getFullYear())
+        .reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+      const avg = d.length ? total / d.length : 0;
+
+      animateCount(document.getElementById('totalExp'), total, 600, '৳');
+      animateCount(document.getElementById('thisMonth'), thisM, 600, '৳');
+      animateCount(document.getElementById('avgExp'), avg, 600, '৳');
+      document.getElementById('expCount').textContent = d.length;
+
+      renderTable();
+    }
+
+    function renderCharts() {
+      // Donut by category
+      const cats = {};
+      allData.forEach(e => { cats[e.category] = (cats[e.category] || 0) + (parseFloat(e.amount) || 0); });
+      const catLabels = Object.keys(cats);
+      const catData = Object.values(cats);
+
+      if (catChart) catChart.destroy();
+      catChart = new Chart(document.getElementById('catChart'), {
+        type: 'doughnut',
+        data: { labels: catLabels.length ? catLabels : ['No Data'], datasets: [{ data: catData.length ? catData : [1], backgroundColor: catLabels.length ? COLORS.slice(0, catLabels.length) : ['rgba(255,255,255,0.1)'], borderWidth: 2, borderColor: '#060818', hoverOffset: 8 }] },
+        options: { responsive: true, maintainAspectRatio: true, cutout: '68%', plugins: { legend: { position: 'bottom', labels: { padding: 14, usePointStyle: true, pointStyleWidth: 10 } }, tooltip: { callbacks: { label: c => `৳${c.raw.toLocaleString('en-BD', { minimumFractionDigits: 2 })}` } } } }
+      });
+
+      // Bar: last 6 months
+      const months = [];
+      const mData = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(); d.setMonth(d.getMonth() - i);
+        months.push(d.toLocaleDateString('en-BD', { month: 'short', year: '2-digit' }));
+        mData.push(allData.filter(e => { const ed = new Date(e.date); return ed.getMonth() === d.getMonth() && ed.getFullYear() === d.getFullYear(); }).reduce((s, e) => s + (parseFloat(e.amount) || 0), 0));
+      }
+
+      if (monthChart) monthChart.destroy();
+      monthChart = new Chart(document.getElementById('monthChart'), {
+        type: 'bar',
+        data: { labels: months, datasets: [{ label: 'Expenses', data: mData, backgroundColor: 'rgba(245,166,35,0.7)', borderRadius: 8, borderSkipped: false }] },
+        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `৳${c.raw.toLocaleString('en-BD', { minimumFractionDigits: 2 })}` } } }, scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { callback: v => '৳' + (v / 1000).toFixed(0) + 'k' } } } }
+      });
+    }
+
+    function renderTable() {
+      document.getElementById('recCount').textContent = `(${filteredData.length})`;
+      if (canEdit) document.getElementById('actH').style.display = '';
+      const rows = filteredData.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+      const tbody = document.getElementById('tableBody');
+
+      if (!rows.length) { tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted" style="padding:30px">No records found</td></tr>`; }
+      else {
+        tbody.innerHTML = rows.map(r => {
+          const agentObj = agents.find(a => a.id === r.agentId);
+          const agentDisp = r.agentName || (agentObj ? agentObj.name : '—');
+          const agentCode = (agentObj && agentObj.outletCode) ? agentObj.outletCode : (r.agentCode || '—');
+          const dt = formatDateTimeDay(r);
+          const expId = getExpenseId(r);
+
+          return `
+          <tr>
+            <td class="bold">
+              <div style="font-weight:700; color:var(--text-primary); font-size:13px;">${agentDisp}</div>
+              <div style="font-size:11px; color:var(--text-muted); font-family:monospace; margin-top:2px;">${agentCode}</div>
+            </td>
+            <td>
+              <span class="badge badge-neutral" style="font-family:monospace; font-weight:700; font-size:11px; letter-spacing:0.5px;">${expId}</span>
+            </td>
+            <td>
+              <div style="line-height:1.35;">
+                <div style="font-weight:700; color:var(--text-primary); font-size:13px;">
+                  ${dt.dateStr} <span class="badge" style="font-size:10px; padding:1px 5px; background:rgba(255,255,255,0.06); color:var(--gold); font-weight:600;">${dt.dayStr}</span>
+                </div>
+                <div style="font-size:11px; color:var(--text-muted); display:flex; align-items:center; gap:4px; margin-top:2px;">
+                  <i class="ri-time-line"></i> ${dt.timeStr}
+                </div>
+              </div>
+            </td>
+            <td style="font-weight:600; color:var(--text-primary);">${r.receivedBy || '—'}</td>
+            <td><span class="badge badge-gold" title="${r.category}" style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:inline-block;">${r.category}</span></td>
+            <td class="primary" style="text-align:right; font-weight:700; font-family:'Outfit',sans-serif; font-size:14px;">${fmt(r.amount)}</td>
+            <td style="color:var(--text-secondary); max-width:200px; font-size:12px;">${r.description || '—'}</td>
+            <td><span class="badge badge-info">${r.paidBy || 'Admin'}</span></td>
+            ${canEdit ? `<td style="text-align:center;">
+              <div class="flex gap-6 justify-center">
+                <button class="btn btn-outline btn-sm btn-icon" onclick="openEdit('${r.id}')" title="Edit"><i class="ri-edit-line"></i></button>
+                <button class="btn btn-danger btn-sm btn-icon" onclick="del('${r.id}')" title="Delete"><i class="ri-delete-bin-line"></i></button>
+              </div>
+            </td>`: ''}
+          </tr>`;
+        }).join('');
+      }
+
+      const total = Math.ceil(filteredData.length / PER_PAGE);
+      const pag = document.getElementById('pagination');
+      if (total <= 1) { pag.innerHTML = ''; return; }
+      pag.innerHTML = Array.from({ length: total }, (_, i) => `<div class="page-btn${i + 1 === page ? ' active' : ''}" onclick="goPage(${i + 1})">${i + 1}</div>`).join('');
+    }
+
+    function goPage(p) { page = p; renderTable(); }
+
+    function openEdit(id) {
+      const r = DB.getExpenses().find(e => e.id === id);
+      if (!r) return;
+      document.getElementById('editId').value = id;
+      document.getElementById('entAgent').value = r.agentId || '';
+      document.getElementById('entDate').value = r.date;
+      document.getElementById('entCat').value = r.category;
+      document.getElementById('entAmount').value = r.amount;
+      document.getElementById('entReceivedBy').value = r.receivedBy || '';
+      document.getElementById('entPaidBy').value = r.paidBy || (user?.name || user?.username || 'Admin');
+      document.getElementById('entDesc').value = r.description || '';
+      document.getElementById('modalTitle').innerHTML = '<i class="ri-edit-line"></i> Edit Expense';
+      Modal.open('addModal');
+    }
+
+    function del(id) {
+      Confirm.show('Delete this expense?', () => { DB.deleteExpense(id); Toast.success('Deleted!'); load(); });
+    }
+
+    ['agentFilter', 'catFilter'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('change', () => {
+          el.title = el.options[el.selectedIndex]?.text || '';
+          applyFilters();
+        });
+      }
+    });
+    document.getElementById('searchInp')?.addEventListener('input', applyFilters);
+
+    if (canEdit) {
+      document.getElementById('addBtn').style.display = '';
+      document.getElementById('addBtn').addEventListener('click', () => {
+        document.getElementById('editId').value = '';
+        document.getElementById('entAgent').value = agents.length === 1 ? agents[0].id : '';
+        document.getElementById('entDate').value = new Date().toISOString().slice(0, 10);
+        document.getElementById('entCat').value = STANDARD_BB_CATEGORIES[0];
+        document.getElementById('entAmount').value = '';
+        document.getElementById('entReceivedBy').value = '';
+        document.getElementById('entDesc').value = '';
+
+        // Auto-fill logged-in user / authorized user name
+        const authName = (user && (user.name || user.username)) ? (user.name || user.username) : 'Admin';
+        document.getElementById('entPaidBy').value = authName;
+
+        document.getElementById('modalTitle').innerHTML = '<i class="ri-add-circle-line"></i> Add Expense';
+        Modal.open('addModal');
+      });
+
+      document.getElementById('saveBtn').addEventListener('click', () => {
+        const id = document.getElementById('editId').value;
+        const agentId = document.getElementById('entAgent').value;
+        const date = document.getElementById('entDate').value;
+        const cat = document.getElementById('entCat').value;
+        const amount = document.getElementById('entAmount').value;
+        const receivedBy = document.getElementById('entReceivedBy').value.trim();
+        const paidBy = document.getElementById('entPaidBy').value.trim() || (user?.name || user?.username || 'Admin');
+        const desc = document.getElementById('entDesc').value.trim();
+
+        if (!agentId) {
+          Toast.error('Please select an Agent.');
+          document.getElementById('entAgent').focus();
+          return;
+        }
+        if (!date) {
+          Toast.error('Please select a Date.');
+          document.getElementById('entDate').focus();
+          return;
+        }
+        if (!amount || parseFloat(amount) <= 0) {
+          Toast.error('Please enter a valid expense Amount.');
+          document.getElementById('entAmount').focus();
+          return;
+        }
+
+        const agentObj = agents.find(a => a.id === agentId);
+        const agentName = agentObj ? agentObj.name : '';
+
+        const data = {
+          agentId,
+          agentName,
+          date,
+          category: cat,
+          amount: parseFloat(amount).toFixed(2),
+          receivedBy,
+          description: desc,
+          paidBy
+        };
+
+        if (id) {
+          DB.updateExpense(id, data);
+          Toast.success('Expense updated!');
+        } else {
+          DB.addExpense(data);
+          Toast.success('Expense added successfully!');
+        }
+
+        Modal.close('addModal');
+        load();
+      });
+    }
+
+    // ── Expenses Summary Report & PDF ──────────────────────────
+    let summaryDateFrom = '';
+    let summaryDateTo = '';
+
+    function initSummaryDateRange() {
+      if (!summaryDateTo) {
+        const now = new Date();
+        summaryDateTo = now.toISOString().slice(0, 10);
+        const past = new Date();
+        past.setMonth(past.getMonth() - 6);
+        summaryDateFrom = past.toISOString().slice(0, 10);
+      }
+      const df = document.getElementById('summaryDateFrom');
+      const dt = document.getElementById('summaryDateTo');
+      if (df) df.value = summaryDateFrom;
+      if (dt) dt.value = summaryDateTo;
+    }
+
+    window.openExpenseSummary = function () {
+      initSummaryDateRange();
+
+      // Populate summary filters
+      const agentSel = document.getElementById('summaryAgentFilter');
+      if (agentSel) {
+        agentSel.innerHTML = '<option value="">All Agents (সকল এজেন্ট)</option>' +
+          agents.map(a => `<option value="${a.id}">${a.name}${a.outletCode ? ' (' + a.outletCode + ')' : ''}</option>`).join('');
+        const curAgent = document.getElementById('agentFilter')?.value;
+        if (curAgent) agentSel.value = curAgent;
+        agentSel.title = agentSel.options[agentSel.selectedIndex]?.text || '';
+      }
+
+      const catSel = document.getElementById('summaryCatFilter');
+      if (catSel) {
+        const existingCats = allData.map(e => e.category).filter(Boolean);
+        const combinedCats = [...new Set([...STANDARD_BB_CATEGORIES, ...existingCats])];
+        catSel.innerHTML = '<option value="">All Categories (সকল ক্যাটাগরি)</option>' +
+          combinedCats.map(c => `<option value="${c}">${c}</option>`).join('');
+        const curCat = document.getElementById('catFilter')?.value;
+        if (curCat) catSel.value = curCat;
+        catSel.title = catSel.options[catSel.selectedIndex]?.text || '';
+      }
+
+      renderExpenseSummary();
+      Modal.open('expSummaryModal');
+    };
+
+    window.setSummaryDatePreset = function (preset) {
+      const now = new Date();
+      summaryDateTo = now.toISOString().slice(0, 10);
+      if (preset === '30d') {
+        const d = new Date(); d.setDate(d.getDate() - 30);
+        summaryDateFrom = d.toISOString().slice(0, 10);
+      } else if (preset === '6m') {
+        const d = new Date(); d.setMonth(d.getMonth() - 6);
+        summaryDateFrom = d.toISOString().slice(0, 10);
+      } else if (preset === '1y') {
+        const d = new Date(); d.setFullYear(d.getFullYear() - 1);
+        summaryDateFrom = d.toISOString().slice(0, 10);
+      } else if (preset === 'all') {
+        summaryDateFrom = '2020-01-01';
+      }
+      initSummaryDateRange();
+      renderExpenseSummary();
+    };
+
+    window.onSummaryDateChange = function () {
+      const df = document.getElementById('summaryDateFrom')?.value;
+      const dt = document.getElementById('summaryDateTo')?.value;
+      if (df) summaryDateFrom = df;
+      if (dt) summaryDateTo = dt;
+      renderExpenseSummary();
+    };
+
+    window.onSummaryFilterChange = function () {
+      const ag = document.getElementById('summaryAgentFilter');
+      if (ag) ag.title = ag.options[ag.selectedIndex]?.text || '';
+      const ct = document.getElementById('summaryCatFilter');
+      if (ct) ct.title = ct.options[ct.selectedIndex]?.text || '';
+      renderExpenseSummary();
+    };
+
+    function renderExpenseSummary() {
+      const agentId = document.getElementById('summaryAgentFilter')?.value || '';
+      const cat = document.getElementById('summaryCatFilter')?.value || '';
+      const from = summaryDateFrom;
+      const to = summaryDateTo;
+
+      let list = allData.filter(e => {
+        if (agentId && e.agentId !== agentId) return false;
+        if (cat && e.category !== cat) return false;
+        if (from && e.date < from) return false;
+        if (to && e.date > to) return false;
+        return true;
+      });
+
+      const selAgent = agents.find(a => a.id === agentId);
+      const agentLabel = selAgent ? `${selAgent.name}${selAgent.outletCode ? ' (' + selAgent.outletCode + ')' : ''}` : 'All Agents (সকল এজেন্ট)';
+      const catLabel = cat || 'All Categories (সকল ক্যাটাগরি)';
+      const tableHeading = (cat && cat.trim()) ? cat : 'All Expense';
+
+      const printHeaderAgentTitle = selAgent
+        ? selAgent.name
+        : (agents.length ? agents.map(a => a.name).join(' • ') : 'All Agents (সকল এজেন্ট)');
+
+      const totalAmount = list.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+      const generatedAt = new Date().toLocaleString('en-BD', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+      document.getElementById('summaryModalTitle').textContent = `${tableHeading} Statement: ${agentLabel}`;
+      document.getElementById('summaryFooterMeta').textContent = `Period: ${fmtDate(from)} to ${fmtDate(to)} • Total: ${fmt(totalAmount)} • Generated: ${generatedAt}`;
+
+      const body = document.getElementById('expSummaryModalBody');
+      body.innerHTML = `
+        <!-- Print Header -->
+        <div class="summary-print-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <h2 style="margin:0; font-size:20px; font-weight:800; font-family:'Outfit',sans-serif; color:#0f172a; text-transform:uppercase;">${printHeaderAgentTitle}</h2>
+              <p style="margin:3px 0 0 0; font-size:12px; color:#475569;">Company &amp; Agent Expense Management • Statement &amp; Audit Report</p>
+              <p style="margin:2px 0 0 0; font-size:11px; color:#64748b;">${selAgent ? `Agent: <strong>${selAgent.name}</strong> (${selAgent.outletCode || selAgent.code || 'Agent'})` : `Scope: <strong>All Agents (${agents.length})</strong>`} | Category: <strong>${catLabel}</strong></p>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:13px; font-weight:800; color:#0f172a; text-transform:uppercase;">${(cat && cat.trim()) ? cat.toUpperCase() : 'ALL EXPENSE'} STATEMENT</div>
+              <div style="font-size:11px; color:#64748b;">Period: ${fmtDate(from)} ~ ${fmtDate(to)}</div>
+              <div style="font-size:11px; color:#64748b;">Generated: ${generatedAt}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Screen KPI Box -->
+        <div class="summary-kpi-row screen-only" style="margin-bottom:16px;">
+          <div class="summary-kpi-box">
+            <div class="summary-kpi-val" style="color:var(--gold);">${fmt(totalAmount)}</div>
+            <div class="summary-kpi-lbl">Total Expenses</div>
+          </div>
+          <div class="summary-kpi-box">
+            <div class="summary-kpi-val" style="color:var(--text-primary);">${list.length}</div>
+            <div class="summary-kpi-lbl">Total Records</div>
+          </div>
+          <div class="summary-kpi-box">
+            <div class="summary-kpi-val" style="color:var(--blue-bright);">${list.length ? fmt(totalAmount / list.length) : '৳0'}</div>
+            <div class="summary-kpi-lbl">Average Expense</div>
+          </div>
+          <div class="summary-kpi-box">
+            <div class="summary-kpi-val" style="color:var(--success); font-size:13px; padding-top:4px;">${agentLabel}</div>
+            <div class="summary-kpi-lbl">Agent Scope</div>
+          </div>
+        </div>
+
+        <!-- Expense Statement Table -->
+        <div class="summary-report-card" style="padding:0; overflow:hidden;">
+          <div style="padding:12px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <div style="font-size:14px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:6px;">
+              <i class="ri-file-list-3-line" style="color:var(--gold);"></i> <span>${tableHeading}</span>
+            </div>
+            <div style="font-size:12px; color:var(--text-muted);">
+              Records: <strong>${list.length}</strong>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="table" style="font-size:11px; width:100%; margin-bottom:0;">
+              <thead>
+                <tr>
+                  <th style="width:110px;">Date</th>
+                  <th style="width:105px;">ID</th>
+                  <th style="width:145px;">RECEIVED BY</th>
+                  <th>Description</th>
+                  <th style="width:115px;">Paid By</th>
+                  <th style="width:130px; text-align:right;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${list.length ? list.map(r => {
+        const dt = formatDateTimeDay(r);
+        return `
+                    <tr>
+                      <td style="white-space:nowrap; font-weight:600;">${dt.dateStr}</td>
+                      <td><span class="badge badge-neutral" style="font-family:monospace; font-weight:700; font-size:10px;">${getExpenseId(r)}</span></td>
+                      <td style="font-weight:600; color:var(--text-primary);">${r.receivedBy || '—'}</td>
+                      <td style="color:var(--text-secondary); max-width:240px;">${r.description || r.category || '—'}</td>
+                      <td><span class="badge badge-info">${r.paidBy || 'Admin'}</span></td>
+                      <td style="text-align:right; font-weight:700; color:var(--text-primary); font-family:'Outfit',sans-serif; font-size:12px;">${fmt(r.amount)}</td>
+                    </tr>
+                  `;
+      }).join('') : `<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);"><i class="ri-inbox-line" style="font-size:24px; display:block; margin-bottom:6px;"></i>কোন রেকর্ড পাওয়া যায়নি</td></tr>`}
+              </tbody>
+              <tfoot>
+                <tr style="background:rgba(255,255,255,0.04); font-weight:800; font-size:13px; border-top:2px solid var(--border);">
+                  <td colspan="5" style="text-align:right; padding:10px 14px; font-weight:700;">Total =</td>
+                  <td style="text-align:right; padding:10px 14px; color:var(--gold); font-size:15px; font-family:'Outfit',sans-serif; font-weight:800;">${fmt(totalAmount)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Print Signatures (Print Only) -->
+        <div class="print-sign-row print-only" style="display:none;">
+          <div class="print-sign-box">
+            Prepared By<br>
+            <strong>Accounts Officer</strong>
+          </div>
+          <div class="print-sign-box">
+            Received By<br>
+            <strong>Authorized Receiver</strong>
+          </div>
+          <div class="print-sign-box">
+            Verified By<br>
+            <strong>Internal Auditor</strong>
+          </div>
+          <div class="print-sign-box">
+            Approved By<br>
+            <strong>Managing Director</strong>
+          </div>
+        </div>
+      `;
+    }
+
+    window.printExpenseSummary = function () {
+      window.print();
+    };
+
+    window.downloadExpenseSummaryPDF = function () {
+      const element = document.getElementById('expSummaryModalBody');
+      if (!element) return;
+      const agentSel = document.getElementById('summaryAgentFilter');
+      const agentText = agentSel && agentSel.value ? (agents.find(a => a.id === agentSel.value)?.name || 'Agent').replace(/\s+/g, '_') : 'All_Agents';
+      const filename = `Expense_Statement_${agentText}_${summaryDateFrom || 'All'}_to_${summaryDateTo || 'Now'}.pdf`;
+
+      if (window.html2pdf) {
+        const opt = {
+          margin: [8, 8, 8, 8],
+          filename: filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            backgroundColor: '#ffffff',
+            onclone: (clonedDoc) => {
+              const printHeader = clonedDoc.querySelector('.summary-print-header');
+              if (printHeader) {
+                printHeader.style.display = 'block';
+                printHeader.style.visibility = 'visible';
+                printHeader.querySelectorAll('*').forEach(el => {
+                  if (el.tagName === 'H2') el.style.color = '#0f172a';
+                  else if (el.style) el.style.color = '#334155';
+                });
+              }
+              const clonedBody = clonedDoc.getElementById('expSummaryModalBody');
+              if (clonedBody) {
+                clonedBody.style.color = '#0f172a';
+                clonedBody.querySelectorAll('h1, h2, h3, h4, th, strong').forEach(el => {
+                  el.style.color = '#0f172a';
+                });
+                clonedBody.querySelectorAll('table, th, td').forEach(el => {
+                  el.style.borderColor = '#cbd5e1';
+                  if (el.tagName === 'TH') {
+                    el.style.background = '#f1f5f9';
+                    el.style.color = '#0f172a';
+                  } else if (el.tagName === 'TD') {
+                    el.style.color = '#1e293b';
+                  }
+                });
+              }
+            }
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save().then(() => {
+          Toast.success('PDF সফলভাবে ডাউনলোড হয়েছে!');
+        }).catch(err => {
+          console.warn('html2pdf failed, falling back to print', err);
+          window.print();
+        });
+      } else {
+        window.print();
+      }
+    };
+
+    load();
+  </script>
+</body>
+
+</html>

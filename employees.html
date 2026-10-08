@@ -1,0 +1,2334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employees — TE & NTE Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    .emp-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      cursor: pointer;
+      transition: all var(--t-fast);
+      position: relative;
+    }
+
+    .emp-card:hover {
+      border-color: var(--border-gold);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .emp-card.active {
+      border-color: var(--gold);
+    }
+
+    .emp-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--bg-primary);
+    }
+
+    .emp-card-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .emp-card-info h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 3px;
+    }
+
+    .emp-card-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .score-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.8s ease;
+    }
+
+    .detail-panel {
+      display: none;
+    }
+
+    .detail-panel.open {
+      display: block;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .info-item label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-item span {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 3px;
+    }
+
+    .att-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-top: 12px;
+    }
+
+    .att-day {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform var(--t-fast);
+    }
+
+    .att-day:hover {
+      transform: scale(1.15);
+    }
+
+    .att-present {
+      background: rgba(16, 185, 129, 0.3);
+      color: var(--success);
+    }
+
+    .att-absent {
+      background: rgba(239, 68, 68, 0.3);
+      color: var(--danger);
+    }
+
+    .att-late {
+      background: rgba(245, 166, 35, 0.3);
+      color: var(--gold);
+    }
+
+    .att-leave {
+      background: rgba(79, 195, 247, 0.3);
+      color: var(--blue-bright);
+    }
+
+    .att-holiday {
+      background: rgba(168, 85, 247, 0.3);
+      color: #c084fc;
+    }
+
+    .att-none {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+    }
+
+    .score-circle {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid;
+      flex-shrink: 0;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .score-circle .val {
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .score-circle .lbl {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .month-picker {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .month-picker button {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: all var(--t-fast);
+    }
+
+    .month-picker button:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .month-picker span {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      min-width: 120px;
+      text-align: center;
+    }
+
+    @media(max-width:700px) {
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Summary Modal & Print Styles */
+    .summary-report-card {
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .summary-kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .summary-kpi-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 10px;
+      text-align: center;
+    }
+
+    .summary-kpi-val {
+      font-size: 18px;
+      font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .summary-kpi-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .summary-tab-btn {
+      padding: 8px 16px;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-glass);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all var(--t-fast);
+    }
+
+    .summary-tab-btn.active {
+      background: rgba(245, 166, 35, 0.15);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .summary-print-header {
+      display: block;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .summary-print-header h2 {
+      color: var(--text-primary) !important;
+    }
+
+    .summary-print-header p,
+    .summary-print-header div {
+      color: var(--text-muted) !important;
+    }
+
+    select.form-control {
+      cursor: pointer;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    select.form-control option {
+      padding: 8px 12px;
+      font-size: 13px;
+      white-space: normal;
+    }
+
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+
+      /* Hide ALL main layout, cards, and page elements completely so only the modal prints on 1 clean page flow */
+      .app-layout,
+      .sidebar,
+      .top-header,
+      .main-content,
+      .page-wrapper,
+      .no-print,
+      .orb,
+      .bg-animated,
+      .breadcrumb,
+      .page-header,
+      .grid,
+      .card,
+      .search-bar,
+      #empList,
+      #empEmpty,
+      #addEmpModal,
+      #hrDataModal,
+      .modal-backdrop,
+      .toast-container {
+        display: none !important;
+        height: 0 !important;
+        overflow: hidden !important;
+      }
+
+      #empSummaryModal {
+        position: static !important;
+        display: block !important;
+        background: #fff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        z-index: 9999 !important;
+      }
+
+      #empSummaryModal .modal {
+        max-width: 100% !important;
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        transform: none !important;
+      }
+
+      #empSummaryModal .modal-header,
+      #empSummaryModal .modal-footer,
+      .screen-only {
+        display: none !important;
+      }
+
+      .summary-print-header {
+        display: block !important;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #333;
+      }
+
+      .summary-print-header h2 {
+        color: #0f172a !important;
+      }
+
+      .summary-print-header p,
+      .summary-print-header div {
+        color: #475569 !important;
+      }
+
+      #empSummaryModalBody {
+        padding: 0 !important;
+        overflow: visible !important;
+        max-height: none !important;
+        color: #000 !important;
+      }
+
+      #empSummaryModalBody * {
+        color: #000 !important;
+      }
+
+      .summary-report-card {
+        background: #fff !important;
+        border: 1px solid #ccc !important;
+        color: #000 !important;
+        break-inside: avoid;
+      }
+
+      .summary-kpi-box {
+        background: #f8f8f8 !important;
+        border: 1px solid #ddd !important;
+      }
+
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
+
+      th,
+      td {
+        border: 1px solid #ccc !important;
+        padding: 6px 8px !important;
+        font-size: 11px !important;
+        color: #000 !important;
+      }
+
+      th {
+        background: #eee !important;
+        font-weight: bold !important;
+      }
+
+      .badge {
+        border: 1px solid #999 !important;
+        background: #f0f0f0 !important;
+        color: #000 !important;
+      }
+
+      .print-sign-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        margin-top: 50px !important;
+        padding-top: 20px !important;
+        break-inside: avoid;
+      }
+
+      .print-sign-box {
+        text-align: center !important;
+        width: 180px !important;
+        border-top: 1px solid #000 !important;
+        font-size: 11px !important;
+        padding-top: 5px !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-animated"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <div class="main-content" id="mainContent">
+      <header class="top-header" id="topHeader">
+        <button class="header-toggle" id="sidebarToggle"><i class="ri-menu-line"></i></button>
+        <div class="header-title">
+          <h1 id="headerTitle">Employees</h1>
+          <p id="headerSubtitle">HR management & performance tracking</p>
+        </div>
+        <div class="header-actions">
+          <div class="header-btn header-btn-settings" id="settingsBtn" title="Settings">
+            <i class="ri-settings-3-line"></i>
+            <span class="header-btn-label">Settings</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="page-wrapper">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb animate-in" id="pageBreadcrumb"></nav>
+
+
+        <!-- Header -->
+        <div class="page-header animate-in">
+          <div class="page-header-left">
+            <h2><i class="ri-group-2-line"></i> Employees</h2>
+            <p>HR data, attendance, performance and salary management</p>
+          </div>
+          <div class="flex gap-8">
+            <select class="form-control" id="agentFilterTop" style="max-width:200px">
+              <option value="">All Agents</option>
+            </select>
+            <button class="btn btn-outline" id="allSummaryBtn" onclick="openEmployeeSummary(null)"
+              title="HR Master Summary of all employees">
+              <i class="ri-file-chart-line"></i> Employee Summary
+            </button>
+            <button class="btn btn-primary" id="addEmpBtn" style="display:none"><i class="ri-user-add-line"></i> Add
+              Employee</button>
+          </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="grid grid-4 mb-24 animate-in anim-delay-1">
+          <div class="kpi-card">
+            <div class="kpi-icon"><i class="ri-group-2-line"></i></div>
+            <div class="kpi-value" id="kTotal">0</div>
+            <div class="kpi-label">Total Employees</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon green"><i class="ri-user-follow-line"></i></div>
+            <div class="kpi-value" id="kActive">0</div>
+            <div class="kpi-label">Active</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon"><i class="ri-money-dollar-circle-line"></i></div>
+            <div class="kpi-value" id="kSalary">৳0</div>
+            <div class="kpi-label">Monthly Salary</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon blue"><i class="ri-bar-chart-2-line"></i></div>
+            <div class="kpi-value" id="kAvgScore">0%</div>
+            <div class="kpi-label">Avg Performance</div>
+          </div>
+        </div>
+
+        <!-- Two-column layout -->
+        <div class="grid grid-3-1 animate-in anim-delay-2" style="gap:24px;align-items:start">
+
+          <!-- Left: Employee list -->
+          <div>
+            <div class="search-bar mb-16">
+              <div class="search-input-wrap"><i class="ri-search-line"></i><input type="search" class="form-control"
+                  id="empSearch" placeholder="Search employees..."></div>
+              <select class="form-control" id="designFilter" style="max-width:190px">
+                <option value="">All Designations</option>
+                <option>In-Charge</option>
+                <option>Assistant In-Charge</option>
+                <option>Accounting Officer</option>
+                <option>Senior Cashier</option>
+                <option>Assistant Cashier</option>
+                <option>Cashier</option>
+                <option>Marketing Officer</option>
+                <option>Senior Desk Officer</option>
+                <option>Desk Officer</option>
+                <option>Pion</option>
+                <option>Guard</option>
+              </select>
+            </div>
+            <div id="empList" class="flex flex-column gap-12"></div>
+            <div id="empEmpty" class="empty-state" style="display:none">
+              <i class="ri-group-line"></i>
+              <p>No employees found.<br>Add employees using the button above.</p>
+            </div>
+          </div>
+
+          <!-- Right: Detail panel -->
+          <div id="detailSide" class="card detail-panel" style="position:sticky;top:100px">
+            <div class="empty-state" style="padding:40px">
+              <i class="ri-hand-point-left-line"></i>
+              <p>Select an employee<br>to view details</p>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end page-wrapper -->
+    </div>
+  </div>
+
+  <!-- Add Employee Modal -->
+  <div class="modal-overlay" id="addEmpModal">
+    <div class="modal" style="max-width:560px">
+      <div class="modal-header">
+        <div class="modal-title" id="empModalTitle"><i class="ri-user-add-line"></i> Add Employee</div>
+        <div class="modal-close"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editEmpId">
+
+        <!-- Photo Upload -->
+        <div
+          style="margin-bottom:14px;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px dashed var(--border-gold);border-radius:var(--r-sm);display:flex;align-items:center;gap:14px">
+          <div
+            style="position:relative;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;overflow:hidden;border:2px solid var(--border-gold);flex-shrink:0;">
+            <img id="empPhotoPreview" src="" alt="Photo" style="display:none;width:100%;height:100%;object-fit:cover;">
+            <i id="empPhotoPlaceholderIcon" class="ri-user-smile-line"
+              style="font-size:26px;color:var(--text-muted);"></i>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:2px">Employee Photo</div>
+            <div style="font-size:11px;color:var(--text-muted)" id="empPhotoStatus">JPG, PNG or WebP (Max 2MB)</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="file" id="empPhotoInput" accept="image/*" style="display:none">
+            <button type="button" class="btn btn-outline btn-sm" id="empPhotoBtn"
+              style="height:32px;font-size:12px;padding:0 12px;">
+              <i class="ri-upload-2-line"></i> Browse
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm" id="empPhotoRemoveBtn"
+              style="display:none;height:32px;width:32px;padding:0;color:var(--danger);" title="Remove photo">
+              <i class="ri-close-line" style="font-size:18px"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group"><label class="form-label">Agent *</label><select id="empAgentSel" class="form-control">
+            <option value="">Select Agent</option>
+          </select></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Employee Name *</label><input type="text" id="empName"
+              class="form-control" placeholder="Full name"></div>
+          <div class="form-group"><label class="form-label">Employee ID</label><input type="text" id="empEmpId"
+              class="form-control" placeholder="e.g. EMP-001"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Designation *</label>
+            <select id="empDesig" class="form-control">
+              <option value="">Select Designation</option>
+              <option>In-Charge</option>
+              <option>Assistant In-Charge</option>
+              <option>Accounting Officer</option>
+              <option>Senior Cashier</option>
+              <option>Assistant Cashier</option>
+              <option>Cashier</option>
+              <option>Marketing Officer</option>
+              <option>Senior Desk Officer</option>
+              <option>Desk Officer</option>
+              <option>Pion</option>
+              <option>Guard</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Gender</label>
+            <select id="empGender" class="form-control">
+              <option value="">Select Gender</option>
+              <option value="Male">Male (পুরুষ)</option>
+              <option value="Female">Female (মহিলা)</option>
+              <option value="Other">Other (অন্যান্য)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Phone Number</label><input type="tel" id="empPhone"
+              class="form-control" placeholder="+880..."></div>
+          <div class="form-group"><label class="form-label">Monthly Salary *</label>
+            <div style="position:relative"><span
+                style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gold);font-weight:700">৳</span>
+              <input type="number" id="empSalary" class="form-control" placeholder="0.00" step="0.01"
+                style="padding-left:30px">
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Join Date</label><input type="date" id="empJoinDate"
+              class="form-control"></div>
+          <div class="form-group"><label class="form-label">Status</label><select id="empStatus" class="form-control">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select></div>
+        </div>
+        <div class="form-group"><label class="form-label">Address</label><input type="text" id="empAddress"
+            class="form-control" placeholder="Employee address"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost modal-close">Cancel</button>
+        <button class="btn btn-primary" id="saveEmpBtn"><i class="ri-save-line"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HR Data Modal (Attendance/Leave/Performance/Target/CS/Salary) -->
+  <div class="modal-overlay" id="hrDataModal">
+    <div class="modal" style="max-width:500px">
+      <div class="modal-header">
+        <div class="modal-title" id="hrModalTitle"></div>
+        <div class="modal-close"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body" id="hrModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost modal-close">Cancel</button>
+        <button class="btn btn-primary" id="saveHRBtn"><i class="ri-save-line"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee HR Summary Modal (Print & Download) -->
+  <div class="modal-overlay" id="empSummaryModal">
+    <div class="modal" style="max-width:920px; width:95vw; max-height:92vh; display:flex; flex-direction:column;">
+      <div class="modal-header no-print" style="padding:16px 20px; border-bottom:1px solid var(--border)">
+        <div class="modal-title"
+          style="font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+          <i class="ri-file-chart-line" style="color:var(--gold); font-size:20px;"></i>
+          <span id="summaryModalTitle">Employee HR Summary Report</span>
+        </div>
+        <div class="modal-close" onclick="Modal.close('empSummaryModal')"><i class="ri-close-line"></i></div>
+      </div>
+
+      <!-- Controls Bar (Screen Only) -->
+      <div class="screen-only"
+        style="padding:14px 20px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:12px;">
+        <!-- Top Row: View Tabs & Employee / Agent Selector -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div class="flex gap-8 items-center flex-wrap" id="summaryTabGroup">
+            <button class="summary-tab-btn active" id="tabBtnSingle" onclick="switchSummaryView('single')">
+              <i class="ri-user-line"></i> Single Employee Report
+            </button>
+            <button class="summary-tab-btn" id="tabBtnAll" onclick="switchSummaryView('all')">
+              <i class="ri-team-line"></i> All Employees Master Sheet
+            </button>
+          </div>
+          <div class="flex gap-10 items-center flex-wrap" id="summaryFilterGroup">
+            <!-- Agent Filter Option -->
+            <div id="summaryAgentSelectWrap" style="display:flex; align-items:center; gap:6px;">
+              <label
+                style="font-size:12px; font-weight:600; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-store-2-line" style="color:var(--gold)"></i> Agent:
+              </label>
+              <select id="summaryAgentSelect" class="form-control"
+                style="min-width:200px; max-width:320px; width:auto; height:38px; padding:6px 12px; font-size:13px; line-height:normal;"
+                onchange="changeSummaryAgent(this.value)">
+                <option value="">All Agents (সকল এজেন্ট)</option>
+              </select>
+            </div>
+            <!-- Employee Filter Option -->
+            <div id="summaryEmpSelectWrap" style="display:flex; align-items:center; gap:6px;">
+              <label
+                style="font-size:12px; font-weight:600; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-user-search-line" style="color:var(--gold)"></i> Employee:
+              </label>
+              <select id="summaryEmpSelect" class="form-control"
+                style="min-width:220px; max-width:340px; width:auto; height:38px; padding:6px 12px; font-size:13px; line-height:normal;"
+                onchange="changeSummaryEmployee(this.value)">
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Row: Date Range Filter & Quick Presets -->
+        <div
+          style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding-top:10px; border-top:1px dashed var(--border);">
+          <div class="flex gap-8 items-center flex-wrap">
+            <span
+              style="font-size:12px; font-weight:600; color:var(--text-primary); display:flex; align-items:center; gap:4px;">
+              <i class="ri-calendar-line" style="color:var(--gold);"></i> Date Range:
+            </span>
+            <div class="flex gap-6 items-center">
+              <input type="date" id="summaryDateFrom" class="form-control"
+                style="height:32px; font-size:12px; max-width:145px;" onchange="onSummaryDateChange()">
+              <span style="color:var(--text-muted); font-size:12px;">to</span>
+              <input type="date" id="summaryDateTo" class="form-control"
+                style="height:32px; font-size:12px; max-width:145px;" onchange="onSummaryDateChange()">
+            </div>
+          </div>
+          <div class="flex gap-6 items-center flex-wrap">
+            <button class="btn btn-ghost btn-sm" onclick="setSummaryDatePreset('6m')"
+              style="height:30px; font-size:11px; padding:0 10px;">Last 6 Months</button>
+            <button class="btn btn-ghost btn-sm" onclick="setSummaryDatePreset('1y')"
+              style="height:30px; font-size:11px; padding:0 10px;">Last 1 Year</button>
+            <button class="btn btn-ghost btn-sm" onclick="setSummaryDatePreset('30d')"
+              style="height:30px; font-size:11px; padding:0 10px;">Last 30 Days</button>
+            <button class="btn btn-ghost btn-sm" onclick="setSummaryDatePreset('all')"
+              style="height:30px; font-size:11px; padding:0 10px;">All Time</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-body" id="empSummaryModalBody" style="overflow-y:auto; padding:20px; flex:1;">
+        <!-- Dynamic Summary Content rendered by JS -->
+      </div>
+
+      <div class="modal-footer no-print"
+        style="justify-content:space-between; padding:12px 20px; border-top:1px solid var(--border);">
+        <div id="summaryFooterMeta" style="font-size:12px; color:var(--text-muted);">
+          MS Techno Enterprise • HR System
+        </div>
+        <div class="flex gap-8">
+          <button class="btn btn-outline btn-sm" onclick="printEmployeeSummary()" title="Print Summary Report">
+            <i class="ri-printer-line"></i> Print
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="downloadEmployeeSummaryPDF()" title="Download PDF Report">
+            <i class="ri-file-pdf-line"></i> Download PDF
+          </button>
+          <button class="btn btn-ghost btn-sm modal-close" onclick="Modal.close('empSummaryModal')">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const user = App.init('employees', 'Employees', 'HR management & performance tracking');
+    UIEnhancements.setBreadcrumb('pageBreadcrumb', [{ label: 'Employees' }]);
+    if (!user) throw new Error();
+    const isAdmin = user.role === 'admin' || user.role === 'sub-admin';
+    const canEdit = isAdmin || Auth.canEdit('employees');
+    Chart.defaults.color = '#9ba8cc'; Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+    const COLORS = ['av-1', 'av-2', 'av-3', 'av-4', 'av-5', 'av-6'];
+    const DESIGNATION_ORDER = ['In-Charge', 'Assistant In-Charge', 'Accounting Officer', 'Senior Cashier', 'Assistant Cashier', 'Cashier', 'Marketing Officer', 'Senior Desk Officer', 'Desk Officer', 'Pion', 'Guard'];
+
+    function fmtTime(t) {
+      if (!t) return '—';
+      const parts = t.split(':');
+      if (parts.length < 2) return t;
+      let h = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10);
+      if (isNaN(h) || isNaN(m)) return t;
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12;
+      h = h ? h : 12;
+      return `${h}:${m < 10 ? '0' + m : m} ${ampm}`;
+    }
+
+    function calcDuration(entry, exit) {
+      if (!entry || !exit) return '—';
+      const [eh, em] = entry.split(':').map(Number);
+      const [xh, xm] = exit.split(':').map(Number);
+      if (isNaN(eh) || isNaN(xh)) return '—';
+      let diffMin = (xh * 60 + xm) - (eh * 60 + em);
+      if (diffMin < 0) diffMin += 24 * 60;
+      const hours = Math.floor(diffMin / 60);
+      const mins = diffMin % 60;
+      return `${hours}h ${mins > 0 ? mins + 'm' : ''}`.trim() || '0m';
+    }
+
+    let allAgents = [], allEmployees = [], selectedEmpId = null;
+    let currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+
+    // ── Load ──────────────────────────────────────────────────
+    function load() {
+      allAgents = Auth.getAccessibleAgents(DB.getAgents());
+      allEmployees = DB.getHREmployees();
+
+      // Populate agent dropdowns
+      const urlAgent = new URLSearchParams(location.search).get('agent');
+      ['agentFilterTop', 'empAgentSel'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const cur = (id === 'agentFilterTop' && urlAgent) ? urlAgent : el.value;
+        el.innerHTML = `<option value="">${id === 'agentFilterTop' ? 'All Agents' : 'Select Agent'}</option>`;
+        allAgents.forEach(a => el.innerHTML += `<option value="${a.id}" ${a.id === cur ? 'selected' : ''}>${a.name}</option>`);
+        if (id === 'agentFilterTop' && urlAgent) {
+          el.value = urlAgent;
+        }
+      });
+
+      renderKPIs();
+      renderList();
+    }
+
+    function renderKPIs() {
+      const active = allEmployees.filter(e => e.status === 'active').length;
+      const totalSalary = allEmployees.reduce((s, e) => s + (parseFloat(e.monthlySalary) || 0), 0);
+      const scores = allEmployees.map(e => DB.getEmployeeHRScore(e.id).overall);
+      const avgScore = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+
+      document.getElementById('kTotal').textContent = allEmployees.length;
+      document.getElementById('kActive').textContent = active;
+      animateCount(document.getElementById('kSalary'), totalSalary, 600, '৳');
+      document.getElementById('kAvgScore').textContent = avgScore + '%';
+    }
+
+    function getFilteredEmployees() {
+      const agentFilter = document.getElementById('agentFilterTop').value;
+      const designFilter = document.getElementById('designFilter').value;
+      const search = document.getElementById('empSearch').value.toLowerCase();
+
+      let emps = [...allEmployees];
+      const agentMap = {};
+      allAgents.forEach(a => agentMap[a.id] = a);
+
+      if (agentFilter) emps = emps.filter(e => e.agentId === agentFilter);
+      if (designFilter) emps = emps.filter(e => e.designation === designFilter);
+      if (search) emps = emps.filter(e =>
+        e.name.toLowerCase().includes(search) ||
+        (e.designation || '').toLowerCase().includes(search) ||
+        (e.employeeId || '').toLowerCase().includes(search)
+      );
+
+      return emps.map(e => ({ ...e, agentName: agentMap[e.agentId]?.name || 'Unknown' }));
+    }
+
+    function renderList() {
+      const emps = getFilteredEmployees();
+      const list = document.getElementById('empList');
+      const empty = document.getElementById('empEmpty');
+
+      // Always show/hide the Add button first (before any early returns)
+      if (canEdit) document.getElementById('addEmpBtn').style.display = '';
+
+      if (!emps.length) { list.innerHTML = ''; empty.style.display = ''; return; }
+      empty.style.display = 'none';
+
+      list.innerHTML = emps.map((e, i) => {
+        const initials = e.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        const score = DB.getEmployeeHRScore(e.id);
+        const clr = score.overall >= 80 ? 'var(--success)' : score.overall >= 60 ? 'var(--gold)' : 'var(--danger)';
+        return `
+        <div class="emp-card ${e.id === selectedEmpId ? 'active' : ''}" onclick="selectEmp('${e.id}')" id="empcard-${e.id}">
+          <div class="emp-avatar ${COLORS[i % COLORS.length]}">
+            ${e.photo ? `<img src="${e.photo}" alt="${e.name}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : initials}
+          </div>
+          <div class="emp-card-info">
+            <h4>${e.name}</h4>
+            <p><span class="badge badge-gold" style="font-size:10px">${e.designation || '—'}</span> &bull; ${e.agentName}</p>
+            <div class="score-bar mt-4">
+              <div class="score-bar-fill" style="width:${score.overall}%;background:${clr}"></div>
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:18px;font-weight:800;font-family:'Outfit',sans-serif;color:${clr}">${score.overall}%</div>
+            <div style="font-size:10px;color:var(--text-muted)">HR Score</div>
+            <div class="mt-4"><span class="badge ${e.status === 'active' ? 'badge-success' : 'badge-warning'}" style="font-size:10px">${e.status}</span></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // ── Select employee → show detail panel ───────────────────
+    function selectEmp(id) {
+      selectedEmpId = id;
+      document.querySelectorAll('.emp-card').forEach(c => c.classList.remove('active'));
+      document.getElementById('empcard-' + id)?.classList.add('active');
+      renderDetail(id);
+    }
+
+    function renderDetail(id) {
+      const emp = DB.getHREmployeeById(id);
+      if (!emp) return;
+      const agent = allAgents.find(a => a.id === emp.agentId);
+      const score = DB.getEmployeeHRScore(id);
+      const initials = emp.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const idx = allEmployees.findIndex(e => e.id === id);
+
+      const panel = document.getElementById('detailSide');
+      panel.classList.add('open');
+
+      const scoreColor = score.overall >= 80 ? 'var(--success)' : score.overall >= 60 ? 'var(--gold)' : 'var(--danger)';
+
+      panel.innerHTML = `
+        <!-- Header -->
+        <div style="border-bottom:1px solid var(--border);padding:20px 20px 16px">
+          <div class="flex gap-12" style="align-items:center">
+            <div class="emp-avatar ${COLORS[idx % COLORS.length]}" style="width:56px;height:56px;font-size:20px">
+              ${emp.photo ? `<img src="${emp.photo}" alt="${emp.name}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : initials}
+            </div>
+            <div style="flex:1">
+              <div style="font-size:16px;font-weight:700;color:var(--text-primary)">${emp.name}</div>
+              <div style="font-size:12px;color:var(--text-muted)">${emp.designation || '—'}</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:3px"><i class="ri-team-line"></i> ${agent?.name || '—'}</div>
+            </div>
+            <div class="flex gap-6 items-center">
+              <button class="btn btn-primary btn-sm" onclick="openEmployeeSummary('${id}')" title="Employee HR Summary Report">
+                <i class="ri-file-chart-line"></i> Employee Summary
+              </button>
+              ${isAdmin ? `
+                <button class="btn btn-outline btn-sm btn-icon" title="Edit Employee" onclick="openEdit('${id}')"><i class="ri-edit-line"></i></button>
+                <button class="btn btn-danger btn-sm btn-icon" title="Delete Employee" onclick="delEmp('${id}')"><i class="ri-delete-bin-line"></i></button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs" style="padding:0 16px;border-bottom:1px solid var(--border)" id="detTabs">
+          <button class="tab-btn active" data-tab="profile">Profile</button>
+          <button class="tab-btn" data-tab="attendance">Attendance</button>
+          <button class="tab-btn" data-tab="performance">Performance</button>
+          <button class="tab-btn" data-tab="leave">Leave</button>
+          <button class="tab-btn" data-tab="target">Target</button>
+          <button class="tab-btn" data-tab="cs">Cust. Service</button>
+          <button class="tab-btn" data-tab="salary">Salary</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="detTabContent" style="padding:16px;max-height:500px;overflow-y:auto"></div>`;
+
+      document.querySelectorAll('#detTabs .tab-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+          document.querySelectorAll('#detTabs .tab-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          renderTab(id, this.dataset.tab, score);
+        });
+      });
+
+      renderTab(id, 'profile', score);
+    }
+
+    function renderTab(empId, tab, score) {
+      const emp = DB.getHREmployeeById(empId);
+      if (!emp) return;
+      const content = document.getElementById('detTabContent');
+
+      if (tab === 'profile') {
+        content.innerHTML = `
+          <div class="info-grid">
+            <div class="info-item"><label>Employee ID</label><span>${emp.employeeId || '—'}</span></div>
+            <div class="info-item"><label>Gender</label><span>${emp.gender || '—'}</span></div>
+            <div class="info-item"><label>Phone</label><span>${emp.phone || '—'}</span></div>
+            <div class="info-item"><label>Designation</label><span>${emp.designation || '—'}</span></div>
+            <div class="info-item"><label>Join Date</label><span>${fmtDate(emp.joinDate)}</span></div>
+            <div class="info-item"><label>Monthly Salary</label><span style="color:var(--gold)">${fmt(emp.monthlySalary)}</span></div>
+            <div class="info-item"><label>Status</label><span><span class="badge ${emp.status === 'active' ? 'badge-success' : 'badge-warning'}">${emp.status}</span></span></div>
+            <div class="info-item" style="grid-column:1/-1"><label>Address</label><span>${emp.address || '—'}</span></div>
+          </div>
+          <div class="divider mt-16"></div>
+          <div style="font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">HR Score Breakdown</div>
+          <div class="flex gap-12 flex-wrap" style="justify-content:space-around">
+            ${[
+            { lbl: 'Attendance', val: score.attScore, clr: 'var(--success)' },
+            { lbl: 'Performance', val: score.perfScore, clr: 'var(--blue-bright)' },
+            { lbl: 'Target', val: score.targetScore, clr: 'var(--gold)' },
+            { lbl: 'Cust. Svc', val: score.csScore, clr: 'var(--warning)' },
+            { lbl: 'Overall', val: score.overall, clr: score.overall >= 80 ? 'var(--success)' : score.overall >= 60 ? 'var(--gold)' : 'var(--danger)' },
+          ].map(s => `
+              <div class="score-circle" style="border-color:${s.clr}">
+                <div class="val" style="color:${s.clr}">${s.val}</div>
+                <div class="lbl">${s.lbl}</div>
+              </div>`).join('')}
+          </div>
+          ${score.incrementRecommended > 0 ? `<div style="margin-top:16px;padding:10px 14px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:var(--r-sm);font-size:13px;color:var(--success)"><i class="ri-arrow-up-circle-line"></i> <strong>+${score.incrementRecommended}% salary increment</strong> recommended based on performance</div>` :
+            `<div style="margin-top:16px;padding:10px 14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:var(--r-sm);font-size:13px;color:var(--danger)"><i class="ri-information-line"></i> No salary increment recommended this period</div>`}`;
+      }
+
+      else if (tab === 'attendance') {
+        const att = DB.getAttendance(empId).sort((a, b) => b.date.localeCompare(a.date));
+        // Build 30-day calendar
+        const days = [];
+        for (let i = 29; i >= 0; i--) {
+          const d = new Date(); d.setDate(d.getDate() - i);
+          const ds = d.toISOString().slice(0, 10);
+          const rec = att.find(r => r.date === ds);
+          days.push({ ds, day: d.getDate(), rec });
+        }
+        const present = att.filter(r => r.status === 'present').length;
+        const absent = att.filter(r => r.status === 'absent').length;
+        const late = att.filter(r => r.status === 'late').length;
+        const leave = att.filter(r => r.status === 'leave').length;
+        const holiday = att.filter(r => r.status === 'holiday').length;
+
+        content.innerHTML = `
+          <div class="flex gap-8 mb-16 flex-wrap">
+            <span class="badge badge-success"><i class="ri-check-line"></i> Present: ${present}</span>
+            <span class="badge badge-danger"><i class="ri-close-line"></i> Absent: ${absent}</span>
+            <span class="badge badge-gold"><i class="ri-time-line"></i> Late: ${late}</span>
+            ${leave ? `<span class="badge badge-info"><i class="ri-calendar-event-line"></i> Leave: ${leave}</span>` : ''}
+            ${holiday ? `<span class="badge" style="background:rgba(168,85,247,0.18);color:#c084fc;border:1px solid rgba(168,85,247,0.35)"><i class="ri-sun-line"></i> Holiday: ${holiday}</span>` : ''}
+            ${isAdmin ? `<button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="openHRModal('attendance','${empId}')"><i class="ri-add-line"></i> Mark Attendance</button>` : ''}
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Last 30 Days Activity</div>
+          <div class="att-grid">
+            ${days.map(d => {
+          const cls = !d.rec ? 'att-none' : `att-${d.rec.status}`;
+          const timeDetails = d.rec && (d.rec.entryTime || d.rec.exitTime) ? ` [In: ${fmtTime(d.rec.entryTime)} | Out: ${fmtTime(d.rec.exitTime)}]` : '';
+          const ttip = d.rec ? `${d.ds} — ${d.rec.status}${timeDetails}` : d.ds;
+          return `<div class="${'att-day ' + cls}" title="${ttip}">${d.day}</div>`;
+        }).join('')}
+          </div>
+          <div class="flex gap-8 mt-12 mb-16 flex-wrap" style="font-size:11px">
+            <span style="color:var(--success)">■ Present</span>
+            <span style="color:var(--danger)">■ Absent</span>
+            <span style="color:var(--gold)">■ Late</span>
+            <span style="color:var(--blue-bright)">■ Leave</span>
+            <span style="color:#c084fc">■ Holiday</span>
+          </div>
+
+          <!-- Attendance Entry/Exit Log -->
+          <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+            <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+              <i class="ri-time-line" style="color:var(--gold)"></i> Attendance Details (Entry & Exit Times)
+            </div>
+            ${att.length ? `
+            <div style="overflow-x:auto">
+              <table class="table" style="font-size:12px;width:100%;margin-bottom:0">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th><i class="ri-login-box-line" style="color:var(--success)"></i> Entry</th>
+                    <th><i class="ri-logout-box-line" style="color:var(--danger)"></i> Exit</th>
+                    <th>Stay Duration</th>
+                    <th>Note</th>
+                    ${isAdmin ? '<th>Action</th>' : ''}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${att.map(r => {
+          const stBadge = {
+            present: 'badge-success',
+            late: 'badge-warning',
+            absent: 'badge-danger',
+            leave: 'badge-info'
+          }[r.status] || 'badge-info';
+          const isHoliday = r.status === 'holiday';
+          const dur = isHoliday ? '—' : calcDuration(r.entryTime, r.exitTime);
+          const stBadgeHtml = isHoliday
+            ? '<span class="badge" style="background:rgba(168,85,247,0.18);color:#c084fc;border:1px solid rgba(168,85,247,0.35)"><i class="ri-sun-line"></i> Holiday</span>'
+            : `<span class="badge ${stBadge}">${r.status}</span>`;
+          return `
+                    <tr>
+                      <td style="font-weight:600;white-space:nowrap">${fmtDate(r.date)}</td>
+                      <td>${stBadgeHtml}</td>
+                      <td style="color:var(--success);font-weight:600">${isHoliday && !r.entryTime ? '<span style="color:var(--text-muted)">—</span>' : fmtTime(r.entryTime)}</td>
+                      <td style="color:var(--danger);font-weight:600">${isHoliday && !r.exitTime ? '<span style="color:var(--text-muted)">—</span>' : fmtTime(r.exitTime)}</td>
+                      <td>${dur !== '—' ? `<span class="badge badge-gold" style="font-size:11px">${dur}</span>` : '—'}</td>
+                      <td style="color:var(--text-muted);max-width:120px;overflow:hidden;text-overflow:ellipsis">${r.note || '—'}</td>
+                      ${isAdmin ? `<td><button class="btn btn-ghost btn-sm btn-icon" title="Delete record" onclick="DB.deleteAttendance('${r.id}');renderTab('${empId}','attendance',DB.getEmployeeHRScore('${empId}'))"><i class="ri-delete-bin-line"></i></button></td>` : ''}
+                    </tr>`;
+        }).join('')}
+                </tbody>
+              </table>
+            </div>` : '<div class="empty-state" style="padding:20px"><i class="ri-calendar-line"></i><p>No attendance records logged yet.</p></div>'}
+          </div>`;
+      }
+
+      else if (tab === 'performance') {
+        const perf = DB.getPerformance(empId).sort((a, b) => b.month.localeCompare(a.month));
+        content.innerHTML = `
+          <div class="flex-between mb-12">
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary)">Monthly Performance</div>
+            ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openHRModal('performance','${empId}')"><i class="ri-add-line"></i> Add</button>` : ''}
+          </div>
+          ${perf.length ? perf.map(r => `
+            <div class="info-row">
+              <span class="label">${r.month}</span>
+              <div style="flex:1;margin:0 12px">
+                <div class="score-bar"><div class="score-bar-fill" style="width:${r.score}%;background:${r.score >= 80 ? 'var(--success)' : r.score >= 60 ? 'var(--gold)' : 'var(--danger)'}"></div></div>
+              </div>
+              <span class="value bold" style="color:${r.score >= 80 ? 'var(--success)' : r.score >= 60 ? 'var(--gold)' : 'var(--danger)'}">${r.score}%</span>
+              ${isAdmin ? `<button class="btn btn-ghost btn-sm btn-icon" onclick="DB.deletePerformance('${r.id}');renderTab('${empId}','performance',DB.getEmployeeHRScore('${empId}'))"><i class="ri-delete-bin-line"></i></button>` : ''}
+            </div>`).join('') : '<div class="empty-state" style="padding:30px"><i class="ri-bar-chart-line"></i><p>No performance data</p></div>'}`;
+      }
+
+      else if (tab === 'leave') {
+        const leaves = DB.getLeave(empId).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        content.innerHTML = `
+          <div class="flex-between mb-12">
+            <div style="font-size:13px;font-weight:600">Leave Records</div>
+            ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openHRModal('leave','${empId}')"><i class="ri-add-line"></i> Add</button>` : ''}
+          </div>
+          ${leaves.length ? leaves.map(r => `
+            <div class="info-row">
+              <span class="label">${fmtDate(r.dateFrom)} → ${fmtDate(r.dateTo)}</span>
+              <span class="badge ${r.status === 'approved' ? 'badge-success' : r.status === 'rejected' ? 'badge-danger' : 'badge-warning'}">${r.status}</span>
+              <span style="font-size:12px;color:var(--text-muted)">${r.type}</span>
+              ${isAdmin ? `<div class="flex gap-4">
+                ${r.status === 'pending' ? `<button class="btn btn-success btn-sm btn-icon" onclick="DB.updateLeave('${r.id}',{status:'approved'});renderTab('${empId}','leave',null)"><i class="ri-check-line"></i></button><button class="btn btn-danger btn-sm btn-icon" onclick="DB.updateLeave('${r.id}',{status:'rejected'});renderTab('${empId}','leave',null)"><i class="ri-close-line"></i></button>` : ''}
+                <button class="btn btn-ghost btn-sm btn-icon" onclick="DB.deleteLeave('${r.id}');renderTab('${empId}','leave',null)"><i class="ri-delete-bin-line"></i></button>
+              </div>`: ''}
+            </div>`).join('') : '<div class="empty-state" style="padding:30px"><i class="ri-calendar-line"></i><p>No leave records</p></div>'}`;
+      }
+
+      else if (tab === 'target') {
+        const targets = DB.getTarget(empId).sort((a, b) => b.month.localeCompare(a.month));
+        content.innerHTML = `
+          <div class="flex-between mb-12">
+            <div style="font-size:13px;font-weight:600">Monthly Targets</div>
+            ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openHRModal('target','${empId}')"><i class="ri-add-line"></i> Add</button>` : ''}
+          </div>
+          ${targets.length ? targets.map(r => {
+          const pct = r.target > 0 ? Math.min(100, Math.round(r.achieved / r.target * 100)) : 0;
+          return `
+            <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:6px">
+              <div class="flex-between w-full">
+                <span class="bold">${r.month}</span>
+                <span style="font-size:12px;color:${pct >= 100 ? 'var(--success)' : pct >= 70 ? 'var(--gold)' : 'var(--danger)'}">${pct}% achieved</span>
+                ${isAdmin ? `<button class="btn btn-ghost btn-sm btn-icon" onclick="DB.deleteTarget('${r.id}');renderTab('${empId}','target',null)"><i class="ri-delete-bin-line"></i></button>` : ''}
+              </div>
+              <div style="font-size:12px;color:var(--text-muted)">Target: ${fmt(r.target)} | Achieved: ${fmt(r.achieved)}</div>
+              <div class="score-bar w-full"><div class="score-bar-fill" style="width:${pct}%;background:${pct >= 100 ? 'var(--success)' : pct >= 70 ? 'var(--gold)' : 'var(--danger)'}"></div></div>
+            </div>`;
+        }).join('') : '<div class="empty-state" style="padding:30px"><i class="ri-target-line"></i><p>No target data</p></div>'}`;
+      }
+
+      else if (tab === 'cs') {
+        const cs = DB.getCustomerService(empId).sort((a, b) => b.month.localeCompare(a.month));
+        content.innerHTML = `
+          <div class="flex-between mb-12">
+            <div style="font-size:13px;font-weight:600">Customer Service</div>
+            ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openHRModal('cs','${empId}')"><i class="ri-add-line"></i> Add</button>` : ''}
+          </div>
+          ${cs.length ? cs.map(r => `
+            <div class="info-row" style="flex-direction:column;align-items:flex-start;gap:4px">
+              <div class="flex-between w-full">
+                <span class="bold">${r.month}</span>
+                <span>${'★'.repeat(Math.round(r.score))}${'☆'.repeat(5 - Math.round(r.score))}</span>
+                ${isAdmin ? `<button class="btn btn-ghost btn-sm btn-icon" onclick="DB.deleteCustomerService('${r.id}');renderTab('${empId}','cs',null)"><i class="ri-delete-bin-line"></i></button>` : ''}
+              </div>
+              <div style="font-size:12px;color:var(--text-muted)">Complaints: ${r.complaints || 0} | Resolved: ${r.resolved || 0}</div>
+              ${r.feedback ? `<div style="font-size:12px;color:var(--text-secondary);font-style:italic">"${r.feedback}"</div>` : ''}
+            </div>`).join('') : '<div class="empty-state" style="padding:30px"><i class="ri-customer-service-2-line"></i><p>No CS data</p></div>'}`;
+      }
+
+      else if (tab === 'salary') {
+        const hist = DB.getSalaryHistory(empId).sort((a, b) => b.month.localeCompare(a.month));
+        const emp = DB.getHREmployeeById(empId);
+        const scoreNow = DB.getEmployeeHRScore(empId);
+        content.innerHTML = `
+          <div style="padding:12px;background:var(--bg-glass);border:1px solid var(--border-gold);border-radius:var(--r-sm);margin-bottom:16px">
+            <div class="flex-between">
+              <div>
+                <div style="font-size:11px;color:var(--text-muted)">Current Salary</div>
+                <div style="font-size:22px;font-weight:800;color:var(--gold);font-family:'Outfit',sans-serif">${fmt(emp?.monthlySalary || 0)}</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:11px;color:var(--text-muted)">Increment Recommended</div>
+                <div style="font-size:18px;font-weight:700;color:${scoreNow.incrementRecommended > 0 ? 'var(--success)' : 'var(--text-muted)'}">${scoreNow.incrementRecommended > 0 ? '+' + scoreNow.incrementRecommended + '%' : 'None'}</div>
+              </div>
+            </div>
+          </div>
+          <div class="flex-between mb-12">
+            <div style="font-size:13px;font-weight:600">Salary History</div>
+            ${isAdmin ? `<button class="btn btn-primary btn-sm" onclick="openHRModal('salary','${empId}')"><i class="ri-add-line"></i> Process</button>` : ''}
+          </div>
+          ${hist.length ? hist.map(r => `
+            <div class="info-row">
+              <span class="label">${r.month}</span>
+              <span class="value">${fmt(r.baseSalary)}</span>
+              ${r.increment ? `<span class="badge badge-success">+${r.increment}%</span>` : ''}
+              ${r.bonus ? `<span class="badge badge-gold">+${fmt(r.bonus)} bonus</span>` : ''}
+              <span style="font-weight:700;color:var(--gold)">${fmt(r.total)}</span>
+              ${isAdmin ? `<button class="btn btn-ghost btn-sm btn-icon" onclick="DB.deleteSalaryHistory('${r.id}');renderTab('${empId}','salary',null)"><i class="ri-delete-bin-line"></i></button>` : ''}
+            </div>`).join('') : '<div class="empty-state" style="padding:30px"><i class="ri-money-dollar-circle-line"></i><p>No salary history</p></div>'}`;
+      }
+    }
+
+    // ── HR Data Modal ─────────────────────────────────────────
+    let hrSaveHandler = null;
+
+    function toggleHRTimeRow(status) {
+      const timeRow = document.getElementById('hrTimeRow');
+      if (!timeRow) return;
+      if (status === 'holiday' || status === 'absent' || status === 'leave') {
+        timeRow.style.display = 'none';
+      } else {
+        timeRow.style.display = '';
+      }
+    }
+
+    function openHRModal(type, empId) {
+      const titles = { attendance: 'Mark Attendance', performance: 'Add Performance', leave: 'Record Leave', target: 'Set Target', cs: 'Customer Service', salary: 'Process Salary' };
+      document.getElementById('hrModalTitle').innerHTML = `<i class="ri-add-circle-line"></i> ${titles[type]}`;
+
+      const today = new Date().toISOString().slice(0, 10);
+      const thisMonth = new Date().toISOString().slice(0, 7);
+      const emp = DB.getHREmployeeById(empId);
+
+      const forms = {
+        attendance: `
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Date *</label><input type="date" id="hrDate" class="form-control" value="${today}"></div>
+            <div class="form-group"><label class="form-label">Status *</label>
+              <select id="hrStatus" class="form-control" onchange="toggleHRTimeRow(this.value)">
+                <option value="present">Present (উপস্থিত)</option>
+                <option value="late">Late (দেরি)</option>
+                <option value="absent">Absent (অনুপস্থিত)</option>
+                <option value="leave">Leave (ছুটি)</option>
+                <option value="holiday">Holiday (ছুটির দিন / শুক্রবার)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" id="hrTimeRow">
+            <div class="form-group">
+              <label class="form-label"><i class="ri-login-box-line" style="color:var(--success)"></i> Entry Time</label>
+              <input type="time" id="hrEntryTime" class="form-control" value="09:00">
+            </div>
+            <div class="form-group">
+              <label class="form-label"><i class="ri-logout-box-line" style="color:var(--danger)"></i> Exit Time</label>
+              <input type="time" id="hrExitTime" class="form-control" value="18:00">
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label">Note</label><input type="text" id="hrNote" class="form-control" placeholder="Optional notes (e.g. Friday / Govt Holiday)"></div>`,
+        performance: `
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Month</label><input type="month" id="hrMonth" class="form-control" value="${thisMonth}"></div>
+            <div class="form-group"><label class="form-label">Score (0-100)</label><input type="number" id="hrScore" class="form-control" min="0" max="100" placeholder="e.g. 85"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Notes</label><textarea id="hrNote" class="form-control" rows="2" placeholder="Performance notes"></textarea></div>`,
+        leave: `
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">From</label><input type="date" id="hrDateFrom" class="form-control" value="${today}"></div>
+            <div class="form-group"><label class="form-label">To</label><input type="date" id="hrDateTo" class="form-control" value="${today}"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Leave Type</label>
+              <select id="hrLeaveType" class="form-control">
+                <option>Annual Leave</option><option>Sick Leave</option><option>Emergency Leave</option>
+                <option>Unpaid Leave</option><option>Maternity/Paternity Leave</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Status</label>
+              <select id="hrStatus" class="form-control">
+                <option value="approved">Approved</option><option value="pending">Pending</option><option value="rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label">Reason</label><textarea id="hrReason" class="form-control" rows="2"></textarea></div>`,
+        target: `
+          <div class="form-group"><label class="form-label">Month</label><input type="month" id="hrMonth" class="form-control" value="${thisMonth}"></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Target Amount</label><input type="number" id="hrTarget" class="form-control" placeholder="0.00" step="0.01"></div>
+            <div class="form-group"><label class="form-label">Achieved Amount</label><input type="number" id="hrAchieved" class="form-control" placeholder="0.00" step="0.01"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Notes</label><input type="text" id="hrNote" class="form-control" placeholder="Optional"></div>`,
+        cs: `
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Month</label><input type="month" id="hrMonth" class="form-control" value="${thisMonth}"></div>
+            <div class="form-group"><label class="form-label">Score (1-5 Stars)</label>
+              <select id="hrScore" class="form-control">
+                <option value="5">★★★★★ Excellent (5)</option><option value="4">★★★★☆ Good (4)</option>
+                <option value="3" selected>★★★☆☆ Average (3)</option><option value="2">★★☆☆☆ Poor (2)</option><option value="1">★☆☆☆☆ Very Poor (1)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Complaints</label><input type="number" id="hrComplaints" class="form-control" value="0" min="0"></div>
+            <div class="form-group"><label class="form-label">Resolved</label><input type="number" id="hrResolved" class="form-control" value="0" min="0"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Feedback</label><textarea id="hrFeedback" class="form-control" rows="2" placeholder="Customer feedback summary"></textarea></div>`,
+        salary: `
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Month</label><input type="month" id="hrMonth" class="form-control" value="${thisMonth}"></div>
+            <div class="form-group"><label class="form-label">Base Salary</label>
+              <input type="number" id="hrBaseSalary" class="form-control" value="${emp?.monthlySalary || 0}" step="0.01">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Increment %</label><input type="number" id="hrIncrement" class="form-control" value="0" min="0" step="0.1"></div>
+            <div class="form-group"><label class="form-label">Bonus</label><input type="number" id="hrBonus" class="form-control" value="0" step="0.01"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Deduction</label><input type="number" id="hrDeduction" class="form-control" value="0" step="0.01"></div>
+            <div class="form-group"><label class="form-label">Paid On</label><input type="date" id="hrPaidAt" class="form-control" value="${today}"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Reason for Increment</label><input type="text" id="hrReason" class="form-control" placeholder="e.g. Good performance Q3"></div>
+          <div id="salaryPreview" style="margin-top:8px;padding:12px;background:var(--bg-glass);border-radius:var(--r-sm);border:1px solid var(--border-gold)">
+            <div class="flex-between"><span style="font-size:13px;color:var(--text-muted)">Estimated Total:</span><span id="salTotalPreview" style="font-size:18px;font-weight:800;color:var(--gold);font-family:'Outfit',sans-serif">৳0.00</span></div>
+          </div>`,
+      };
+
+      document.getElementById('hrModalBody').innerHTML = forms[type];
+
+      // Salary live preview
+      if (type === 'salary') {
+        const calc = () => {
+          const base = parseFloat(document.getElementById('hrBaseSalary')?.value) || 0;
+          const inc = parseFloat(document.getElementById('hrIncrement')?.value) || 0;
+          const bon = parseFloat(document.getElementById('hrBonus')?.value) || 0;
+          const ded = parseFloat(document.getElementById('hrDeduction')?.value) || 0;
+          const total = base + (base * inc / 100) + bon - ded;
+          document.getElementById('salTotalPreview').textContent = fmt(total);
+        };
+        ['hrBaseSalary', 'hrIncrement', 'hrBonus', 'hrDeduction'].forEach(id => document.getElementById(id)?.addEventListener('input', calc));
+        calc();
+      }
+
+      // Remove old save handler
+      const btn = document.getElementById('saveHRBtn');
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+
+      const savers = {
+        attendance: () => {
+          const status = document.getElementById('hrStatus')?.value || 'present';
+          const isOffDay = status === 'holiday' || status === 'absent' || status === 'leave';
+          return DB.addAttendance({
+            empId,
+            date: document.getElementById('hrDate')?.value,
+            status,
+            entryTime: isOffDay ? '' : (document.getElementById('hrEntryTime')?.value || ''),
+            exitTime: isOffDay ? '' : (document.getElementById('hrExitTime')?.value || ''),
+            note: document.getElementById('hrNote')?.value || ''
+          });
+        },
+        performance: () => DB.addPerformance({ empId, month: document.getElementById('hrMonth')?.value, score: document.getElementById('hrScore')?.value, notes: document.getElementById('hrNote')?.value }),
+        leave: () => DB.addLeave({ empId, dateFrom: document.getElementById('hrDateFrom')?.value, dateTo: document.getElementById('hrDateTo')?.value, type: document.getElementById('hrLeaveType')?.value, status: document.getElementById('hrStatus')?.value, reason: document.getElementById('hrReason')?.value }),
+        target: () => DB.addTarget({ empId, month: document.getElementById('hrMonth')?.value, target: document.getElementById('hrTarget')?.value || 0, achieved: document.getElementById('hrAchieved')?.value || 0, notes: document.getElementById('hrNote')?.value }),
+        cs: () => DB.addCustomerService({ empId, month: document.getElementById('hrMonth')?.value, score: document.getElementById('hrScore')?.value, complaints: document.getElementById('hrComplaints')?.value || 0, resolved: document.getElementById('hrResolved')?.value || 0, feedback: document.getElementById('hrFeedback')?.value }),
+        salary: () => {
+          const base = parseFloat(document.getElementById('hrBaseSalary')?.value) || 0;
+          const inc = parseFloat(document.getElementById('hrIncrement')?.value) || 0;
+          const bon = parseFloat(document.getElementById('hrBonus')?.value) || 0;
+          const ded = parseFloat(document.getElementById('hrDeduction')?.value) || 0;
+          const total = base + (base * inc / 100) + bon - ded;
+          // Update employee's base salary if increment applied
+          if (inc > 0) DB.updateHREmployee(empId, { monthlySalary: (base + base * inc / 100) });
+          DB.addSalaryHistory({ empId, month: document.getElementById('hrMonth')?.value, baseSalary: base, increment: inc, bonus: bon, deduction: ded, total, reason: document.getElementById('hrReason')?.value, paidAt: document.getElementById('hrPaidAt')?.value });
+        },
+      };
+
+      document.getElementById('saveHRBtn').addEventListener('click', () => {
+        savers[type]?.();
+        Modal.close('hrDataModal');
+        Toast.success('Data saved!');
+        const score = DB.getEmployeeHRScore(empId);
+        const activeTab = document.querySelector('#detTabs .tab-btn.active')?.dataset.tab || tab;
+        renderTab(empId, activeTab, score);
+        renderKPIs();
+        renderList();
+      });
+
+      Modal.open('hrDataModal');
+    }
+
+    // ── Photo Upload for Employee ─────────────────────────────
+    let empPhotoData = '';
+    const empPhotoInput = document.getElementById('empPhotoInput');
+    const empPhotoBtn = document.getElementById('empPhotoBtn');
+    const empPhotoRemoveBtn = document.getElementById('empPhotoRemoveBtn');
+    const empPhotoPreview = document.getElementById('empPhotoPreview');
+    const empPhotoPlaceholderIcon = document.getElementById('empPhotoPlaceholderIcon');
+    const empPhotoStatus = document.getElementById('empPhotoStatus');
+
+    if (empPhotoBtn && empPhotoInput) {
+      empPhotoBtn.addEventListener('click', () => empPhotoInput.click());
+    }
+
+    function setEmpPhotoUI(dataUrl, fileName = '') {
+      empPhotoData = dataUrl || '';
+      if (empPhotoData) {
+        if (empPhotoPreview) {
+          empPhotoPreview.src = empPhotoData;
+          empPhotoPreview.style.display = 'block';
+        }
+        if (empPhotoPlaceholderIcon) empPhotoPlaceholderIcon.style.display = 'none';
+        if (empPhotoRemoveBtn) empPhotoRemoveBtn.style.display = 'inline-flex';
+        if (empPhotoStatus) empPhotoStatus.textContent = fileName ? (fileName.length > 20 ? fileName.slice(0, 17) + '...' : fileName) : 'Photo attached';
+      } else {
+        if (empPhotoInput) empPhotoInput.value = '';
+        if (empPhotoPreview) {
+          empPhotoPreview.src = '';
+          empPhotoPreview.style.display = 'none';
+        }
+        if (empPhotoPlaceholderIcon) empPhotoPlaceholderIcon.style.display = 'block';
+        if (empPhotoRemoveBtn) empPhotoRemoveBtn.style.display = 'none';
+        if (empPhotoStatus) empPhotoStatus.textContent = 'JPG, PNG or WebP (Max 2MB)';
+      }
+    }
+
+    if (empPhotoInput) {
+      empPhotoInput.addEventListener('change', function () {
+        const file = this.files && this.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+          Toast.error('Please select an image file (JPG, PNG, WebP).');
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          Toast.error('Image size exceeds 5MB. Please choose a smaller image.');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function () {
+            const maxDim = 256;
+            let w = img.width, h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+              else { w = Math.round(w * maxDim / h); h = maxDim; }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const compressed = canvas.toDataURL('image/jpeg', 0.85);
+            setEmpPhotoUI(compressed, file.name);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (empPhotoRemoveBtn) {
+      empPhotoRemoveBtn.addEventListener('click', () => setEmpPhotoUI(''));
+    }
+
+    // ── Add / Edit Employee ────────────────────────────────────
+    if (isAdmin) {
+      document.getElementById('addEmpBtn').addEventListener('click', () => {
+        document.getElementById('editEmpId').value = '';
+        document.getElementById('empModalTitle').innerHTML = '<i class="ri-user-add-line"></i> Add Employee';
+        setEmpPhotoUI('');
+        ['empName', 'empEmpId', 'empPhone', 'empAddress'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('empAgentSel').value = '';
+        document.getElementById('empDesig').value = '';
+        document.getElementById('empGender').value = '';
+        document.getElementById('empSalary').value = '';
+        document.getElementById('empJoinDate').value = new Date().toISOString().slice(0, 10);
+        document.getElementById('empStatus').value = 'active';
+        Modal.open('addEmpModal');
+      });
+
+      document.getElementById('saveEmpBtn').addEventListener('click', () => {
+        const agentId = document.getElementById('empAgentSel').value;
+        const name = document.getElementById('empName').value.trim();
+        const desig = document.getElementById('empDesig').value;
+        const salary = document.getElementById('empSalary').value;
+        const editId = document.getElementById('editEmpId').value;
+
+        if (!agentId) { Toast.error('Select an agent.'); return; }
+        if (!name) { Toast.error('Employee name is required.'); return; }
+        if (!desig) { Toast.error('Select a designation.'); return; }
+        if (!salary) { Toast.error('Monthly salary is required.'); return; }
+
+        const data = {
+          agentId, name, designation: desig, salary,
+          gender: document.getElementById('empGender').value || '',
+          photo: empPhotoData || '',
+          phone: document.getElementById('empPhone').value.trim(),
+          employeeId: document.getElementById('empEmpId').value.trim(),
+          monthlySalary: parseFloat(salary),
+          joinDate: document.getElementById('empJoinDate').value,
+          status: document.getElementById('empStatus').value,
+          address: document.getElementById('empAddress').value.trim(),
+        };
+
+        if (editId) {
+          DB.updateHREmployee(editId, data);
+          Toast.success('Employee updated!');
+        } else {
+          DB.addHREmployee(data);
+          Toast.success('Employee added!');
+        }
+
+        Modal.close('addEmpModal');
+        load();
+      });
+    }
+
+    window.openEdit = function (id) {
+      const e = DB.getHREmployeeById(id);
+      if (!e) return;
+      document.getElementById('editEmpId').value = id;
+      document.getElementById('empModalTitle').innerHTML = '<i class="ri-edit-line"></i> Edit Employee';
+      setEmpPhotoUI(e.photo || '');
+      document.getElementById('empAgentSel').value = e.agentId;
+      document.getElementById('empName').value = e.name;
+      document.getElementById('empEmpId').value = e.employeeId || '';
+      document.getElementById('empDesig').value = e.designation || '';
+      document.getElementById('empGender').value = e.gender || '';
+      document.getElementById('empPhone').value = e.phone || '';
+      document.getElementById('empSalary').value = e.monthlySalary || '';
+      document.getElementById('empJoinDate').value = e.joinDate || '';
+      document.getElementById('empStatus').value = e.status;
+      document.getElementById('empAddress').value = e.address || '';
+      Modal.open('addEmpModal');
+    };
+
+    window.delEmp = function (id) {
+      Confirm.show('Delete this employee and all their HR data?', () => {
+        DB.deleteHREmployee(id);
+        selectedEmpId = null;
+        document.getElementById('detailSide').innerHTML = '<div class="empty-state" style="padding:40px"><i class="ri-hand-point-left-line"></i><p>Select an employee to view details</p></div>';
+        document.getElementById('detailSide').classList.remove('open');
+        Toast.success('Employee deleted.');
+        load();
+      });
+    };
+
+    // ── Employee HR Summary & Report ───────────────────────────
+    let currentSummaryEmpId = null;
+    let currentSummaryView = 'single'; // 'single' or 'all'
+    let currentSummaryAgentId = '';
+    let summaryDateFrom = '';
+    let summaryDateTo = '';
+
+    function initSummaryDateRange() {
+      if (!summaryDateTo) {
+        const now = new Date();
+        summaryDateTo = now.toISOString().slice(0, 10);
+        const past = new Date();
+        past.setMonth(past.getMonth() - 6);
+        summaryDateFrom = past.toISOString().slice(0, 10);
+      }
+      const df = document.getElementById('summaryDateFrom');
+      const dt = document.getElementById('summaryDateTo');
+      if (df) df.value = summaryDateFrom;
+      if (dt) dt.value = summaryDateTo;
+    }
+
+    window.setSummaryDatePreset = function (preset) {
+      const now = new Date();
+      summaryDateTo = now.toISOString().slice(0, 10);
+      if (preset === '30d') {
+        const d = new Date(); d.setDate(d.getDate() - 30);
+        summaryDateFrom = d.toISOString().slice(0, 10);
+      } else if (preset === '6m') {
+        const d = new Date(); d.setMonth(d.getMonth() - 6);
+        summaryDateFrom = d.toISOString().slice(0, 10);
+      } else if (preset === '1y') {
+        const d = new Date(); d.setFullYear(d.getFullYear() - 1);
+        summaryDateFrom = d.toISOString().slice(0, 10);
+      } else if (preset === 'all') {
+        summaryDateFrom = '2020-01-01';
+      }
+      initSummaryDateRange();
+      onSummaryDateChange();
+    };
+
+    window.onSummaryDateChange = function () {
+      const df = document.getElementById('summaryDateFrom')?.value;
+      const dt = document.getElementById('summaryDateTo')?.value;
+      if (df) summaryDateFrom = df;
+      if (dt) summaryDateTo = dt;
+      if (currentSummaryView === 'single') {
+        renderSingleSummary(currentSummaryEmpId);
+      } else {
+        renderAllSummary();
+      }
+    };
+
+    window.openEmployeeSummary = function (empId = null) {
+      if (!allEmployees || allEmployees.length === 0) {
+        Toast.error('No employees registered yet.');
+        return;
+      }
+
+      initSummaryDateRange();
+      currentSummaryEmpId = empId || selectedEmpId || allEmployees[0]?.id;
+      currentSummaryView = empId ? 'single' : 'all';
+
+      // Populate dropdowns & tooltips
+      populateSummaryDropdowns();
+      switchSummaryView(currentSummaryView);
+      Modal.open('empSummaryModal');
+    };
+
+    function populateSummaryDropdowns() {
+      const agentSel = document.getElementById('summaryAgentSelect');
+      if (agentSel) {
+        agentSel.innerHTML = '<option value="">All Agents (সকল এজেন্ট)</option>' +
+          allAgents.map(a => `<option value="${a.id}" ${a.id === currentSummaryAgentId ? 'selected' : ''}>${a.name} (${a.code || 'Agent'})</option>`).join('');
+        if (agentSel.selectedIndex >= 0) {
+          agentSel.title = agentSel.options[agentSel.selectedIndex].text;
+        }
+      }
+      refreshSummaryEmpDropdown();
+    }
+
+    function refreshSummaryEmpDropdown() {
+      const sel = document.getElementById('summaryEmpSelect');
+      if (!sel) return;
+
+      const filtered = currentSummaryAgentId
+        ? allEmployees.filter(e => e.agentId === currentSummaryAgentId)
+        : allEmployees;
+
+      let html = '';
+      if (currentSummaryView === 'all') {
+        html += `<option value="" ${!currentSummaryEmpId ? 'selected' : ''}>All Employees (সকল কর্মচারী)</option>`;
+      }
+      html += filtered.map(e => {
+        const isSel = String(e.id) === String(currentSummaryEmpId);
+        return `<option value="${e.id}" ${isSel ? 'selected' : ''}>${e.name} (${e.employeeId || e.designation || 'Staff'})</option>`;
+      }).join('');
+      sel.innerHTML = html;
+
+      // Ensure a valid selection if none
+      if (currentSummaryView === 'single' && !sel.value && filtered.length) {
+        sel.value = filtered[0].id;
+        currentSummaryEmpId = filtered[0].id;
+      }
+
+      if (sel.selectedIndex >= 0) {
+        sel.title = sel.options[sel.selectedIndex].text;
+      }
+    }
+
+    window.switchSummaryView = function (view) {
+      currentSummaryView = view;
+      const btnSingle = document.getElementById('tabBtnSingle');
+      const btnAll = document.getElementById('tabBtnAll');
+      const empSelectWrap = document.getElementById('summaryEmpSelectWrap');
+      const agentSelectWrap = document.getElementById('summaryAgentSelectWrap');
+
+      if (view === 'single') {
+        btnSingle?.classList.add('active');
+        btnAll?.classList.remove('active');
+        // If currentSummaryEmpId was empty, select first
+        if (!currentSummaryEmpId && allEmployees.length) {
+          currentSummaryEmpId = allEmployees[0].id;
+        }
+      } else {
+        btnAll?.classList.add('active');
+        btnSingle?.classList.remove('active');
+      }
+
+      // Both dropdowns are always visible and available in both views
+      if (empSelectWrap) empSelectWrap.style.display = 'flex';
+      if (agentSelectWrap) agentSelectWrap.style.display = 'flex';
+
+      refreshSummaryEmpDropdown();
+
+      if (view === 'single') {
+        renderSingleSummary(currentSummaryEmpId);
+      } else {
+        renderAllSummary();
+      }
+    };
+
+    window.changeSummaryAgent = function (agentId) {
+      currentSummaryAgentId = agentId;
+      const agentSel = document.getElementById('summaryAgentSelect');
+      if (agentSel && agentSel.selectedIndex >= 0) {
+        agentSel.title = agentSel.options[agentSel.selectedIndex].text;
+      }
+
+      refreshSummaryEmpDropdown();
+
+      if (currentSummaryView === 'single') {
+        const sel = document.getElementById('summaryEmpSelect');
+        currentSummaryEmpId = sel?.value || (allEmployees[0]?.id || '');
+        renderSingleSummary(currentSummaryEmpId);
+      } else {
+        renderAllSummary();
+      }
+    };
+
+    window.changeSummaryEmployee = function (empId) {
+      currentSummaryEmpId = empId;
+      const sel = document.getElementById('summaryEmpSelect');
+      if (sel && sel.selectedIndex >= 0) {
+        sel.title = sel.options[sel.selectedIndex].text;
+      }
+
+      if (currentSummaryView === 'single') {
+        if (!empId && allEmployees.length) {
+          currentSummaryEmpId = allEmployees[0].id;
+        }
+        renderSingleSummary(currentSummaryEmpId);
+      } else {
+        renderAllSummary();
+      }
+    };
+
+    function renderSingleSummary(empId) {
+      const emp = DB.getHREmployeeById(empId);
+      if (!emp) return;
+      const agent = allAgents.find(a => a.id === emp.agentId);
+      const selAgent = currentSummaryAgentId ? allAgents.find(a => a.id === currentSummaryAgentId) : agent;
+      const printHeaderAgentTitle = selAgent
+        ? selAgent.name
+        : (allAgents.length ? allAgents.map(a => a.name).join(' • ') : 'All Agents (সকল এজেন্ট)');
+      const score = DB.getEmployeeHRScore(empId);
+      const initials = (emp.name || 'E').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+      // Filter records by date range
+      const attAll = DB.getAttendance(empId).sort((a, b) => b.date.localeCompare(a.date));
+      const att = attAll.filter(r => (!summaryDateFrom || r.date >= summaryDateFrom) && (!summaryDateTo || r.date <= summaryDateTo));
+
+      const leaveAll = DB.getLeave(empId).sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+      const leave = leaveAll.filter(r => (!summaryDateFrom || (r.dateTo || r.dateFrom) >= summaryDateFrom) && (!summaryDateTo || r.dateFrom <= summaryDateTo));
+
+      const fromMonth = summaryDateFrom ? summaryDateFrom.slice(0, 7) : '';
+      const toMonth = summaryDateTo ? summaryDateTo.slice(0, 7) : '';
+
+      const perfAll = DB.getPerformance(empId).sort((a, b) => (b.month || '').localeCompare(a.month || ''));
+      const perf = perfAll.filter(r => (!fromMonth || r.month >= fromMonth) && (!toMonth || r.month <= toMonth));
+
+      const targetAll = DB.getTarget(empId).sort((a, b) => (b.month || '').localeCompare(a.month || ''));
+      const target = targetAll.filter(r => (!fromMonth || r.month >= fromMonth) && (!toMonth || r.month <= toMonth));
+
+      const csAll = DB.getCustomerService(empId).sort((a, b) => (b.month || '').localeCompare(a.month || ''));
+      const cs = csAll.filter(r => (!fromMonth || r.month >= fromMonth) && (!toMonth || r.month <= toMonth));
+
+      const salAll = DB.getSalaryHistory(empId).sort((a, b) => (b.month || '').localeCompare(a.month || ''));
+      const sal = salAll.filter(r => (!fromMonth || r.month >= fromMonth) && (!toMonth || r.month <= toMonth));
+
+      const present = att.filter(r => r.status === 'present').length;
+      const absent = att.filter(r => r.status === 'absent').length;
+      const late = att.filter(r => r.status === 'late').length;
+      const leaveDays = att.filter(r => r.status === 'leave').length;
+      const holiday = att.filter(r => r.status === 'holiday').length;
+
+      // Group attendance by month
+      const monthMap = {};
+      att.forEach(r => {
+        if (!r.date) return;
+        const m = r.date.slice(0, 7);
+        if (!monthMap[m]) {
+          monthMap[m] = { month: m, present: 0, absent: 0, late: 0, leave: 0, holiday: 0, notes: [] };
+        }
+        if (r.status === 'present') monthMap[m].present++;
+        else if (r.status === 'absent') monthMap[m].absent++;
+        else if (r.status === 'late') monthMap[m].late++;
+        else if (r.status === 'leave') monthMap[m].leave++;
+        else if (r.status === 'holiday') monthMap[m].holiday++;
+
+        if (r.note && r.note.trim()) {
+          monthMap[m].notes.push(r.note.trim());
+        }
+      });
+      const monthList = Object.values(monthMap).sort((a, b) => b.month.localeCompare(a.month));
+
+      const scoreColor = score.overall >= 80 ? 'var(--success)' : score.overall >= 60 ? 'var(--gold)' : 'var(--danger)';
+      const generatedAt = new Date().toLocaleString('en-BD', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+      // Calculate card average results
+      const calcLeaveDays = (from, to) => {
+        if (!from) return 1;
+        const d1 = new Date(from);
+        const d2 = to ? new Date(to) : d1;
+        if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return 1;
+        const diff = Math.round((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
+        return diff > 0 ? diff : 1;
+      };
+      const totalLeaveDays = leave.reduce((sum, r) => sum + calcLeaveDays(r.dateFrom, r.dateTo), 0);
+      const avgLeaveDays = leave.length ? (totalLeaveDays / leave.length).toFixed(1) : '0';
+
+      const avgPerfScore = perf.length ? Math.round(perf.reduce((s, r) => s + Number(r.score || 0), 0) / perf.length) : 0;
+
+      const totalTarget = target.reduce((s, r) => s + Number(r.target || 0), 0);
+      const totalAchieved = target.reduce((s, r) => s + Number(r.achieved || 0), 0);
+      const avgTargetRate = totalTarget > 0 ? Math.round((totalAchieved / totalTarget) * 100) : (target.length ? Math.round(target.reduce((s, r) => s + (r.target > 0 ? (r.achieved / r.target) * 100 : 0), 0) / target.length) : 0);
+
+      const avgCsScore = cs.length ? (cs.reduce((s, r) => s + Number(r.score || 0), 0) / cs.length).toFixed(1) : '0';
+
+      const body = document.getElementById('empSummaryModalBody');
+      body.innerHTML = `
+        <!-- Print Header (Company Letterhead) -->
+        <div class="summary-print-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <h2 style="margin:0; font-size:20px; font-weight:800; font-family:'Outfit',sans-serif; color:#0f172a; text-transform:uppercase;">${printHeaderAgentTitle}</h2>
+              <p style="margin:3px 0 0 0; font-size:12px; color:#475569;">Human Resources &amp; Employee Performance Management</p>
+              <p style="margin:2px 0 0 0; font-size:11px; color:#64748b;">${selAgent ? `Agent: <strong>${selAgent.name}</strong> (${selAgent.code || 'Agent'})` : 'All Agents'} • Confidential HR Summary Dossier</p>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:12px; font-weight:700; color:#0f172a;">EMPLOYEE HR DOSSIER</div>
+              <div style="font-size:11px; color:#64748b;">Range: ${fmtDate(summaryDateFrom)} ~ ${fmtDate(summaryDateTo)}</div>
+              <div style="font-size:11px; color:#64748b;">Date: ${generatedAt}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 1. Profile Overview Card -->
+        <div class="summary-report-card">
+          <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+            <div style="width:64px; height:64px; border-radius:50%; overflow:hidden; border:2px solid var(--border-gold); background:rgba(245,166,35,0.15); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800; color:var(--gold); flex-shrink:0;">
+              ${emp.photo ? `<img src="${emp.photo}" alt="${emp.name}" style="width:100%; height:100%; object-fit:cover;">` : initials}
+            </div>
+            <div style="flex:1; min-width:220px;">
+              <div style="font-size:18px; font-weight:700; color:var(--text-primary);">${emp.name}</div>
+              <div style="font-size:13px; color:var(--text-muted); margin-top:2px;">
+                <span style="font-weight:600; color:var(--gold);">${emp.designation || 'Staff'}</span> • 
+                ID: <strong>${emp.employeeId || '—'}</strong> • 
+                Gender: <strong>${emp.gender || '—'}</strong>
+              </div>
+              <div style="font-size:12px; color:var(--text-muted); margin-top:4px; display:flex; gap:14px; flex-wrap:wrap;">
+                <span><i class="ri-team-line"></i> Agent: <strong>${agent?.name || '—'}</strong> (${agent?.code || '—'})</span>
+                <span><i class="ri-phone-line"></i> Phone: <strong>${emp.phone || '—'}</strong></span>
+                <span><i class="ri-calendar-line"></i> Joined: <strong>${fmtDate(emp.joinDate)}</strong></span>
+              </div>
+            </div>
+            <div style="text-align:right; min-width:140px;">
+              <div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Current Salary</div>
+              <div style="font-size:20px; font-weight:800; color:var(--gold); font-family:'Outfit',sans-serif;">${fmt(emp.monthlySalary)}</div>
+              <span class="badge ${emp.status === 'active' ? 'badge-success' : 'badge-warning'}" style="margin-top:4px; text-transform:uppercase;">${emp.status}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. HR Composite Scores & Recommendation -->
+        <div class="summary-report-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div style="font-size:13px; font-weight:700; text-transform:uppercase; color:var(--text-primary); letter-spacing:0.5px;">
+              <i class="ri-award-line" style="color:var(--gold)"></i> HR Performance Matrix
+            </div>
+            <span style="font-size:12px; font-weight:700; color:${scoreColor}">Overall Score: ${score.overall}%</span>
+          </div>
+
+          <div class="summary-kpi-row">
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--success)">${score.attScore}%</div>
+              <div class="summary-kpi-lbl">Attendance Score</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--blue-bright)">${score.perfScore}%</div>
+              <div class="summary-kpi-lbl">Performance Score</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--gold)">${score.targetScore}%</div>
+              <div class="summary-kpi-lbl">Target Score</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--warning)">${score.csScore}%</div>
+              <div class="summary-kpi-lbl">Customer Service</div>
+            </div>
+            <div class="summary-kpi-box" style="border-color:${scoreColor}; background:rgba(255,255,255,0.05)">
+              <div class="summary-kpi-val" style="color:${scoreColor}">${score.overall}%</div>
+              <div class="summary-kpi-lbl" style="font-weight:700">Composite Score</div>
+            </div>
+          </div>
+
+          ${score.incrementRecommended > 0
+          ? `<div style="padding:10px 14px; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.3); border-radius:var(--r-sm); font-size:13px; color:var(--success); display:flex; align-items:center; gap:8px;">
+                 <i class="ri-arrow-up-circle-fill" style="font-size:18px;"></i>
+                 <div><strong>+${score.incrementRecommended}% Salary Increment Recommended</strong> based on composite performance evaluation.</div>
+               </div>`
+          : `<div style="padding:10px 14px; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); border-radius:var(--r-sm); font-size:13px; color:var(--danger); display:flex; align-items:center; gap:8px;">
+                 <i class="ri-information-line" style="font-size:18px;"></i>
+                 <div>No salary increment recommended this cycle (requires composite score &ge; 60%).</div>
+               </div>`
+        }
+        </div>
+
+        <!-- 3. Attendance Summary (মাসভিত্তিক উপস্থিতি সামারি) -->
+        <div class="summary-report-card">
+          <div style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+            <span><i class="ri-calendar-check-line" style="color:var(--gold)"></i> Attendance Summary (${fmtDate(summaryDateFrom)} হতে ${fmtDate(summaryDateTo)})</span>
+            <span style="font-size:12px; color:var(--text-muted)">Total Records: ${att.length}</span>
+          </div>
+          <div class="summary-kpi-row" style="margin-bottom:12px;">
+            <div class="summary-kpi-box"><div class="summary-kpi-val" style="color:var(--success)">${present}</div><div class="summary-kpi-lbl">Total Present</div></div>
+            <div class="summary-kpi-box"><div class="summary-kpi-val" style="color:var(--danger)">${absent}</div><div class="summary-kpi-lbl">Total Absent</div></div>
+            <div class="summary-kpi-box"><div class="summary-kpi-val" style="color:var(--gold)">${late}</div><div class="summary-kpi-lbl">Total Late</div></div>
+            <div class="summary-kpi-box"><div class="summary-kpi-val" style="color:var(--blue-bright)">${leaveDays}</div><div class="summary-kpi-lbl">Total Leave</div></div>
+            <div class="summary-kpi-box"><div class="summary-kpi-val" style="color:#c084fc">${holiday}</div><div class="summary-kpi-lbl">Total Holiday</div></div>
+          </div>
+          ${monthList.length ? `
+          <div style="overflow-x:auto;">
+            <table class="table" style="font-size:12px; margin-bottom:0; width:100%;">
+              <thead>
+                <tr>
+                  <th style="font-weight:700;">Month</th>
+                  <th style="color:var(--success); text-align:center;">Present</th>
+                  <th style="color:var(--danger); text-align:center;">Absent</th>
+                  <th style="color:var(--gold); text-align:center;">Late</th>
+                  <th style="color:var(--blue-bright); text-align:center;">Leave</th>
+                  <th style="color:#c084fc; text-align:center;">Holiday</th>
+                  <th>NOTE</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${monthList.map(m => {
+          const noteText = m.notes.length ? [...new Set(m.notes)].slice(0, 3).join('; ') : '—';
+          const dObj = new Date(m.month + '-01');
+          const monthName = isNaN(dObj.getTime()) ? m.month : dObj.toLocaleDateString('en-BD', { month: 'short', year: 'numeric' });
+          return `<tr>
+                    <td style="font-weight:700; white-space:nowrap; color:var(--text-primary);">${monthName} (${m.month})</td>
+                    <td style="color:var(--success); font-weight:700; text-align:center;">${m.present}</td>
+                    <td style="color:var(--danger); font-weight:700; text-align:center;">${m.absent}</td>
+                    <td style="color:var(--gold); font-weight:700; text-align:center;">${m.late}</td>
+                    <td style="color:var(--blue-bright); font-weight:700; text-align:center;">${m.leave}</td>
+                    <td style="color:#c084fc; font-weight:700; text-align:center;">${m.holiday}</td>
+                    <td style="color:var(--text-muted); font-size:11px; max-width:220px;">${noteText}</td>
+                  </tr>`;
+        }).join('')}
+              </tbody>
+              <tfoot>
+                <tr style="background:rgba(255,255,255,0.04); font-weight:800;">
+                  <td>Total</td>
+                  <td style="color:var(--success); text-align:center;">${present}</td>
+                  <td style="color:var(--danger); text-align:center;">${absent}</td>
+                  <td style="color:var(--gold); text-align:center;">${late}</td>
+                  <td style="color:var(--blue-bright); text-align:center;">${leaveDays}</td>
+                  <td style="color:#c084fc; text-align:center;">${holiday}</td>
+                  <td style="color:var(--text-muted);">${monthList.length} month(s)</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>` : '<div style="font-size:12px; color:var(--text-muted); text-align:center; padding:16px;">নির্বাচিত তারিখের মধ্যে কোনো উপস্থিতি রেকর্ড পাওয়া যায়নি।</div>'}
+        </div>
+
+        <!-- 4. Leave & Performance Modules in 2 Columns -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px;">
+          <!-- Leave Records -->
+          <div class="summary-report-card">
+            <div style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:10px;">
+              <i class="ri-calendar-event-line" style="color:var(--gold)"></i> Leave Records <span style="font-weight:600; color:var(--gold); font-size:12px;">(গড়: ${avgLeaveDays} দিন)</span>
+            </div>
+            ${leave.length ? `
+            <div style="overflow-x:auto;">
+              <table class="table" style="font-size:11px; width:100%; margin-bottom:0;">
+                <thead>
+                  <tr><th>Period</th><th>Type</th><th>Status</th><th>Reason</th></tr>
+                </thead>
+                <tbody>
+                  ${leave.map(r => `
+                    <tr>
+                      <td style="white-space:nowrap">${fmtDate(r.dateFrom)} ~ ${fmtDate(r.dateTo)}</td>
+                      <td>${r.type}</td>
+                      <td><span class="badge ${r.status === 'approved' ? 'badge-success' : r.status === 'rejected' ? 'badge-danger' : 'badge-gold'}">${r.status}</span></td>
+                      <td style="color:var(--text-muted)">${r.reason || '—'}</td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>` : '<div style="font-size:12px; color:var(--text-muted); padding:10px; text-align:center;">No leave records in selected period</div>'}
+          </div>
+
+          <!-- Monthly Performance -->
+          <div class="summary-report-card">
+            <div style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:10px;">
+              <i class="ri-bar-chart-2-line" style="color:var(--gold)"></i> Monthly Performance <span style="font-weight:600; color:var(--gold); font-size:12px;">(গড় স্কোর: ${avgPerfScore}/100)</span>
+            </div>
+            ${perf.length ? `
+            <div style="overflow-x:auto;">
+              <table class="table" style="font-size:11px; width:100%; margin-bottom:0;">
+                <thead>
+                  <tr><th>Month</th><th>Score</th><th>Notes</th></tr>
+                </thead>
+                <tbody>
+                  ${perf.map(r => `
+                    <tr>
+                      <td style="font-weight:600">${r.month}</td>
+                      <td><span class="badge ${r.score >= 80 ? 'badge-success' : r.score >= 60 ? 'badge-gold' : 'badge-danger'}">${r.score}/100</span></td>
+                      <td style="color:var(--text-muted)">${r.notes || '—'}</td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>` : '<div style="font-size:12px; color:var(--text-muted); padding:10px; text-align:center;">No performance records in selected period</div>'}
+          </div>
+        </div>
+
+        <!-- 5. Target & Customer Service in 2 Columns -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px;">
+          <!-- Target Records -->
+          <div class="summary-report-card">
+            <div style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:10px;">
+              <i class="ri-focus-2-line" style="color:var(--gold)"></i> Sales Targets <span style="font-weight:600; color:var(--gold); font-size:12px;">(গড় অর্জন: ${avgTargetRate}%)</span>
+            </div>
+            ${target.length ? `
+            <div style="overflow-x:auto;">
+              <table class="table" style="font-size:11px; width:100%; margin-bottom:0;">
+                <thead>
+                  <tr><th>Month</th><th>Target</th><th>Achieved</th><th>Rate</th></tr>
+                </thead>
+                <tbody>
+                  ${target.map(r => {
+          const rate = r.target > 0 ? Math.round((r.achieved / r.target) * 100) : 0;
+          return `<tr>
+                      <td style="font-weight:600">${r.month}</td>
+                      <td>${fmt(r.target)}</td>
+                      <td style="color:var(--gold); font-weight:600">${fmt(r.achieved)}</td>
+                      <td><span class="badge ${rate >= 100 ? 'badge-success' : rate >= 75 ? 'badge-gold' : 'badge-danger'}">${rate}%</span></td>
+                    </tr>`;
+        }).join('')}
+                </tbody>
+              </table>
+            </div>` : '<div style="font-size:12px; color:var(--text-muted); padding:10px; text-align:center;">No targets in selected period</div>'}
+          </div>
+
+          <!-- Customer Service -->
+          <div class="summary-report-card">
+            <div style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:10px;">
+              <i class="ri-customer-service-2-line" style="color:var(--gold)"></i> Customer Service <span style="font-weight:600; color:var(--gold); font-size:12px;">(গড় রেটিং: ${avgCsScore}★)</span>
+            </div>
+            ${cs.length ? `
+            <div style="overflow-x:auto;">
+              <table class="table" style="font-size:11px; width:100%; margin-bottom:0;">
+                <thead>
+                  <tr><th>Month</th><th>Score</th><th>Complaints</th><th>Feedback</th></tr>
+                </thead>
+                <tbody>
+                  ${cs.map(r => `
+                    <tr>
+                      <td style="font-weight:600">${r.month}</td>
+                      <td style="color:var(--gold)">${'★'.repeat(r.score)}${'☆'.repeat(5 - r.score)} (${r.score})</td>
+                      <td>${r.resolved}/${r.complaints}</td>
+                      <td style="color:var(--text-muted); max-width:130px; overflow:hidden; text-overflow:ellipsis;">${r.feedback || '—'}</td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>` : '<div style="font-size:12px; color:var(--text-muted); padding:10px; text-align:center;">No customer service records in selected period</div>'}
+          </div>
+        </div>
+
+        <!-- 6. Salary & Disbursement History -->
+        <div class="summary-report-card">
+          <div style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:10px; display:flex; justify-content:space-between;">
+            <span><i class="ri-money-dollar-circle-line" style="color:var(--gold)"></i> Salary & Compensation History</span>
+            <span style="font-size:12px; color:var(--text-muted)">Base: ${fmt(emp.monthlySalary)}</span>
+          </div>
+          ${sal.length ? `
+          <div style="overflow-x:auto;">
+            <table class="table" style="font-size:11px; width:100%; margin-bottom:0;">
+              <thead>
+                <tr>
+                  <th>Month</th>
+                  <th>Base Salary</th>
+                  <th>Increment</th>
+                  <th>Bonus</th>
+                  <th>Deduction</th>
+                  <th>Total Disbursed</th>
+                  <th>Paid Date</th>
+                  <th>Reason/Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sal.map(r => `
+                  <tr>
+                    <td style="font-weight:600">${r.month}</td>
+                    <td>${fmt(r.baseSalary)}</td>
+                    <td>${r.increment ? `<span class="badge badge-success">+${r.increment}%</span>` : '—'}</td>
+                    <td>${r.bonus ? `<span style="color:var(--success)">+${fmt(r.bonus)}</span>` : '—'}</td>
+                    <td>${r.deduction ? `<span style="color:var(--danger)">-${fmt(r.deduction)}</span>` : '—'}</td>
+                    <td style="font-weight:800; color:var(--gold)">${fmt(r.total)}</td>
+                    <td>${fmtDate(r.paidAt)}</td>
+                    <td style="color:var(--text-muted)">${r.reason || '—'}</td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>` : '<div style="font-size:12px; color:var(--text-muted); padding:10px; text-align:center;">No salary records in selected period</div>'}
+        </div>
+
+        <!-- Print Signatures (Print Only) -->
+        <div class="print-sign-row print-only" style="display:none;">
+          <div class="print-sign-box">
+            Prepared By<br>
+            <strong>HR Executive</strong>
+          </div>
+          <div class="print-sign-box">
+            Verified By<br>
+            <strong>Accounts & Audit</strong>
+          </div>
+          <div class="print-sign-box">
+            Approved By<br>
+            <strong>Managing Director</strong>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAllSummary() {
+      let filteredEmployees = allEmployees;
+      if (currentSummaryAgentId) {
+        filteredEmployees = filteredEmployees.filter(e => e.agentId === currentSummaryAgentId);
+      }
+      if (currentSummaryEmpId) {
+        filteredEmployees = filteredEmployees.filter(e => String(e.id) === String(currentSummaryEmpId));
+      }
+      const selAgent = allAgents.find(a => a.id === currentSummaryAgentId);
+      const selEmp = allEmployees.find(e => String(e.id) === String(currentSummaryEmpId));
+      let scopeLabel = selAgent ? ` • Agent: ${selAgent.name}` : ' • All Agents';
+      if (selEmp) scopeLabel += ` • Emp: ${selEmp.name}`;
+
+      const printHeaderAgentTitle = selAgent
+        ? selAgent.name
+        : (allAgents.length ? allAgents.map(a => a.name).join(' • ') : 'All Agents (সকল এজেন্ট)');
+
+      const generatedAt = new Date().toLocaleString('en-BD', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+      document.getElementById('summaryModalTitle').textContent = `All Employees HR Master Sheet (${filteredEmployees.length} Employees)${selAgent ? ' - ' + selAgent.name : ''}${selEmp ? ' - ' + selEmp.name : ''}`;
+      document.getElementById('summaryFooterMeta').textContent = `Period: ${fmtDate(summaryDateFrom)} to ${fmtDate(summaryDateTo)}${scopeLabel} • Generated: ${generatedAt}`;
+
+      const totalSalary = filteredEmployees.reduce((sum, e) => sum + (parseFloat(e.monthlySalary) || 0), 0);
+      const activeCount = filteredEmployees.filter(e => e.status === 'active').length;
+      const scores = filteredEmployees.map(e => DB.getEmployeeHRScore(e.id).overall);
+      const avgScore = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+
+      const body = document.getElementById('empSummaryModalBody');
+      body.innerHTML = `
+        <!-- Print Header -->
+        <div class="summary-print-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <h2 style="margin:0; font-size:20px; font-weight:800; font-family:'Outfit',sans-serif; color:#0f172a; text-transform:uppercase;">${printHeaderAgentTitle}</h2>
+              <p style="margin:3px 0 0 0; font-size:12px; color:#475569;">Human Resources Department • All Employees Master Evaluation Summary</p>
+              <p style="margin:2px 0 0 0; font-size:11px; color:#64748b;">${selAgent ? `Agent: <strong>${selAgent.name}</strong> (${selAgent.code || 'Agent'})` : `Scope: <strong>All Agents (${allAgents.length})</strong>`}${selEmp ? ` • Employee: <strong>${selEmp.name}</strong>` : ''}</p>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:12px; font-weight:700; color:#0f172a;">HR MASTER SHEET ${selAgent ? '(' + selAgent.name + ')' : ''}${selEmp ? ' - ' + selEmp.name : ''}</div>
+              <div style="font-size:11px; color:#64748b;">Range: ${fmtDate(summaryDateFrom)} ~ ${fmtDate(summaryDateTo)}</div>
+              <div style="font-size:11px; color:#64748b;">Date: ${generatedAt}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- High-level KPI summary -->
+        <div class="summary-kpi-row" style="margin-bottom:16px;">
+          <div class="summary-kpi-box">
+            <div class="summary-kpi-val" style="color:var(--text-primary)">${filteredEmployees.length}</div>
+            <div class="summary-kpi-lbl">Total Staff</div>
+          </div>
+          <div class="summary-kpi-box">
+            <div class="summary-kpi-val" style="color:var(--success)">${activeCount}</div>
+            <div class="summary-kpi-lbl">Active Employees</div>
+          </div>
+          <div class="summary-kpi-box">
+            <div class="summary-kpi-val" style="color:var(--gold)">${fmt(totalSalary)}</div>
+            <div class="summary-kpi-lbl">Total Monthly Payroll</div>
+          </div>
+          <div class="summary-kpi-box">
+            <div class="summary-kpi-val" style="color:var(--blue-bright)">${avgScore}%</div>
+            <div class="summary-kpi-lbl">Avg HR Performance</div>
+          </div>
+        </div>
+
+        <!-- Master Table -->
+        <div class="summary-report-card" style="padding:0; overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table class="table" style="font-size:11px; width:100%; margin-bottom:0;">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Employee ID</th>
+                  <th>Name</th>
+                  <th>Gender</th>
+                  <th>Designation</th>
+                  <th>Agent</th>
+                  <th>Monthly Salary</th>
+                  <th>Status</th>
+                  <th>Att. Score</th>
+                  <th>Perf.</th>
+                  <th>Target</th>
+                  <th>CS</th>
+                  <th>Overall HR Score</th>
+                  <th>Recommendation</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredEmployees.length ? filteredEmployees.map((e, idx) => {
+        const ag = allAgents.find(a => a.id === e.agentId);
+        const sc = DB.getEmployeeHRScore(e.id);
+        const scColor = sc.overall >= 80 ? 'var(--success)' : sc.overall >= 60 ? 'var(--gold)' : 'var(--danger)';
+        return `
+                    <tr style="cursor:pointer;" onclick="currentSummaryEmpId='${e.id}';switchSummaryView('single');" title="Click to view single employee dossier">
+                      <td>${idx + 1}</td>
+                      <td style="font-weight:600">${e.employeeId || '—'}</td>
+                      <td style="font-weight:700; color:var(--text-primary);">${e.name}</td>
+                      <td>${e.gender || '—'}</td>
+                      <td>${e.designation || '—'}</td>
+                      <td style="color:var(--text-muted);">${ag?.name || '—'}</td>
+                      <td style="font-weight:700; color:var(--gold);">${fmt(e.monthlySalary)}</td>
+                      <td><span class="badge ${e.status === 'active' ? 'badge-success' : 'badge-warning'}">${e.status}</span></td>
+                      <td style="color:var(--success); font-weight:600;">${sc.attScore}%</td>
+                      <td style="color:var(--blue-bright); font-weight:600;">${sc.perfScore}%</td>
+                      <td style="color:var(--gold); font-weight:600;">${sc.targetScore}%</td>
+                      <td style="color:var(--warning); font-weight:600;">${sc.csScore}%</td>
+                      <td><span class="badge" style="border:1px solid ${scColor}; color:${scColor}; font-weight:800;">${sc.overall}%</span></td>
+                      <td>${sc.incrementRecommended > 0 ? `<span class="badge badge-success">+${sc.incrementRecommended}% Inc.</span>` : '<span style="color:var(--text-muted)">—</span>'}</td>
+                    </tr>
+                  `;
+      }).join('') : `<tr><td colspan="14" style="text-align:center; padding:24px; color:var(--text-muted);"><i class="ri-user-unfollow-line" style="font-size:22px; display:block; margin-bottom:6px;"></i>এই এজেন্টের অধীনে কোন এমপ্লয়ী পাওয়া যায়নি</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Print Signatures (Print Only) -->
+        <div class="print-sign-row print-only" style="display:none;">
+          <div class="print-sign-box">
+            Prepared By<br>
+            <strong>HR Executive</strong>
+          </div>
+          <div class="print-sign-box">
+            Verified By<br>
+            <strong>Head of Finance</strong>
+          </div>
+          <div class="print-sign-box">
+            Approved By<br>
+            <strong>Managing Director</strong>
+          </div>
+        </div>
+      `;
+    }
+
+    window.printEmployeeSummary = function () {
+      window.print();
+    };
+
+    window.downloadEmployeeSummaryPDF = function () {
+      const element = document.getElementById('empSummaryModalBody');
+      if (!element) return;
+      const selAgent = allAgents.find(a => a.id === currentSummaryAgentId);
+      const titleName = currentSummaryView === 'all'
+        ? (selAgent ? `HR_Master_Sheet_${selAgent.name.replace(/\s+/g, '_')}` : 'All_Agents_HR_Master_Sheet')
+        : `Employee_HR_Summary_${(emp?.name || 'employee').replace(/\s+/g, '_')}`;
+      const filename = `${titleName}_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+      Toast.info('PDF প্রস্তুত হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...');
+
+      if (window.html2pdf) {
+        const opt = {
+          margin: [8, 8, 8, 8],
+          filename: filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            backgroundColor: '#ffffff',
+            onclone: (clonedDoc) => {
+              const printHeader = clonedDoc.querySelector('.summary-print-header');
+              if (printHeader) {
+                printHeader.style.display = 'block';
+                printHeader.style.visibility = 'visible';
+                printHeader.querySelectorAll('*').forEach(el => {
+                  if (el.tagName === 'H2') el.style.color = '#0f172a';
+                  else if (el.style) el.style.color = '#334155';
+                });
+              }
+              const clonedBody = clonedDoc.getElementById('empSummaryModalBody');
+              if (clonedBody) {
+                clonedBody.style.color = '#0f172a';
+                clonedBody.querySelectorAll('h1, h2, h3, h4, th, strong').forEach(el => {
+                  el.style.color = '#0f172a';
+                });
+                clonedBody.querySelectorAll('table, th, td').forEach(el => {
+                  el.style.borderColor = '#cbd5e1';
+                  if (el.tagName === 'TH') {
+                    el.style.background = '#f1f5f9';
+                    el.style.color = '#0f172a';
+                  } else if (el.tagName === 'TD') {
+                    el.style.color = '#1e293b';
+                  }
+                });
+              }
+            }
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: currentSummaryView === 'all' ? 'landscape' : 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save().then(() => {
+          Toast.success('PDF সফলভাবে ডাউনলোড হয়েছে!');
+        }).catch(err => {
+          console.warn('html2pdf generation error, falling back to print preview:', err);
+          window.print();
+        });
+      } else {
+        window.print();
+      }
+    };
+
+    // ── Filters ───────────────────────────────────────────────
+    ['agentFilterTop', 'designFilter'].forEach(id => document.getElementById(id)?.addEventListener('change', renderList));
+    document.getElementById('empSearch')?.addEventListener('input', renderList);
+
+    load();
+  </script>
+</body>
+
+</html>

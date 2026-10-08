@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports — MTE & NTE Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    @media print {
+
+      .sidebar,
+      .top-header,
+      .no-print,
+      .orb,
+      .bg-animated {
+        display: none !important;
+      }
+
+      .main-content {
+        margin-left: 0 !important;
+      }
+
+      .page-wrapper {
+        padding-top: 20px !important;
+      }
+
+      body {
+        background: white !important;
+        color: black !important;
+      }
+
+      .card {
+        border: 1px solid #ddd !important;
+        background: white !important;
+      }
+
+      .kpi-card {
+        border: 1px solid #ddd !important;
+        background: white !important;
+      }
+
+      .kpi-value,
+      .card-title {
+        color: black !important;
+      }
+
+      td,
+      th {
+        color: black !important;
+      }
+
+      #aiReportCard {
+        border: 1px solid #bbb !important;
+        background: #ffffff !important;
+        box-shadow: none !important;
+      }
+
+      #aiReportCard * {
+        color: #0f172a !important;
+      }
+
+      #aiHealthBadge {
+        border: 1px solid #475569 !important;
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+      }
+    }
+
+    .report-section {
+      margin-bottom: 32px;
+    }
+
+    .report-summary-table td {
+      font-size: 14px;
+    }
+
+    .summary-divider {
+      margin: 24px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-animated"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <div class="main-content" id="mainContent">
+      <header class="top-header" id="topHeader">
+        <button class="header-toggle" id="sidebarToggle"><i class="ri-menu-line"></i></button>
+        <div class="header-title">
+          <h1 id="headerTitle">Reports</h1>
+          <p id="headerSubtitle">Analytics & financial summaries</p>
+        </div>
+        <div class="header-actions">
+          <div class="header-btn header-btn-settings no-print" id="settingsBtn" title="Settings"><i
+              class="ri-settings-3-line"></i><span class="header-btn-label">Settings</span></div>
+          <button class="header-btn no-print" onclick="window.print()" title="Print Report"><i
+              class="ri-printer-line"></i></button>
+        </div>
+      </header>
+
+      <div class="page-wrapper">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb animate-in" id="pageBreadcrumb"></nav>
+
+
+        <!-- Filters -->
+        <div class="card mb-24 no-print animate-in">
+          <div class="card-header">
+            <div class="card-title"><i class="ri-filter-3-line"></i> Report Filters</div>
+          </div>
+          <div class="card-body">
+            <div class="form-row-3">
+              <div class="form-group"><label class="form-label">Agent</label><select class="form-control" id="agentSel">
+                  <option value="">All Agents</option>
+                </select></div>
+              <div class="form-group"><label class="form-label">Date From</label><input type="date" class="form-control"
+                  id="dateFrom"></div>
+              <div class="form-group"><label class="form-label">Date To</label><input type="date" class="form-control"
+                  id="dateTo"></div>
+            </div>
+            <div class="flex gap-8 mt-8">
+              <button class="btn btn-primary" id="genReport"><i class="ri-bar-chart-2-line"></i> Generate
+                Report</button>
+              <button class="btn btn-ghost" id="clearFilters"><i class="ri-refresh-line"></i> Clear</button>
+              <button class="btn btn-outline" onclick="exportAllCSV()"><i class="ri-download-line"></i> Export
+                CSV</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════ Report Content ════ -->
+        <div id="reportContent">
+
+          <!-- KPI Summary -->
+          <div class="report-section">
+            <div class="grid grid-4 animate-in">
+              <div class="kpi-card">
+                <div class="kpi-icon"><i class="ri-money-dollar-circle-line"></i></div>
+                <div class="kpi-value" id="rBalance">৳0</div>
+                <div class="kpi-label">Total Balance</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-icon green"><i class="ri-arrow-down-circle-line"></i></div>
+                <div class="kpi-value" id="rCashIn">৳0</div>
+                <div class="kpi-label">Cash In</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-icon red"><i class="ri-arrow-up-circle-line"></i></div>
+                <div class="kpi-value" id="rCashOut">৳0</div>
+                <div class="kpi-label">Cash Out</div>
+              </div>
+              <div class="kpi-card">
+                <div class="kpi-icon blue"><i class="ri-funds-line"></i></div>
+                <div class="kpi-value" id="rCapital">৳0</div>
+                <div class="kpi-label">Total Capital</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-4 mb-24 animate-in anim-delay-1">
+            <div class="kpi-card">
+              <div class="kpi-icon"><i class="ri-award-line"></i></div>
+              <div class="kpi-value" id="rCommission">৳0</div>
+              <div class="kpi-label">Commission</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon"><i class="ri-hand-coin-line"></i></div>
+              <div class="kpi-value" id="rLoans">৳0</div>
+              <div class="kpi-label">Loans</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon red"><i class="ri-wallet-3-line"></i></div>
+              <div class="kpi-value" id="rExpenses">৳0</div>
+              <div class="kpi-label">Expenses</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-icon green"><i class="ri-scales-3-line"></i></div>
+              <div class="kpi-value" id="rNet">৳0</div>
+              <div class="kpi-label">Net Position</div>
+            </div>
+          </div>
+
+          <!-- ════ AI Report Summary & Data Analysis ════ -->
+          <div class="card mb-24 animate-in anim-delay-1" id="aiReportCard"
+            style="border:1.5px solid rgba(245,166,35,0.35); position:relative; overflow:hidden;">
+            <!-- Subtle Radial Glow -->
+            <div
+              style="position:absolute; right:-30px; top:-30px; width:220px; height:220px; border-radius:50%; background:radial-gradient(circle, rgba(245,166,35,0.12), transparent 70%); pointer-events:none;">
+            </div>
+
+            <div class="card-header"
+              style="border-bottom:1px solid rgba(245,166,35,0.25); background:rgba(245,166,35,0.05); flex-wrap:wrap; gap:12px;">
+              <div class="card-title"
+                style="font-size:16px; font-weight:800; color:var(--gold-light); display:flex; align-items:center; gap:10px;">
+                <div
+                  style="width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg, #f5a623, #d97706); display:flex; align-items:center; justify-content:center; color:#060818; box-shadow:0 0 14px rgba(245,166,35,0.4); flex-shrink:0;">
+                  <i class="ri-sparkling-fill" style="font-size:18px;"></i>
+                </div>
+                <div>
+                  <span style="letter-spacing:0.3px;">AI রিপোর্ট সারাংশ ও ডাটা এনালাইসিস</span>
+                  <span
+                    style="font-size:11px; font-weight:700; color:var(--text-muted); margin-left:6px; display:inline-block;">(Smart
+                    Executive Intelligence)</span>
+                </div>
+              </div>
+              <div class="flex gap-8 align-center">
+                <span class="badge" id="aiHealthBadge"
+                  style="background:rgba(16,185,129,0.18); border:1px solid rgba(16,185,129,0.4); color:var(--success); font-weight:700; font-size:12px; padding:5px 12px;">
+                  <i class="ri-heart-pulse-line"></i> Health Score: 92/100 (Excellent)
+                </span>
+                <button class="btn btn-ghost btn-sm no-print" id="btnRefreshAI"
+                  style="height:32px; font-size:12px; font-weight:700;" title="Regenerate AI Analysis">
+                  <i class="ri-refresh-line"></i> Re-Analyze
+                </button>
+              </div>
+            </div>
+
+            <div class="card-body" style="padding:22px;">
+              <!-- 4 Insight Pillar Metric Cards -->
+              <div class="grid grid-4 mb-20" id="aiPillarsGrid">
+                <!-- 1. Cash Flow Health -->
+                <div
+                  style="background:var(--bg-glass); border:1px solid var(--border); border-radius:var(--r-md); padding:14px; display:flex; flex-direction:column; gap:6px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span
+                      style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">তারল্য
+                      ও ক্যাশ প্রবাহ</span>
+                    <i class="ri-hand-coin-line" style="color:var(--success); font-size:18px;"></i>
+                  </div>
+                  <div id="aiMetricCashflow" style="font-size:17px; font-weight:800; color:var(--text-primary);">৳0
+                  </div>
+                  <div id="aiMetricCashflowSub" style="font-size:11px; color:var(--text-secondary); font-weight:600;">
+                    ক্যাশ ব্যালেন্স কভারেজ সন্তোষজনক</div>
+                </div>
+
+                <!-- 2. Revenue & Commission -->
+                <div
+                  style="background:var(--bg-glass); border:1px solid var(--border); border-radius:var(--r-md); padding:14px; display:flex; flex-direction:column; gap:6px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span
+                      style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">কমিশন
+                      উৎপাদন দক্ষতা</span>
+                    <i class="ri-award-line" style="color:var(--gold); font-size:18px;"></i>
+                  </div>
+                  <div id="aiMetricCommission" style="font-size:17px; font-weight:800; color:var(--gold);">৳0</div>
+                  <div id="aiMetricCommissionSub" style="font-size:11px; color:var(--text-secondary); font-weight:600;">
+                    শীর্ষ পারফর্মার সক্রিয়</div>
+                </div>
+
+                <!-- 3. Capital & Risk -->
+                <div
+                  style="background:var(--bg-glass); border:1px solid var(--border); border-radius:var(--r-md); padding:14px; display:flex; flex-direction:column; gap:6px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span
+                      style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">ক্যাপিটাল
+                      ও ঋণ ঝুঁকি</span>
+                    <i class="ri-shield-check-line" style="color:var(--blue-bright); font-size:18px;"></i>
+                  </div>
+                  <div id="aiMetricRisk" style="font-size:17px; font-weight:800; color:var(--blue-bright);">0% অনুপাত
+                  </div>
+                  <div id="aiMetricRiskSub" style="font-size:11px; color:var(--text-secondary); font-weight:600;">
+                    ক্যাপিটালের বিপরীতে ঋণ নিরাপদ সীমায়</div>
+                </div>
+
+                <!-- 4. Expense Efficiency -->
+                <div
+                  style="background:var(--bg-glass); border:1px solid var(--border); border-radius:var(--r-md); padding:14px; display:flex; flex-direction:column; gap:6px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span
+                      style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">ব্যয়
+                      ও পরিচালন মার্জিন</span>
+                    <i class="ri-pie-chart-line" style="color:var(--danger); font-size:18px;"></i>
+                  </div>
+                  <div id="aiMetricExpense" style="font-size:17px; font-weight:800; color:var(--danger);">৳0</div>
+                  <div id="aiMetricExpenseSub" style="font-size:11px; color:var(--text-secondary); font-weight:600;">
+                    ব্যয়ের প্রধান খাত পর্যালোচনা</div>
+                </div>
+              </div>
+
+              <!-- AI Narrative Summary & Key Findings -->
+              <div
+                style="background:var(--bg-glass); border:1px solid var(--border); border-radius:var(--r-md); padding:16px 18px; margin-bottom:16px;">
+                <div
+                  style="font-size:13px; font-weight:800; color:var(--gold-light); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+                  <i class="ri-file-list-3-line"></i> নির্বাহী সারসংক্ষেপ (Executive AI Summary)
+                </div>
+                <p id="aiExecutiveNarrative"
+                  style="font-size:13px; line-height:1.75; color:var(--text-primary); margin:0; font-weight:600;">
+                  ডাটা বিশ্লেষণ করা হচ্ছে...
+                </p>
+              </div>
+
+              <!-- Strategic Recommendations & Strengths -->
+              <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px;"
+                id="aiRecGrid">
+                <!-- Highlights & Strengths -->
+                <div
+                  style="background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.25); border-radius:var(--r-md); padding:14px 16px;">
+                  <div
+                    style="font-size:12px; font-weight:800; color:var(--success); margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                    <i class="ri-checkbox-circle-fill"></i> ইতিবাচক দিক ও ব্যবসায়িক শক্তি (Key Strengths)
+                  </div>
+                  <ul id="aiStrengthsList"
+                    style="margin:0; padding-left:18px; font-size:12px; line-height:1.7; color:var(--text-primary); font-weight:600;">
+                  </ul>
+                </div>
+
+                <!-- Strategic Recommendations & Actions -->
+                <div
+                  style="background:rgba(245,166,35,0.05); border:1px solid rgba(245,166,35,0.3); border-radius:var(--r-md); padding:14px 16px;">
+                  <div
+                    style="font-size:12px; font-weight:800; color:var(--gold); margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                    <i class="ri-lightbulb-flash-fill"></i> কৌশলগত সুপারিশ ও করণীয় (Actionable Insights)
+                  </div>
+                  <ul id="aiActionList"
+                    style="margin:0; padding-left:18px; font-size:12px; line-height:1.7; color:var(--text-primary); font-weight:600;">
+                  </ul>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="grid grid-2 mb-24 animate-in anim-delay-2">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="ri-bar-chart-grouped-line"></i> Agent Comparison</div>
+              </div>
+              <div class="card-body">
+                <div class="chart-container"><canvas id="compChart"></canvas></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title"><i class="ri-donut-chart-line"></i> Financial Breakdown</div>
+              </div>
+              <div class="card-body">
+                <div class="chart-container"><canvas id="breakChart"></canvas></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Agent-wise Summary Table -->
+          <div class="card mb-24 animate-in anim-delay-3">
+            <div class="card-header">
+              <div class="card-title"><i class="ri-table-line"></i> Agent-wise Summary</div>
+            </div>
+            <div class="table-wrapper report-summary-table" style="border:none;border-radius:0">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Agent</th>
+                    <th>Area</th>
+                    <th>Balance</th>
+                    <th>Net Cash</th>
+                    <th>Capital</th>
+                    <th>Commission</th>
+                    <th>Loans</th>
+                  </tr>
+                </thead>
+                <tbody id="agentSummaryTable"></tbody>
+                <tfoot id="agentSummaryFoot"></tfoot>
+              </table>
+            </div>
+          </div>
+
+          <!-- Expense Summary -->
+          <div class="card animate-in anim-delay-4">
+            <div class="card-header">
+              <div class="card-title"><i class="ri-wallet-3-line"></i> Expense Category Summary</div>
+            </div>
+            <div class="table-wrapper" style="border:none;border-radius:0">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Entries</th>
+                    <th>Total Amount</th>
+                    <th>% of Total</th>
+                  </tr>
+                </thead>
+                <tbody id="expenseSummaryTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const user = App.init('reports', 'Reports', 'Analytics & financial summaries');
+    UIEnhancements.setBreadcrumb('pageBreadcrumb', [{ label: 'Reports' }]);
+    if (!user) throw new Error();
+    Chart.defaults.color = '#9ba8cc'; Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+    let compChart, breakChart;
+
+    // Set default date range (last 30 days)
+    const today = new Date();
+    const monthAgo = new Date(); monthAgo.setDate(monthAgo.getDate() - 30);
+    document.getElementById('dateTo').value = today.toISOString().slice(0, 10);
+    document.getElementById('dateFrom').value = monthAgo.toISOString().slice(0, 10);
+
+    // Load agents dropdown — only show accessible agents
+    const agents = Auth.getAccessibleAgents(DB.getAgents());
+    const sel = document.getElementById('agentSel');
+    agents.forEach(a => sel.innerHTML += `<option value="${a.id}">${a.name}</option>`);
+
+    function generateReport() {
+      const agentFilter = document.getElementById('agentSel').value;
+      const from = document.getElementById('dateFrom').value;
+      const to = document.getElementById('dateTo').value;
+
+      const filteredAgents = agentFilter ? agents.filter(a => a.id === agentFilter) : agents;
+
+      const filterByDate = (arr) => {
+        if (!from && !to) return arr;
+        return arr.filter(r => {
+          const d = r.date || r.createdAt?.slice(0, 10) || '';
+          return (!from || d >= from) && (!to || d <= to);
+        });
+      };
+
+      // Aggregate across filtered agents
+      let totalBalance = 0, cashIn = 0, cashOut = 0, totalCapital = 0, totalCommission = 0, totalLoans = 0;
+
+      const agentRows = filteredAgents.map(a => {
+        const balances = filterByDate(DB.getBalances(a.id));
+        const cashbook = filterByDate(DB.getCashbook(a.id));
+        const capital = filterByDate(DB.getCapital(a.id));
+        const commission = filterByDate(DB.getCommission(a.id));
+        const loans = filterByDate(DB.getLoans(a.id));
+
+        const aBalance = balances.reduce((s, r) => s + (parseFloat(r.balance) || 0), 0);
+        const aCashIn = cashbook.filter(r => r.type === 'in').reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+        const aCashOut = cashbook.filter(r => r.type === 'out').reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+        const aCapital = capital.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+        const aCommission = commission.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+        const aLoans = loans.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+
+        totalBalance += aBalance;
+        cashIn += aCashIn;
+        cashOut += aCashOut;
+        totalCapital += aCapital;
+        totalCommission += aCommission;
+        totalLoans += aLoans;
+
+        return { agent: a, balance: aBalance, cashIn: aCashIn, cashOut: aCashOut, capital: aCapital, commission: aCommission, loans: aLoans };
+      });
+
+      // Expenses
+      let expenses = filterByDate(DB.getExpenses());
+      const totalExpenses = expenses.reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+
+      const net = cashIn - cashOut - totalExpenses;
+
+      // Update KPIs
+      animateCount(document.getElementById('rBalance'), totalBalance, 700, '৳');
+      animateCount(document.getElementById('rCashIn'), cashIn, 700, '৳');
+      animateCount(document.getElementById('rCashOut'), cashOut, 700, '৳');
+      animateCount(document.getElementById('rCapital'), totalCapital, 700, '৳');
+      animateCount(document.getElementById('rCommission'), totalCommission, 700, '৳');
+      animateCount(document.getElementById('rLoans'), totalLoans, 700, '৳');
+      animateCount(document.getElementById('rExpenses'), totalExpenses, 700, '৳');
+      animateCount(document.getElementById('rNet'), Math.abs(net), 700, net < 0 ? '-৳' : '৳');
+      document.getElementById('rNet').style.color = net >= 0 ? 'var(--success)' : 'var(--danger)';
+
+      // Comparison chart
+      if (compChart) compChart.destroy();
+      compChart = new Chart(document.getElementById('compChart'), {
+        type: 'bar',
+        data: {
+          labels: agentRows.map(r => r.agent.name.split(' ')[0]),
+          datasets: [
+            { label: 'Balance', data: agentRows.map(r => r.balance), backgroundColor: 'rgba(245,166,35,0.7)', borderRadius: 6, borderSkipped: false },
+            { label: 'Capital', data: agentRows.map(r => r.capital), backgroundColor: 'rgba(79,195,247,0.7)', borderRadius: 6, borderSkipped: false },
+            { label: 'Commission', data: agentRows.map(r => r.commission), backgroundColor: 'rgba(16,185,129,0.7)', borderRadius: 6, borderSkipped: false },
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: true,
+          plugins: { legend: { position: 'top', labels: { usePointStyle: true } }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${fmt(c.raw)}` } } },
+          scales: { x: { grid: { display: false } }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { callback: v => '৳' + (v / 1000).toFixed(0) + 'k' } } }
+        }
+      });
+
+      // Breakdown donut
+      if (breakChart) breakChart.destroy();
+      breakChart = new Chart(document.getElementById('breakChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Cash In', 'Cash Out', 'Capital', 'Commission', 'Loans', 'Expenses'],
+          datasets: [{
+            data: [cashIn, cashOut, totalCapital, totalCommission, totalLoans, totalExpenses].map(v => Math.max(v, 0)),
+            backgroundColor: ['#10b981', '#ef4444', '#4fc3f7', '#f5a623', '#8b5cf6', '#f59e0b'],
+            borderWidth: 2, borderColor: '#060818', hoverOffset: 8
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: true, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { padding: 14, usePointStyle: true, pointStyleWidth: 10 } }, tooltip: { callbacks: { label: c => `${c.label}: ${fmt(c.raw)}` } } } }
+      });
+
+      // Agent summary table
+      const tbody = document.getElementById('agentSummaryTable');
+      tbody.innerHTML = agentRows.map(r => `
+        <tr>
+          <td class="bold">${r.agent.name}</td>
+          <td>${r.agent.area || '—'}</td>
+          <td class="primary">${fmt(r.balance)}</td>
+          <td class="${r.cashIn - r.cashOut >= 0 ? 'text-success' : 'text-danger'}">${fmt(r.cashIn - r.cashOut)}</td>
+          <td style="color:var(--blue-bright)">${fmt(r.capital)}</td>
+          <td style="color:var(--warning)">${fmt(r.commission)}</td>
+          <td style="color:var(--danger)">${fmt(r.loans)}</td>
+        </tr>`).join('');
+
+      document.getElementById('agentSummaryFoot').innerHTML = `
+        <tr style="background:rgba(245,166,35,0.08);font-weight:700">
+          <td colspan="2" style="color:var(--gold)">TOTAL</td>
+          <td class="primary">${fmt(totalBalance)}</td>
+          <td class="${cashIn - cashOut >= 0 ? 'text-success' : 'text-danger'}">${fmt(cashIn - cashOut)}</td>
+          <td style="color:var(--blue-bright)">${fmt(totalCapital)}</td>
+          <td style="color:var(--warning)">${fmt(totalCommission)}</td>
+          <td style="color:var(--danger)">${fmt(totalLoans)}</td>
+        </tr>`;
+
+      // Expense summary
+      const cats = {};
+      expenses.forEach(e => { cats[e.category] = (cats[e.category] || { count: 0, total: 0 }); cats[e.category].count++; cats[e.category].total += (parseFloat(e.amount) || 0); });
+      document.getElementById('expenseSummaryTable').innerHTML = Object.entries(cats)
+        .sort((a, b) => b[1].total - a[1].total)
+        .map(([cat, v]) => `
+          <tr>
+            <td><span class="badge badge-gold">${cat}</span></td>
+            <td>${v.count}</td>
+            <td class="primary">${fmt(v.total)}</td>
+            <td>${totalExpenses > 0 ? (v.total / totalExpenses * 100).toFixed(1) + '%' : '—'}</td>
+          </tr>`).join('') || `<tr><td colspan="4" class="text-center text-muted" style="padding:20px">No expense data</td></tr>`;
+
+      // Trigger AI Report Summary & Data Analysis
+      generateAIReportSummary({
+        agentRows, totalBalance, cashIn, cashOut, totalCapital,
+        totalCommission, totalLoans, totalExpenses, net, expenses,
+        filteredAgents, from, to
+      });
+    }
+
+    let lastReportData = null;
+
+    function generateAIReportSummary(data) {
+      lastReportData = data;
+      const {
+        agentRows, totalBalance, cashIn, cashOut, totalCapital,
+        totalCommission, totalLoans, totalExpenses, net, expenses,
+        filteredAgents, from, to
+      } = data;
+
+      const netCash = cashIn - cashOut;
+      const loanToCapital = totalCapital > 0 ? (totalLoans / totalCapital) : (totalLoans > 0 ? 1 : 0);
+      const expToComm = totalCommission > 0 ? (totalExpenses / totalCommission) : 0.5;
+
+      // 1. Calculate Health Score
+      let penalty = 0;
+      if (net < 0) penalty += 18;
+      if (netCash < 0) penalty += 14;
+      if (loanToCapital > 0.4) penalty += Math.min(22, Math.round((loanToCapital - 0.4) * 35));
+      if (expToComm > 0.75) penalty += Math.min(18, Math.round((expToComm - 0.75) * 30));
+      if (totalBalance <= 0) penalty += 12;
+
+      const healthScore = Math.max(48, Math.min(98, 96 - penalty));
+
+      const badge = document.getElementById('aiHealthBadge');
+      if (healthScore >= 85) {
+        badge.style.background = 'rgba(16,185,129,0.18)';
+        badge.style.borderColor = 'rgba(16,185,129,0.4)';
+        badge.style.color = 'var(--success)';
+        badge.innerHTML = `<i class="ri-heart-pulse-line"></i> Health Score: ${healthScore}/100 • চমৎকার (Strong & Secure)`;
+      } else if (healthScore >= 70) {
+        badge.style.background = 'rgba(79,195,247,0.18)';
+        badge.style.borderColor = 'rgba(79,195,247,0.4)';
+        badge.style.color = 'var(--blue-bright)';
+        badge.innerHTML = `<i class="ri-heart-pulse-line"></i> Health Score: ${healthScore}/100 • স্থিতিশীল (Healthy Operations)`;
+      } else if (healthScore >= 55) {
+        badge.style.background = 'rgba(245,158,11,0.18)';
+        badge.style.borderColor = 'rgba(245,158,11,0.4)';
+        badge.style.color = 'var(--warning)';
+        badge.innerHTML = `<i class="ri-alert-line"></i> Health Score: ${healthScore}/100 • মাঝারি ঝুঁকি (Moderate Risk)`;
+      } else {
+        badge.style.background = 'rgba(239,68,68,0.18)';
+        badge.style.borderColor = 'rgba(239,68,68,0.4)';
+        badge.style.color = 'var(--danger)';
+        badge.innerHTML = `<i class="ri-error-warning-line"></i> Health Score: ${healthScore}/100 • মনোযোগ প্রয়োজন (Critical Attention)`;
+      }
+
+      // 2. Pillars Metric Cards
+      // Pillar 1: Cash Flow
+      const cfElem = document.getElementById('aiMetricCashflow');
+      cfElem.textContent = (netCash >= 0 ? '+' : '') + fmt(netCash);
+      cfElem.style.color = netCash >= 0 ? 'var(--success)' : 'var(--danger)';
+      document.getElementById('aiMetricCashflowSub').textContent = `ক্যাশ-ইন ${fmt(cashIn)} | ক্যাশ-আউট ${fmt(cashOut)}`;
+
+      // Pillar 2: Commission & Top Performer
+      const sortedByComm = [...agentRows].sort((a, b) => b.commission - a.commission);
+      const topAgent = sortedByComm.length ? sortedByComm[0] : null;
+      document.getElementById('aiMetricCommission').textContent = fmt(totalCommission);
+      document.getElementById('aiMetricCommissionSub').textContent = topAgent && topAgent.commission > 0
+        ? `শীর্ষ: ${topAgent.agent.name} (${fmt(topAgent.commission)})`
+        : 'আউটলেট ভিত্তিক সক্রিয় কমিশন';
+
+      // Pillar 3: Capital & Risk
+      const riskElem = document.getElementById('aiMetricRisk');
+      riskElem.textContent = `${(loanToCapital * 100).toFixed(1)}% অনুপাত`;
+      riskElem.style.color = loanToCapital > 0.5 ? 'var(--danger)' : (loanToCapital > 0.25 ? 'var(--warning)' : 'var(--blue-bright)');
+      document.getElementById('aiMetricRiskSub').textContent = `মোট ঋণ ${fmt(totalLoans)} | ক্যাপিটাল ${fmt(totalCapital)}`;
+
+      // Pillar 4: Expense & Dominant Category
+      const catsMap = {};
+      expenses.forEach(e => { catsMap[e.category] = (catsMap[e.category] || 0) + (parseFloat(e.amount) || 0); });
+      const topCatEntry = Object.entries(catsMap).sort((a, b) => b[1] - a[1])[0];
+      const topExpCat = topCatEntry ? topCatEntry[0] : 'কোনো ব্যয় নেই';
+      const topExpVal = topCatEntry ? topCatEntry[1] : 0;
+      document.getElementById('aiMetricExpense').textContent = fmt(totalExpenses);
+      document.getElementById('aiMetricExpenseSub').textContent = topCatEntry
+        ? `সর্বোচ্চ খাত: ${topExpCat.split(' ')[0]} (${fmt(topExpVal)})`
+        : 'নিয়ন্ত্রিত ব্যয় কাঠামো';
+
+      // 3. AI Executive Narrative Summary
+      const dateRangeStr = (from && to) ? `${from} হতে ${to}` : 'সম্পূর্ণ তথ্য';
+      const agentScopeStr = filteredAgents.length === 1 ? `এজেন্ট "${filteredAgents[0].name}"` : `সকল এজেন্টের (${filteredAgents.length} টি আউটলেট)`;
+
+      const narrative = `
+        <strong>[এআই সারসংক্ষেপ - ${dateRangeStr}]:</strong> ${agentScopeStr} হিসাব পর্যালোচনায় দেখা যায়, 
+        মোট কার্যকরী ব্যালেন্স <strong>${fmt(totalBalance)}</strong> এবং অর্জিত মোট কমিশন <strong>${fmt(totalCommission)}</strong>।
+        বিবেচ্য সময়ে ক্যাশ-ইন হয়েছে <strong>${fmt(cashIn)}</strong> এবং ক্যাশ-আউট হয়েছে <strong>${fmt(cashOut)}</strong>, 
+        যার ফলে নেট ক্যাশ প্রবাহ দাঁড়িয়েছে <strong>${netCash >= 0 ? 'উদ্বৃত্ত +' : 'ঘাটতি -'}${fmt(Math.abs(netCash))}</strong>।
+        একই সাথে মোট পরিচালন ব্যয় হয়েছে <strong>${fmt(totalExpenses)}</strong> 
+        ${topCatEntry ? `(যার মধ্যে সর্বোচ্চ ব্যয় খাত <em>${topExpCat}</em>-এ ব্যয় হয়েছে ৳${fmt(topExpVal)})` : ''}। 
+        সকল লেনদেন ও পরিচালন ব্যয় সমন্বয় শেষে সামগ্রিক নিট ব্যবসায়িক ফলাফল <strong>${net >= 0 ? 'ধনাত্মক +' : 'ঋণাত্মক -'}${fmt(Math.abs(net))}</strong>। 
+        প্রতিষ্ঠানটির মোট মূলধন বা ক্যাপিটাল <strong>${fmt(totalCapital)}</strong>, যা বিদ্যমান মোট ঋণ <strong>${fmt(totalLoans)}</strong>-এর 
+        তুলনায় <strong>${loanToCapital > 0 ? (totalCapital / (totalLoans || 1)).toFixed(1) + ' গুণ' : 'সম্পূর্ণ ঋণমুক্ত'}</strong> শক্তিশালী ভিত্তি প্রদর্শন করে।
+      `;
+      document.getElementById('aiExecutiveNarrative').innerHTML = narrative;
+
+      // 4. Key Strengths
+      const strengths = [];
+      if (net >= 0) {
+        strengths.push(`সামগ্রিক নিট ব্যবসায়িক অবস্থান ইতিবাচক (<strong>${fmt(net)}</strong>), যা শক্তিশালী প্রবৃদ্ধি নির্দেশ করে।`);
+      }
+      if (netCash >= 0) {
+        strengths.push(`নগদ আন্তঃপ্রবাহ বহিঃপ্রবাহের চেয়ে <strong>${fmt(netCash)}</strong> বেশি, ফলে দৈনিক পরিচালন তারল্য স্বস্তিদায়ক।`);
+      } else {
+        strengths.push(`উচ্চ আউটফ্লোর বিপরীতে স্থিতিশীল রিজার্ভ ব্যালেন্স (<strong>${fmt(totalBalance)}</strong>) বিদ্যমান।`);
+      }
+      if (totalCapital > totalLoans) {
+        strengths.push(`মোট ক্যাপিটাল (<strong>${fmt(totalCapital)}</strong>) মোট ঋণের চেয়ে বহুগুণ বেশি, ফলে মূলধন ঝুঁকির মাত্রা অত্যন্ত কম।`);
+      }
+      if (topAgent && topAgent.commission > 0) {
+        strengths.push(`শীর্ষ আউটলেট <strong>${topAgent.agent.name}</strong> সর্বোচ্চ <strong>${fmt(topAgent.commission)}</strong> কমিশন আয় তৈরি করেছে।`);
+      }
+      if (!strengths.length) {
+        strengths.push(`নিয়মিত ক্যাশবুক ও ব্যালেন্স ট্র্যাকিং প্রক্রিয়া কার্যকরভাবে চলমান রয়েছে।`);
+      }
+      document.getElementById('aiStrengthsList').innerHTML = strengths.map(s => `<li style="margin-bottom:6px;">${s}</li>`).join('');
+
+      // 5. Actionable Insights
+      const actions = [];
+      if (totalLoans > 0) {
+        actions.push(`বকেয়া ঋণ (<strong>${fmt(totalLoans)}</strong>) আদায়ে নিয়মিত কিস্তি সমন্বয় ও নজরদারি নিশ্চিত করুন।`);
+      }
+      if (totalExpenses > totalCommission * 0.6 && totalCommission > 0) {
+        actions.push(`কমিশন আয়ের তুলনায় ব্যয় <strong>${((totalExpenses / totalCommission) * 100).toFixed(0)}%</strong>; প্রধান ব্যয় খাত (<em>${topExpCat}</em>) নিয়ন্ত্রণ ও কমানোর পরিকল্পনা নিন।`);
+      }
+      const sortedByNet = [...agentRows].sort((a, b) => (a.cashIn - a.cashOut) - (b.cashIn - b.cashOut));
+      const laggingAgent = sortedByNet.length && (sortedByNet[0].cashIn - sortedByNet[0].cashOut < 0) ? sortedByNet[0] : null;
+      if (laggingAgent) {
+        actions.push(`আউটলেট <strong>${laggingAgent.agent.name}</strong>-এ ক্যাশ ঘাটতি রয়েছে; উক্ত আউটলেটে ক্যাশ ডিপোজিট বৃদ্ধির উদ্যোগ নিন।`);
+      }
+      actions.push(`ক্যাপিটাল নিরাপত্তা বজায় রেখে শীর্ষ পারফর্মিং এজেন্টদের ট্রানজেকশন লিমিট বৃদ্ধি করুন।`);
+      document.getElementById('aiActionList').innerHTML = actions.map(a => `<li style="margin-bottom:6px;">${a}</li>`).join('');
+    }
+
+    function exportAllCSV() {
+      const agentFilter = document.getElementById('agentSel').value;
+      const filteredAgents = agentFilter ? agents.filter(a => a.id === agentFilter) : agents;
+      const from = document.getElementById('dateFrom').value;
+      const to = document.getElementById('dateTo').value;
+
+      const rows = [];
+      filteredAgents.forEach(a => {
+        const stats = DB.getAgentStats(a.id);
+        rows.push({ agent: a.name, area: a.area || '', balance: stats.totalBalance, cashIn: stats.cashIn, cashOut: stats.cashOut, capital: stats.totalCapital, commission: stats.totalCommission, loans: stats.totalLoans });
+      });
+
+      exportCSV(rows, 'report.csv', [
+        { key: 'agent', label: 'Agent' }, { key: 'area', label: 'Area' }, { key: 'balance', label: 'Balance' },
+        { key: 'cashIn', label: 'Cash In' }, { key: 'cashOut', label: 'Cash Out' }, { key: 'capital', label: 'Capital' },
+        { key: 'commission', label: 'Commission' }, { key: 'loans', label: 'Loans' }
+      ]);
+    }
+
+    document.getElementById('genReport').addEventListener('click', generateReport);
+    document.getElementById('clearFilters').addEventListener('click', () => {
+      document.getElementById('agentSel').value = '';
+      document.getElementById('dateFrom').value = monthAgo.toISOString().slice(0, 10);
+      document.getElementById('dateTo').value = today.toISOString().slice(0, 10);
+      generateReport();
+    });
+
+    document.getElementById('btnRefreshAI')?.addEventListener('click', () => {
+      if (lastReportData) {
+        Toast.info('AI এনালাইসিস রিফ্রেশ করা হচ্ছে...');
+        generateAIReportSummary(lastReportData);
+        Toast.success('AI এনালাইসিস আপডেট সম্পন্ন!');
+      } else {
+        generateReport();
+      }
+    });
+
+    // Auto-generate on load
+    generateReport();
+  </script>
+</body>
+
+</html>

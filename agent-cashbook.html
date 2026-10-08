@@ -1,0 +1,2622 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cash Book — TE & NTE Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    @page {
+      size: A4 landscape;
+      margin: 10mm 12mm 12mm 12mm;
+    }
+
+    .summary-print-header {
+      display: block;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .summary-print-header h2 {
+      color: var(--text-primary) !important;
+    }
+
+    .summary-print-header p,
+    .summary-print-header div {
+      color: var(--text-muted) !important;
+    }
+
+    .print-only {
+      display: none;
+    }
+
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      }
+
+      .app-layout,
+      .sidebar,
+      .top-header,
+      .main-content,
+      .page-wrapper,
+      .no-print,
+      .orb,
+      .bg-animated,
+      .breadcrumb,
+      .page-header,
+      .grid,
+      .card,
+      #addModal,
+      .modal-backdrop,
+      .toast-container {
+        display: none !important;
+        height: 0 !important;
+        overflow: hidden !important;
+      }
+
+      #cbSummaryModal:not(.open),
+      #viewSheetModal:not(.open) {
+        display: none !important;
+        height: 0 !important;
+      }
+
+      #cbSummaryModal.open,
+      #viewSheetModal.open {
+        position: static !important;
+        display: block !important;
+        background: #fff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        z-index: 9999 !important;
+      }
+
+      #cbSummaryModal.open .modal,
+      #viewSheetModal.open .modal {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        transform: none !important;
+        display: block !important;
+      }
+
+      #cbSummaryModal .modal-header,
+      #cbSummaryModal .modal-footer,
+      .screen-only {
+        display: none !important;
+      }
+
+      .summary-print-header {
+        display: block !important;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #0f172a !important;
+      }
+
+      .summary-print-header h2 {
+        color: #0f172a !important;
+      }
+
+      .summary-print-header p,
+      .summary-print-header div {
+        color: #334155 !important;
+      }
+
+      #cbSummaryModalBody {
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        max-height: none !important;
+        height: auto !important;
+        color: #000 !important;
+        display: block !important;
+      }
+
+      #cbSummaryModalBody * {
+        color: #000 !important;
+      }
+
+      .table-wrapper {
+        overflow: visible !important;
+        width: 100% !important;
+      }
+
+      .summary-report-card {
+        background: #fff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #000 !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        width: 100% !important;
+        overflow: visible !important;
+      }
+
+      .summary-kpi-box {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        table-layout: fixed !important;
+      }
+
+      th,
+      td {
+        border: 1px solid #cbd5e1 !important;
+        padding: 6px 4px !important;
+        font-size: 10.5px !important;
+        color: #0f172a !important;
+      }
+
+      th {
+        background: #f1f5f9 !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+      }
+
+      .audit-sign-wrapper {
+        display: block !important;
+        margin-top: 45px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        width: 100% !important;
+      }
+
+      .audit-sign-table {
+        display: table !important;
+        width: 100% !important;
+        border: none !important;
+        border-collapse: collapse !important;
+        background: transparent !important;
+      }
+
+      .audit-sign-table td {
+        border: none !important;
+        vertical-align: top !important;
+        padding: 0 15px !important;
+      }
+
+      .audit-sign-box {
+        border-top: 1.5px solid #0f172a !important;
+        padding-top: 6px !important;
+        font-size: 11px !important;
+        font-weight: 500 !important;
+        color: #0f172a !important;
+        text-align: center !important;
+        line-height: 1.4 !important;
+      }
+
+      .audit-sign-box strong {
+        color: #0f172a !important;
+        font-weight: 700 !important;
+        font-size: 12px !important;
+      }
+
+      .print-only {
+        display: block !important;
+      }
+    }
+
+    .col-highlight {
+      background: rgba(245, 166, 35, 0.08) !important;
+      color: var(--gold) !important;
+      font-weight: 700;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-animated"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <div class="main-content" id="mainContent">
+      <header class="top-header" id="topHeader">
+        <button class="header-toggle" id="sidebarToggle"><i class="ri-menu-line"></i></button>
+        <div class="header-title">
+          <h1 id="headerTitle">Cash Book</h1>
+          <p id="headerSubtitle">Cash in/out transactions for all agents</p>
+        </div>
+        <div class="header-actions">
+          <div class="header-btn header-btn-settings" id="settingsBtn" title="Settings"><i
+              class="ri-settings-3-line"></i><span class="header-btn-label">Settings</span></div>
+        </div>
+      </header>
+      <div class="page-wrapper">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb animate-in" id="pageBreadcrumb"></nav>
+
+
+        <div class="page-header animate-in">
+          <div class="page-header-left">
+            <h2><i class="ri-book-2-line"></i> Cash Book</h2>
+            <p>All cash in/out transactions</p>
+          </div>
+          <div class="flex gap-8">
+            <button class="btn btn-primary" id="cashbookSummaryBtn" onclick="openCashbookSummaryModal()"><i
+                class="ri-file-chart-line"></i> Summary</button>
+            <button class="btn btn-primary" id="addBtn" style="display:none"><i class="ri-add-line"></i> Add
+              Entry</button>
+          </div>
+        </div>
+
+        <!-- KPI Cards Row 1: Hand Cash & Flow (Cards 1 to 4) -->
+        <div class="grid grid-4 mb-16 animate-in anim-delay-1">
+          <!-- Card 1: Opening Balance (Hand Cash) -->
+          <div class="kpi-card">
+            <div class="kpi-icon blue"><i class="ri-hand-coin-line"></i></div>
+            <div class="kpi-value" id="kpiOpenHand">৳0</div>
+            <div class="kpi-label">Opening Balance (Hand Cash)</div>
+          </div>
+          <!-- Card 2: Closing Hand Cash -->
+          <div class="kpi-card">
+            <div class="kpi-icon green"><i class="ri-safe-2-line"></i></div>
+            <div class="kpi-value" id="kpiCloseHand">৳0</div>
+            <div class="kpi-label">Closing Hand Cash</div>
+          </div>
+          <!-- Card 3: Total Receive -->
+          <div class="kpi-card">
+            <div class="kpi-icon green"><i class="ri-arrow-down-circle-line"></i></div>
+            <div class="kpi-value" id="kpiTotalRx">৳0</div>
+            <div class="kpi-label">Total Receive</div>
+          </div>
+          <!-- Card 4: Total Payment -->
+          <div class="kpi-card">
+            <div class="kpi-icon red"><i class="ri-arrow-up-circle-line"></i></div>
+            <div class="kpi-value" id="kpiTotalPay">৳0</div>
+            <div class="kpi-label">Total Payment</div>
+          </div>
+        </div>
+
+        <!-- KPI Cards Row 2: Settlement & Capital (Cards 5 to 7) -->
+        <div class="grid grid-3 mb-24 animate-in anim-delay-2">
+          <!-- Card 5: OPENING BALANCE (Settlement) -->
+          <div class="kpi-card">
+            <div class="kpi-icon purple"><i class="ri-bank-card-line"></i></div>
+            <div class="kpi-value" id="kpiOpenSettle" style="color:#a78bfa;">৳0</div>
+            <div class="kpi-label">OPENING BALANCE (Settlement)</div>
+          </div>
+          <!-- Card 6: CLOSING BALANCE (Settlement) -->
+          <div class="kpi-card">
+            <div class="kpi-icon blue"><i class="ri-shield-check-line"></i></div>
+            <div class="kpi-value" id="kpiCloseSettle">৳0</div>
+            <div class="kpi-label">CLOSING BALANCE (Settlement)</div>
+          </div>
+          <!-- Card 7: Closing Balance = -->
+          <div class="kpi-card" style="border-color:rgba(239,68,68,0.35);">
+            <div class="kpi-icon red"><i class="ri-scales-3-line"></i></div>
+            <div class="kpi-value" id="kpiClosingBal" style="color:#ef4444;">৳0</div>
+            <div class="kpi-label">Closing Balance =</div>
+          </div>
+        </div>
+
+        <!-- Chart + Filters -->
+        <div class="grid grid-2-1 animate-in anim-delay-2 mb-24">
+          <div class="card">
+            <div class="card-header"
+              style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px;">
+              <div class="card-title" id="chartCardTitle"><i class="ri-line-chart-line"></i> Cash Flow &amp; Balance
+                Pairs</div>
+              <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+                <div class="tabs" id="chartPairTabs" style="margin-bottom:0;">
+                  <button class="tab-btn active" data-pair="handcash"
+                    title="Opening Balance (Hand Cash) &amp; Closing Hand Cash + Closing Balance =">Hand Cash
+                    Pair</button>
+                  <button class="tab-btn" data-pair="flow"
+                    title="Total Receive &amp; Total Payment + Closing Balance =">Receive &amp; Payment</button>
+                  <button class="tab-btn" data-pair="settlement"
+                    title="OPENING BALANCE (Settlement) &amp; CLOSING BALANCE (Settlement) + Closing Balance =">Settlement
+                    Pair</button>
+                  <button class="tab-btn" data-pair="all" title="All Metrics">All</button>
+                </div>
+                <select class="form-control" id="chartTypeSel"
+                  style="font-size:11px; padding:3px 6px; width:auto; height:30px;" title="Chart Type">
+                  <option value="bar">Bar Chart</option>
+                  <option value="line">Line Chart</option>
+                  <option value="doughnut">Doughnut Chart</option>
+                  <option value="area">Area Chart</option>
+                </select>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" style="position:relative; height:260px; max-height:260px;"><canvas id="cashChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="ri-filter-3-line"></i> Filters</div>
+            </div>
+            <div class="card-body">
+              <div class="form-group"><label class="form-label">Agent</label><select class="form-control" id="agentSel">
+                  <option value="">All Agents</option>
+                </select></div>
+              <div class="form-group"><label class="form-label">Type</label>
+                <select class="form-control" id="typeSel">
+                  <option value="">All</option>
+                  <option value="in">Cash In</option>
+                  <option value="out">Cash Out</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">From</label><input type="date" class="form-control"
+                    id="dateFrom"></div>
+                <div class="form-group"><label class="form-label">To</label><input type="date" class="form-control"
+                    id="dateTo"></div>
+              </div>
+              <div class="search-input-wrap"><i class="ri-search-line"></i><input type="search" class="form-control"
+                  id="searchInp" placeholder="Search..."></div>
+              <button class="btn btn-outline w-full mt-8" id="clearFilters"><i class="ri-refresh-line"></i>
+                Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card animate-in anim-delay-3">
+          <div class="card-header">
+            <div class="card-title"><i class="ri-table-line"></i> Transactions <span id="recCount"
+                style="font-size:12px;color:var(--text-muted);font-weight:400"></span></div>
+          </div>
+          <div class="table-wrapper" style="border:none;border-radius:0">
+            <table>
+              <thead>
+                <tr>
+                  <th>Agent</th>
+                  <th>Date</th>
+                  <th>User Name</th>
+                  <th style="text-align:right;">Closing Hand Cash</th>
+                  <th style="text-align:right;">Closing Balance =</th>
+                  <th>Description</th>
+                  <th id="actH" style="display:none; text-align:center;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr>
+                  <td colspan="7" class="text-center text-muted" style="padding:30px">Loading...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Modal -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal" style="max-width:1080px; width:95vw; max-height:92vh; overflow-y:auto;">
+      <div class="modal-header"
+        style="position:sticky; top:0; background:var(--bg-secondary); z-index:10; border-bottom:1px solid var(--border);">
+        <div class="modal-title"><i class="ri-book-open-line"></i> Add Daily Cash Book Sheet</div>
+        <div class="modal-close"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body" style="padding:18px 22px;">
+        <!-- Top Info Row (Agent, Date, Note) -->
+        <div
+          style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:10px; padding:14px 18px; margin-bottom:18px;">
+          <div
+            style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; align-items:flex-end;">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="font-size:12px;font-weight:600"><i class="ri-user-line"></i> Agent
+                *</label>
+              <select id="entAgent" class="form-control">
+                <option value="">Select Agent</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="font-size:12px;font-weight:600"><i class="ri-calendar-line"></i> Date
+                *</label>
+              <input type="date" id="entDate" class="form-control">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="font-size:12px;font-weight:600"><i class="ri-sticky-note-line"></i> Note
+                / Description</label>
+              <input type="text" id="entDesc" class="form-control" placeholder="Optional description / remark">
+            </div>
+          </div>
+        </div>
+
+        <!-- Cash Book Full Sheet Section -->
+        <div class="cb-sheet-wrap" id="cashbookSheet">
+          <!-- Grid 1: Calculate Hand Cash & Daily Transaction & Balance Details -->
+          <div class="cb-grid">
+            <!-- Card 1: Calculate Hand Cash -->
+            <div class="cb-card">
+              <div class="cb-card-header"><i class="ri-hand-coin-line"></i> Calculate Hand Cash</div>
+              <div class="cb-card-body">
+                <table class="cb-table fixed-table">
+                  <tr class="highlight-red">
+                    <th colspan="2">Received From Clients</th>
+                    <td id="cb-rfc">0.00</td>
+                  </tr>
+                  <tr>
+                    <th colspan="2">Enhance Cash</th>
+                    <td><input type="text" inputmode="decimal" id="cb-enhance" value="" placeholder="0.00" /></td>
+                  </tr>
+                  <tr class="highlight-green">
+                    <th colspan="2">Total Receive</th>
+                    <td id="cb-total-receive-1">0.00</td>
+                  </tr>
+                </table>
+                <table class="cb-table fixed-table">
+                  <tr>
+                    <th colspan="2">Opening Balance (Hand Cash)</th>
+                    <td><input type="text" inputmode="decimal" id="cb-opening-hand" value="" placeholder="0.00" /></td>
+                  </tr>
+                  <tr>
+                    <th colspan="2" class="red">Total Receive</th>
+                    <td class="red" id="cb-total-receive">0.00</td>
+                  </tr>
+                  <tr>
+                    <th colspan="2">Total Payment</th>
+                    <td id="cb-total-payment">0.00</td>
+                  </tr>
+                  <tr class="highlight-green">
+                    <th colspan="2">CLOSING BALANCE =</th>
+                    <td class="blue" id="cb-closing" style="font-size:14px;"><strong>0.00</strong></td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+
+            <!-- Card 2: Daily Transaction & Balance Details -->
+            <div class="cb-card">
+              <div class="cb-card-header"><i class="ri-exchange-funds-line"></i> Daily Transaction &amp; Balance Details
+              </div>
+              <div class="cb-card-body">
+                <table class="cb-table fixed-table">
+                  <tr>
+                    <th colspan="2">PAYMENT CLIENTS (Deposit)</th>
+                    <td><input type="text" inputmode="decimal" id="cb-pay-clients" value="" placeholder="0.00" /></td>
+                  </tr>
+                  <tr>
+                    <th colspan="2">AG W (Daily & Monthly Expenses)</th>
+                    <td><input type="text" inputmode="decimal" id="cb-agw" value="" placeholder="0.00" /></td>
+                  </tr>
+                  <tr>
+                    <th colspan="2">Agent's Withdraw (Personal Usage)</th>
+                    <td><input type="text" inputmode="decimal" id="cb-agent-withdraw" value="" placeholder="0.00" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <th colspan="2">Profit (Commission)</th>
+                    <td><input type="text" inputmode="decimal" id="cb-profit" value="" placeholder="0.00" /></td>
+                  </tr>
+                  <tr>
+                    <th colspan="2" class="red">OPENING BALANCE (Settlement)</th>
+                    <td><input type="text" inputmode="decimal" id="cb-opening-settlement" value="" placeholder="0.00" />
+                    </td>
+                  </tr>
+                  <tr class="yellow">
+                    <th colspan="2">TOTAL PAYMENT</th>
+                    <td class="red" id="cb-total-payment-right">0.00</td>
+                  </tr>
+                  <tr class="highlight-red">
+                    <th colspan="2">RECEIVED FROM CLIENTS (Withdraw)</th>
+                    <td id="cb-received-withdraw">0.00</td>
+                  </tr>
+                  <tr>
+                    <th colspan="2">CLOSING BALANCE (Settlement)</th>
+                    <td><input type="text" inputmode="decimal" id="cb-closing-settlement" value="" placeholder="0.00" />
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grid 2: Cash Notes & AGENT'S CAPITAL -->
+          <div class="cb-grid">
+            <!-- Card 3: Cash Notes -->
+            <div class="cb-card">
+              <div class="cb-card-header"><i class="ri-money-dollar-box-line"></i> Cash Notes</div>
+              <div class="cb-card-body">
+                <table class="cb-table" id="notes-table" style="table-layout:fixed; width:100%;">
+                  <thead>
+                    <tr>
+                      <th style="width:48px; text-align:center;">Type</th>
+                      <th style="width:65px; text-align:center;">Notes</th>
+                      <th style="width:85px; text-align:center;">Number</th>
+                      <th style="width:95px; text-align:right;">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td rowspan="7" style="text-align:center; font-weight:700; background:rgba(255,255,255,0.02);">
+                        TAKA</td>
+                      <td style="text-align:center;">1000</td>
+                      <td style="text-align:center;"><input type="text" inputmode="numeric" pattern="[0-9]*" value=""
+                          data-value="1000" class="note-count" placeholder="0" /></td>
+                      <td class="amt">0.00</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align:center;">500</td>
+                      <td style="text-align:center;"><input type="text" inputmode="numeric" pattern="[0-9]*" value=""
+                          data-value="500" class="note-count" placeholder="0" /></td>
+                      <td class="amt">0.00</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align:center;">200</td>
+                      <td style="text-align:center;"><input type="text" inputmode="numeric" pattern="[0-9]*" value=""
+                          data-value="200" class="note-count" placeholder="0" /></td>
+                      <td class="amt">0.00</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align:center;">100</td>
+                      <td style="text-align:center;"><input type="text" inputmode="numeric" pattern="[0-9]*" value=""
+                          data-value="100" class="note-count" placeholder="0" /></td>
+                      <td class="amt">0.00</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align:center;">50</td>
+                      <td style="text-align:center;"><input type="text" inputmode="numeric" pattern="[0-9]*" value=""
+                          data-value="50" class="note-count" placeholder="0" /></td>
+                      <td class="amt">0.00</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align:center;">20</td>
+                      <td style="text-align:center;"><input type="text" inputmode="numeric" pattern="[0-9]*" value=""
+                          data-value="20" class="note-count" placeholder="0" /></td>
+                      <td class="amt">0.00</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align:center;">10</td>
+                      <td style="text-align:center;"><input type="text" inputmode="numeric" pattern="[0-9]*" value=""
+                          data-value="10" class="note-count" placeholder="0" /></td>
+                      <td class="amt">0.00</td>
+                    </tr>
+                    <tr>
+                      <td rowspan="3" style="text-align:center; font-weight:700; background:rgba(255,255,255,0.02);">
+                        COINS</td>
+                      <td style="text-align:center;">5</td>
+                      <td style="text-align:center;"><input type="text" inputmode="numeric" pattern="[0-9]*" value=""
+                          data-value="5" class="note-count" placeholder="0" /></td>
+                      <td class="amt">0.00</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align:center;">2</td>
+                      <td style="text-align:center;"><input type="text" inputmode="numeric" pattern="[0-9]*" value=""
+                          data-value="2" class="note-count" placeholder="0" /></td>
+                      <td class="amt">0.00</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align:center;">1</td>
+                      <td style="text-align:center;"><input type="text" inputmode="numeric" pattern="[0-9]*" value=""
+                          data-value="1" class="note-count" placeholder="0" /></td>
+                      <td class="amt">0.00</td>
+                    </tr>
+                    <tr>
+                      <td style="text-align:center; font-weight:700; background:rgba(255,255,255,0.02);">POISA</td>
+                      <td style="text-align:center;">0.01</td>
+                      <td style="text-align:center;"><input type="text" inputmode="decimal" min="0" value=""
+                          data-value="0.01" class="note-count" step="1" placeholder="0" /></td>
+                      <td class="amt">0.00</td>
+                    </tr>
+                    <tr>
+                      <td colspan="2" style="text-align:center; font-weight:700;">Cheque</td>
+                      <td style="text-align:center;"><input type="text" inputmode="decimal" id="cheque-input" value=""
+                          data-value="cheque" class="note-count" placeholder="0" /></td>
+                      <td class="amt" id="cheque-amt">0.00</td>
+                    </tr>
+                    <tr style="background:rgba(255,255,255,0.04);">
+                      <td colspan="3" style="text-align:right; font-weight:700;">Total Cash =</td>
+                      <td class="blue" style="font-size:14px;"><strong id="total-cash-display">0.00</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Card 4: AGENT'S CAPITAL -->
+            <div class="cb-card">
+              <div class="cb-card-header red-header"><i class="ri-bank-card-line"></i> AGENT'S CAPITAL</div>
+              <div class="cb-card-body">
+                <table class="cb-table fixed-table">
+                  <tr>
+                    <th colspan="2">Opening Balance (Settlement)</th>
+                    <td id="cap-open-settle">0.00</td>
+                  </tr>
+                  <tr>
+                    <th colspan="2">Enhance Cash</th>
+                    <td id="cap-enhance">0.00</td>
+                  </tr>
+                  <tr>
+                    <th colspan="2">Opening Hand Cash</th>
+                    <td id="cap-open-hand">0.00</td>
+                  </tr>
+                  <tr>
+                    <th colspan="2">Profit (Commission)</th>
+                    <td id="cap-profit">0.00</td>
+                  </tr>
+                  <tr>
+                    <th colspan="2">AG W (Daily & Monthly Expenses)</th>
+                    <td id="cap-agw">0.00</td>
+                  </tr>
+                  <tr>
+                    <th colspan="2">Agent's Withdraw (Personal Usage)</th>
+                    <td id="cap-agent-withdraw">0.00</td>
+                  </tr>
+                  <tr class="highlight-green">
+                    <th colspan="2">Total =</th>
+                    <td id="cap-total">0.00</td>
+                  </tr>
+                  <tr class="highlight-blue">
+                    <th colspan="2">Total Cash =</th>
+                    <td id="cap-total-cash">0.00</td>
+                  </tr>
+                  <tr>
+                    <th colspan="2">Agent Balance =</th>
+                    <td id="cap-agent-balance">0.00</td>
+                  </tr>
+                  <tr class="highlight-red">
+                    <th colspan="2">Closing Balance =</th>
+                    <td id="cap-closing">0.00</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 5: Voucher & Differ -->
+          <div class="cb-card mb-0">
+            <div class="cb-card-header"><i class="ri-file-shield-line"></i> Voucher &amp; Differ</div>
+            <div class="cb-card-body">
+              <table class="cb-table inword-table" style="width:100%; margin-bottom:12px;">
+                <tr>
+                  <th style="text-align:left; width:100px; color:var(--text-muted);">In-Word :</th>
+                  <td style="text-align:left; color:var(--gold); font-size:13px; font-weight:700;"><span
+                      id="cap-inword">Zero</span></td>
+                </tr>
+              </table>
+
+              <div class="voucher-differ-grid">
+                <table class="cb-table voucher-table">
+                  <tr>
+                    <th colspan="2" style="text-align:center; background:rgba(255,255,255,0.05);">Voucher</th>
+                  </tr>
+                  <tr>
+                    <th>Dr Voucher</th>
+                    <td><input id="dr-voucher" type="text" value="" style="width:100%; text-align:center;"
+                        inputmode="numeric" pattern="[0-9]*" data-noformat="1" placeholder="0"></td>
+                  </tr>
+                  <tr>
+                    <th>Cr Voucher</th>
+                    <td><input id="cr-voucher" type="text" value="" style="width:100%; text-align:center;"
+                        inputmode="numeric" pattern="[0-9]*" data-noformat="1" placeholder="0"></td>
+                  </tr>
+                  <tr>
+                    <th>Remittance Vr =</th>
+                    <td><input id="rem-voucher" type="text" value="" style="width:100%; text-align:center;"
+                        inputmode="numeric" pattern="[0-9]*" data-noformat="1" placeholder="0"></td>
+                  </tr>
+                  <tr class="highlight-grey">
+                    <th>Total Voucher =</th>
+                    <td id="total-voucher" style="text-align:center; font-weight:bold;">0</td>
+                  </tr>
+                </table>
+                <table class="cb-table differ-table">
+                  <tr>
+                    <th colspan="2" style="text-align:center; background:rgba(255,255,255,0.05);">Differ</th>
+                  </tr>
+                  <tr>
+                    <th>DIFFER</th>
+                    <td id="cap-differ" style="font-weight:700; text-align:center;">0.00</td>
+                  </tr>
+                  <tr>
+                    <th>DIFFER CASH</th>
+                    <td id="cap-differ-cash" style="font-weight:700; text-align:center;">0.00</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer"
+        style="position:sticky; bottom:0; background:var(--bg-secondary); z-index:10; border-top:1px solid var(--border);">
+        <button class="btn btn-ghost modal-close">Cancel</button>
+        <button class="btn btn-outline" id="resetCbBtn"><i class="ri-refresh-line"></i> Reset Sheet</button>
+        <button class="btn btn-primary" id="saveBtn"><i class="ri-save-line"></i> Save Entry</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Full Sheet Modal -->
+  <div class="modal-overlay" id="viewSheetModal">
+    <div class="modal" style="max-width:1080px; width:95vw; max-height:92vh; overflow-y:auto;">
+      <div class="modal-header"
+        style="position:sticky; top:0; background:var(--bg-secondary); z-index:10; border-bottom:1px solid var(--border);">
+        <div class="modal-title" id="viewSheetTitle"><i class="ri-file-text-line"></i> Cash Book Sheet Details</div>
+        <div class="flex gap-8 items-center">
+          <button class="btn btn-ghost btn-sm" onclick="window.print()"><i class="ri-printer-line"></i> Print</button>
+          <div class="modal-close"><i class="ri-close-line"></i></div>
+        </div>
+      </div>
+      <div class="modal-body" id="viewSheetBody" style="padding:20px 24px;">
+        <!-- Dynamically rendered read-only sheet -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost modal-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cash Book Summary Modal (Print & Download PDF) -->
+  <div class="modal-overlay" id="cbSummaryModal">
+    <div class="modal" style="max-width:1240px; width:96vw; max-height:92vh; display:flex; flex-direction:column;">
+      <div class="modal-header no-print" style="padding:16px 20px; border-bottom:1px solid var(--border)">
+        <div class="modal-title"
+          style="font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+          <i class="ri-file-chart-line" style="color:var(--gold); font-size:20px;"></i>
+          <span id="cbSummaryModalTitle">Cash Book Summary Statement</span>
+        </div>
+        <div class="modal-close" onclick="Modal.close('cbSummaryModal')"><i class="ri-close-line"></i></div>
+      </div>
+
+      <!-- Controls Bar (Screen Only) -->
+      <div class="screen-only"
+        style="padding:14px 20px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <!-- Left: Agent & Category Filters -->
+          <div class="flex gap-10 items-center flex-wrap">
+            <div class="flex gap-6 items-center">
+              <label
+                style="font-size:12px; font-weight:600; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-store-2-line" style="color:var(--gold)"></i> Agent:
+              </label>
+              <select id="cbSummaryAgent" class="form-control"
+                style="min-width:200px; max-width:320px; width:auto; height:38px; padding:6px 12px; font-size:13px;"
+                onchange="renderCashbookSummary()" title="Select Agent">
+                <option value="">All Agents</option>
+              </select>
+            </div>
+            <div class="flex gap-6 items-center">
+              <label
+                style="font-size:12px; font-weight:600; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-list-check-2" style="color:var(--gold)"></i> Category:
+              </label>
+              <select id="cbSummaryCategory" class="form-control"
+                style="min-width:210px; max-width:320px; width:auto; height:38px; padding:6px 12px; font-size:13px;"
+                onchange="renderCashbookSummary()" title="Select Category">
+                <option value="all">All Category (সকল ক্যাটাগরি)</option>
+                <option value="openingHand">Opening Hand</option>
+                <option value="closingHand">Closing Hand</option>
+                <option value="totalRx">Total Receive</option>
+                <option value="totalPay">Total Payment</option>
+                <option value="openingSettle">Opening Settle</option>
+                <option value="closingSettle">Closing Settle</option>
+                <option value="closingBal">Closing Balance =</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Date Range Filter & Quick Presets -->
+        <div
+          style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding-top:10px; border-top:1px dashed var(--border);">
+          <div class="flex gap-8 items-center flex-wrap">
+            <span
+              style="font-size:12px; font-weight:600; color:var(--text-primary); display:flex; align-items:center; gap:4px;">
+              <i class="ri-calendar-line" style="color:var(--gold);"></i> Date Range:
+            </span>
+            <div class="flex gap-6 items-center">
+              <input type="date" id="cbSummaryDateFrom" class="form-control"
+                style="height:32px; font-size:12px; max-width:145px;" onchange="renderCashbookSummary()">
+              <span style="color:var(--text-muted); font-size:12px;">to</span>
+              <input type="date" id="cbSummaryDateTo" class="form-control"
+                style="height:32px; font-size:12px; max-width:145px;" onchange="renderCashbookSummary()">
+            </div>
+          </div>
+          <div class="flex gap-6 items-center flex-wrap">
+            <button class="btn btn-ghost btn-sm" onclick="setCbSummaryDatePreset('30d')"
+              style="height:30px; font-size:11px; padding:0 10px;">Last 30 Days</button>
+            <button class="btn btn-ghost btn-sm" onclick="setCbSummaryDatePreset('6m')"
+              style="height:30px; font-size:11px; padding:0 10px;">Last 6 Months</button>
+            <button class="btn btn-ghost btn-sm" onclick="setCbSummaryDatePreset('fy')"
+              style="height:30px; font-size:11px; padding:0 10px;">This Fiscal Year</button>
+            <button class="btn btn-ghost btn-sm" onclick="setCbSummaryDatePreset('all')"
+              style="height:30px; font-size:11px; padding:0 10px;">All Time</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body (Print & PDF Area) -->
+      <div class="modal-body" id="cbSummaryModalBody" style="overflow-y:auto; padding:20px; flex:1;">
+        <!-- Dynamic Summary Statement Content rendered by JS -->
+      </div>
+
+      <!-- Modal Footer (Screen Only) -->
+      <div class="modal-footer no-print"
+        style="justify-content:space-between; padding:12px 20px; border-top:1px solid var(--border);">
+        <div id="cbSummaryFooterMeta" style="font-size:12px; color:var(--text-muted);">
+          MS Techno Enterprise • Cash Book Statement System
+        </div>
+        <div class="flex gap-8">
+          <button class="btn btn-outline btn-sm" onclick="printCashbookSummary()" title="Print Statement">
+            <i class="ri-printer-line"></i> Print
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="downloadCashbookSummaryPDF()" title="Download PDF Report">
+            <i class="ri-file-pdf-line"></i> Download PDF
+          </button>
+          <button class="btn btn-ghost btn-sm modal-close" onclick="Modal.close('cbSummaryModal')">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const user = App.init('agent-cashbook', 'Cash Book', 'Cash in/out transactions');
+    UIEnhancements.setBreadcrumb('pageBreadcrumb', [{ label: 'Cash Book' }]);
+    if (!user) throw new Error();
+    const isAdmin = user.role === 'admin' || user.role === 'sub-admin';
+    const canEdit = isAdmin || Auth.canEdit('agent-cashbook');
+    Chart.defaults.color = '#9ba8cc';
+    Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+    let allData = [], agents = [], filteredData = [];
+    const PER_PAGE = 15; let page = 1;
+    let chart;
+
+    // ── Cash Book KPI Helper Functions ──────────────────
+    function getRecOpeningHand(r) {
+      if (!r) return 0;
+      if (r.sheetData?.fields && r.sheetData.fields['cb-opening-hand'] !== undefined) {
+        return parseNum(r.sheetData.fields['cb-opening-hand']);
+      }
+      return parseNum(r.openingHand || 0);
+    }
+
+    function getRecClosingHand(r) {
+      if (!r) return 0;
+      if (r.closingHand !== undefined) return parseNum(r.closingHand);
+      if (r.sheetData?.calculated?.closingHand !== undefined) return parseNum(r.sheetData.calculated.closingHand);
+      return parseNum(r.amount || 0);
+    }
+
+    function getRecTotalReceive(r) {
+      if (!r) return 0;
+      if (r.totalRx !== undefined) return parseNum(r.totalRx);
+      if (r.sheetData?.calculated?.totalReceive !== undefined) return parseNum(r.sheetData.calculated.totalReceive);
+      return r.type === 'in' ? parseNum(r.amount) : 0;
+    }
+
+    function getRecTotalPayment(r) {
+      if (!r) return 0;
+      if (r.totalPay !== undefined) return parseNum(r.totalPay);
+      if (r.sheetData?.calculated?.totalPayment !== undefined) return parseNum(r.sheetData.calculated.totalPayment);
+      return r.type === 'out' ? parseNum(r.amount) : 0;
+    }
+
+    function getRecOpeningSettlement(r) {
+      if (!r) return 0;
+      if (r.sheetData?.fields && r.sheetData.fields['cb-opening-settlement'] !== undefined) {
+        return parseNum(r.sheetData.fields['cb-opening-settlement']);
+      }
+      return parseNum(r.openingSettlement || 0);
+    }
+
+    function getRecClosingSettlement(r) {
+      if (!r) return 0;
+      if (r.closingSettlement !== undefined) return parseNum(r.closingSettlement);
+      if (r.sheetData?.fields && r.sheetData.fields['cb-closing-settlement'] !== undefined) {
+        return parseNum(r.sheetData.fields['cb-closing-settlement']);
+      }
+      return 0;
+    }
+
+    function getRecClosingBalance(r) {
+      if (!r) return 0;
+      if (r.agentCapitalClosing !== undefined) return parseNum(r.agentCapitalClosing);
+      if (r.sheetData?.calculated?.capClosing !== undefined) return parseNum(r.sheetData.calculated.capClosing);
+      return 0;
+    }
+
+    function load() {
+      agents = Auth.getAccessibleAgents(DB.getAgents());
+      const agentMap = {};
+      agents.forEach(a => agentMap[a.id] = a);
+
+      allData = DB.getCashbook().map(r => ({
+        ...r,
+        agentName: agentMap[r.agentId]?.name || 'Unknown',
+        agentCode: agentMap[r.agentId]?.code || '—',
+        userName: r.userName || (user && (user.name || user.username)) || 'Admin'
+      })).sort((a, b) => {
+        const dDiff = new Date(b.date) - new Date(a.date);
+        if (dDiff !== 0) return dDiff;
+        if (b.createdAt && a.createdAt) {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        }
+        return 0;
+      });
+
+      ['agentSel', 'entAgent'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const cur = el.value;
+        el.innerHTML = `<option value="">${id === 'agentSel' ? 'All Agents' : 'Select Agent'}</option>`;
+        agents.forEach(a => el.innerHTML += `<option value="${a.id}" ${a.id === cur ? 'selected' : ''}>${a.name}</option>`);
+      });
+
+      applyFilters();
+      renderChart();
+    }
+
+    function applyFilters() {
+      let d = [...allData];
+      const agent = document.getElementById('agentSel').value;
+      const type = document.getElementById('typeSel').value;
+      const from = document.getElementById('dateFrom').value;
+      const to = document.getElementById('dateTo').value;
+      const search = document.getElementById('searchInp').value.toLowerCase();
+
+      if (agent) d = d.filter(r => r.agentId === agent);
+      if (type) d = d.filter(r => r.type === type);
+      if (from) d = d.filter(r => r.date >= from);
+      if (to) d = d.filter(r => r.date <= to);
+      if (search) d = d.filter(r => r.agentName.toLowerCase().includes(search) || (r.agentCode || '').toLowerCase().includes(search) || (r.description || '').toLowerCase().includes(search) || (r.category || '').toLowerCase().includes(search));
+
+      filteredData = d;
+      page = 1;
+
+      // ── KPI Card Calculations (7 Cards) ────────────────
+      let openHand = 0;
+      let closeHand = 0;
+      let openSettle = 0;
+      let closeSettle = 0;
+      let closingBal = 0;
+
+      if (agent) {
+        const agRecs = d.filter(r => r.agentId === agent);
+        if (agRecs.length > 0) {
+          const latest = agRecs[0];
+          openHand = getRecOpeningHand(latest);
+          closeHand = getRecClosingHand(latest);
+          openSettle = getRecOpeningSettlement(latest);
+          closeSettle = getRecClosingSettlement(latest);
+          closingBal = getRecClosingBalance(latest);
+        }
+      } else {
+        const latestAgentMap = {};
+        d.forEach(r => {
+          if (!latestAgentMap[r.agentId]) {
+            latestAgentMap[r.agentId] = r;
+          }
+        });
+        const latestRecs = Object.values(latestAgentMap);
+        openHand = latestRecs.reduce((s, r) => s + getRecOpeningHand(r), 0);
+        closeHand = latestRecs.reduce((s, r) => s + getRecClosingHand(r), 0);
+        openSettle = latestRecs.reduce((s, r) => s + getRecOpeningSettlement(r), 0);
+        closeSettle = latestRecs.reduce((s, r) => s + getRecClosingSettlement(r), 0);
+        closingBal = latestRecs.reduce((s, r) => s + getRecClosingBalance(r), 0);
+      }
+
+      // Flows across filtered transactions:
+      const totalReceive = d.reduce((s, r) => s + getRecTotalReceive(r), 0);
+      const totalPayment = d.reduce((s, r) => s + getRecTotalPayment(r), 0);
+
+      // Animate 7 KPI Card counters
+      const elOpenHand = document.getElementById('kpiOpenHand');
+      const elCloseHand = document.getElementById('kpiCloseHand');
+      const elTotalRx = document.getElementById('kpiTotalRx');
+      const elTotalPay = document.getElementById('kpiTotalPay');
+      const elOpenSettle = document.getElementById('kpiOpenSettle');
+      const elCloseSettle = document.getElementById('kpiCloseSettle');
+      const elClosingBal = document.getElementById('kpiClosingBal');
+
+      if (elOpenHand) animateCount(elOpenHand, Math.abs(openHand), 600, openHand < 0 ? '-৳' : '৳');
+      if (elCloseHand) animateCount(elCloseHand, Math.abs(closeHand), 600, closeHand < 0 ? '-৳' : '৳');
+      if (elTotalRx) animateCount(elTotalRx, Math.abs(totalReceive), 600, totalReceive < 0 ? '-৳' : '৳');
+      if (elTotalPay) animateCount(elTotalPay, Math.abs(totalPayment), 600, totalPayment < 0 ? '-৳' : '৳');
+      if (elOpenSettle) animateCount(elOpenSettle, Math.abs(openSettle), 600, openSettle < 0 ? '-৳' : '৳');
+      if (elCloseSettle) animateCount(elCloseSettle, Math.abs(closeSettle), 600, closeSettle < 0 ? '-৳' : '৳');
+      if (elClosingBal) animateCount(elClosingBal, Math.abs(closingBal), 600, closingBal < 0 ? '-৳' : '৳');
+
+      renderTable();
+      renderChart();
+    }
+
+    // ── Paired Cash Flow Chart Logic ────────────────────
+    let currentChartPair = 'handcash';
+
+    function renderChart() {
+      const chartType = document.getElementById('chartTypeSel')?.value || 'bar';
+      const agent = document.getElementById('agentSel')?.value || '';
+
+      let labels = [];
+      let recordsToChart = [];
+
+      if (agent) {
+        // Specific agent: show chronological records (up to 8 records)
+        const agRecs = filteredData.filter(r => r.agentId === agent);
+        recordsToChart = agRecs.slice(0, 8).reverse();
+        labels = recordsToChart.map(r => {
+          const d = new Date(r.date + 'T12:00:00');
+          return isNaN(d) ? r.date : d.toLocaleDateString('en-BD', { month: 'short', day: 'numeric' });
+        });
+      } else {
+        // All agents: show each agent's latest record side-by-side
+        agents.forEach(a => {
+          const aRecs = filteredData.filter(r => r.agentId === a.id);
+          if (aRecs.length > 0) {
+            recordsToChart.push(aRecs[0]);
+            labels.push(a.name);
+          }
+        });
+      }
+
+      // Fallback if recordsToChart is empty
+      if (!recordsToChart.length && allData.length) {
+        agents.forEach(a => {
+          const aRecs = allData.filter(r => r.agentId === a.id);
+          if (aRecs.length > 0) {
+            recordsToChart.push(aRecs[0]);
+            labels.push(a.name);
+          }
+        });
+      }
+
+      // Extract datasets according to active pair
+      const openHandData = recordsToChart.map(r => getRecOpeningHand(r));
+      const closeHandData = recordsToChart.map(r => getRecClosingHand(r));
+      const totalRxData = recordsToChart.map(r => getRecTotalReceive(r));
+      const totalPayData = recordsToChart.map(r => getRecTotalPayment(r));
+      const openSettleData = recordsToChart.map(r => getRecOpeningSettlement(r));
+      const closeSettleData = recordsToChart.map(r => getRecClosingSettlement(r));
+      const closingBalData = recordsToChart.map(r => getRecClosingBalance(r));
+
+      let datasets = [];
+      const titleEl = document.getElementById('chartCardTitle');
+
+      if (currentChartPair === 'handcash') {
+        if (titleEl) titleEl.innerHTML = `<i class="ri-hand-coin-line"></i> Hand Cash Pair: Opening vs Closing Hand Cash (+ Closing Balance =)`;
+        datasets = [
+          {
+            label: 'Opening Balance (Hand Cash)',
+            data: openHandData,
+            backgroundColor: 'rgba(56, 189, 248, 0.85)',
+            borderColor: '#38bdf8',
+            borderWidth: chartType === 'line' ? 2 : 1,
+            borderRadius: chartType === 'bar' ? 6 : undefined,
+            tension: chartType === 'line' ? 0.35 : undefined,
+            fill: chartType === 'line' ? false : undefined
+          },
+          {
+            label: 'Closing Hand Cash',
+            data: closeHandData,
+            backgroundColor: 'rgba(16, 185, 129, 0.85)',
+            borderColor: '#10b981',
+            borderWidth: chartType === 'line' ? 2 : 1,
+            borderRadius: chartType === 'bar' ? 6 : undefined,
+            tension: chartType === 'line' ? 0.35 : undefined,
+            fill: chartType === 'line' ? false : undefined
+          },
+          {
+            label: 'Closing Balance =',
+            data: closingBalData,
+            backgroundColor: 'rgba(245, 166, 35, 0.85)',
+            borderColor: '#f5a623',
+            borderWidth: chartType === 'line' ? 2 : 1,
+            borderRadius: chartType === 'bar' ? 6 : undefined,
+            tension: chartType === 'line' ? 0.15 : undefined,
+            fill: chartType === 'line' ? 'origin' : undefined
+          }
+        ];
+      } else if (currentChartPair === 'flow') {
+        if (titleEl) titleEl.innerHTML = `<i class="ri-exchange-funds-line"></i> Cash Flow Pair: Total Receive vs Total Payment (+ Closing Balance =)`;
+        datasets = [
+          {
+            label: 'Total Receive',
+            data: totalRxData,
+            backgroundColor: 'rgba(16, 185, 129, 0.85)',
+            borderColor: '#10b981',
+            borderWidth: chartType === 'line' ? 2 : 1,
+            borderRadius: chartType === 'bar' ? 6 : undefined,
+            tension: chartType === 'line' ? 0.15 : undefined,
+            fill: chartType === 'line' ? 'origin' : undefined
+          },
+          {
+            label: 'Total Payment',
+            data: totalPayData,
+            backgroundColor: 'rgba(244, 63, 94, 0.85)',
+            borderColor: '#f43f5e',
+            borderWidth: chartType === 'line' ? 2 : 1,
+            borderRadius: chartType === 'bar' ? 6 : undefined,
+            tension: chartType === 'line' ? 0.15 : undefined,
+            fill: chartType === 'line' ? 'origin' : undefined
+          },
+          {
+            label: 'Closing Balance =',
+            data: closingBalData,
+            backgroundColor: 'rgba(245, 166, 35, 0.85)',
+            borderColor: '#f5a623',
+            borderWidth: chartType === 'line' ? 2 : 1,
+            borderRadius: chartType === 'bar' ? 6 : undefined,
+            tension: chartType === 'line' ? 0.15 : undefined,
+            fill: chartType === 'line' ? 'origin' : undefined
+          }
+        ];
+      } else if (currentChartPair === 'settlement') {
+        if (titleEl) titleEl.innerHTML = `<i class="ri-bank-card-line"></i> Settlement Pair: Opening vs Closing Settlement (+ Closing Balance =)`;
+        datasets = [
+          {
+            label: 'OPENING BALANCE (Settlement)',
+            data: openSettleData,
+            backgroundColor: 'rgba(168, 85, 247, 0.85)',
+            borderColor: '#a855f7',
+            borderWidth: chartType === 'line' ? 2 : 1,
+            borderRadius: chartType === 'bar' ? 6 : undefined,
+            tension: chartType === 'line' ? 0.15 : undefined,
+            fill: chartType === 'line' ? 'origin' : undefined
+          },
+          {
+            label: 'CLOSING BALANCE (Settlement)',
+            data: closeSettleData,
+            backgroundColor: 'rgba(14, 165, 233, 0.85)',
+            borderColor: '#0ea5e9',
+            borderWidth: chartType === 'line' ? 2 : 1,
+            borderRadius: chartType === 'bar' ? 6 : undefined,
+            tension: chartType === 'line' ? 0.15 : undefined,
+            fill: chartType === 'line' ? 'origin' : undefined
+          },
+          {
+            label: 'Closing Balance =',
+            data: closingBalData,
+            backgroundColor: 'rgba(245, 166, 35, 0.85)',
+            borderColor: '#f5a623',
+            borderWidth: chartType === 'line' ? 2 : 1,
+            borderRadius: chartType === 'bar' ? 6 : undefined,
+            tension: chartType === 'line' ? 0.15 : undefined,
+            fill: chartType === 'line' ? 'origin' : undefined
+          }
+        ];
+      } else {
+        if (titleEl) titleEl.innerHTML = `<i class="ri-scales-3-line"></i> All Metrics Comparison (+ Closing Balance =)`;
+        datasets = [
+          { label: 'Opening Hand', data: openHandData, backgroundColor: 'rgba(56, 189, 248, 0.85)', borderColor: '#38bdf8' },
+          { label: 'Closing Hand', data: closeHandData, backgroundColor: 'rgba(16, 185, 129, 0.85)', borderColor: '#10b981' },
+          { label: 'Total Receive', data: totalRxData, backgroundColor: 'rgba(20, 184, 166, 0.85)', borderColor: '#14b8a6' },
+          { label: 'Total Payment', data: totalPayData, backgroundColor: 'rgba(244, 63, 94, 0.85)', borderColor: '#f43f5e' },
+          { label: 'Opening Settle', data: openSettleData, backgroundColor: 'rgba(168, 85, 247, 0.85)', borderColor: '#a855f7' },
+          { label: 'Closing Settle', data: closeSettleData, backgroundColor: 'rgba(14, 165, 233, 0.85)', borderColor: '#0ea5e9' },
+          { label: 'Closing Balance =', data: closingBalData, backgroundColor: 'rgba(245, 166, 35, 0.85)', borderColor: '#f5a623' }
+        ];
+      }
+
+      if (chart) chart.destroy();
+      const ctx = document.getElementById('cashChart').getContext('2d');
+
+      const isArea     = chartType === 'area';
+      const isDoughnut = chartType === 'doughnut';
+      const isLine     = chartType === 'line' || isArea;
+      const chartJsType = isDoughnut ? 'doughnut' : (isArea ? 'line' : chartType);
+
+      // For doughnut: sum each dataset into a single value
+      if (isDoughnut) {
+        const sumDS = datasets.map(ds => ({
+          label: ds.label,
+          value: ds.data.reduce((a, b) => a + b, 0),
+          color: ds.backgroundColor
+        }));
+        chart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: sumDS.map(d => d.label),
+            datasets: [{
+              data: sumDS.map(d => d.value),
+              backgroundColor: sumDS.map(d => d.color),
+              borderColor: 'rgba(0,0,0,0.1)',
+              borderWidth: 2,
+              hoverOffset: 16
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            animation: { animateRotate: true, animateScale: true, duration: 1400, easing: 'easeOutElastic' },
+            plugins: {
+              legend: { position: 'bottom', labels: { usePointStyle: true, padding: 14, color: '#9ba8cc', font: { size: 11 } } },
+              tooltip: { callbacks: { label: c => ` ${c.label}: ` + fmt(c.raw) } }
+            }
+          }
+        });
+        return;
+      }
+
+      // Update dataset properties for line/area charts (matching screenshot design)
+      if (isLine) {
+        datasets = datasets.map((ds, i) => {
+          const grad = ctx.createLinearGradient(0, 0, 0, 260);
+          const base = ds.backgroundColor || 'rgba(245, 166, 35, 0.85)';
+          grad.addColorStop(0, base.replace('0.85', '0.30'));
+          grad.addColorStop(0.5, base.replace('0.85', '0.10'));
+          grad.addColorStop(1, 'rgba(0, 0, 0, 0.00)');
+
+          return {
+            ...ds,
+            backgroundColor: grad,
+            borderWidth: 2,
+            tension: 0.15,
+            fill: 'origin',
+            pointRadius: 0,
+            pointHoverRadius: 6,
+            pointHoverBackgroundColor: ds.borderColor,
+            pointHoverBorderColor: '#ffffff',
+            pointHoverBorderWidth: 2,
+            borderRadius: undefined
+          };
+        });
+      }
+
+      chart = new Chart(ctx, {
+        type: chartJsType,
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          animation: { duration: 1200, easing: 'easeOutQuart' },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { usePointStyle: true, padding: 12, color: '#9ba8cc', font: { size: 11 } }
+            },
+            tooltip: {
+              callbacks: {
+                label: c => ` ${c.dataset.label}: ` + fmt(c.raw)
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y: {
+              grid: { color: 'rgba(255,255,255,0.04)' },
+              ticks: {
+                callback: v => (v < 0 ? '-৳' : '৳') + (Math.abs(v) >= 1000 ? (Math.abs(v) / 1000).toFixed(0) + 'k' : Math.abs(v))
+              }
+            }
+          }
+        }
+      });
+    }
+
+
+    // ── Updated Transactions Table with Agent Code, Date (Day, Time), and User Name ──
+    function renderTable() {
+      document.getElementById('recCount').textContent = `(${filteredData.length} records)`;
+      const actH = document.getElementById('actH');
+      if (actH) actH.style.display = '';
+      const rows = filteredData.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+      const tbody = document.getElementById('tableBody');
+
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted" style="padding:30px">No records found</td></tr>`;
+      } else {
+        tbody.innerHTML = rows.map(r => {
+          let dateObj = null;
+          if (r.createdAt) {
+            const t = new Date(r.createdAt);
+            if (!isNaN(t)) dateObj = t;
+          }
+          if (!dateObj && r.date) {
+            const t = new Date(r.date + 'T12:00:00');
+            if (!isNaN(t)) dateObj = t;
+          }
+          const dateStr = dateObj ? dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : (r.date || '—');
+          const dayStr = dateObj ? dateObj.toLocaleDateString('en-GB', { weekday: 'long' }) : '';
+          const timeStr = (r.createdAt && !isNaN(new Date(r.createdAt)))
+            ? new Date(r.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+            : (r.time || '10:00 AM');
+
+          const closeHand = getRecClosingHand(r);
+          const closingBal = getRecClosingBalance(r);
+          const rawCode = r.agentCode || (agents.find(a => a.id === r.agentId)?.code) || (agents.find(a => a.id === r.agentId)?.outletCode) || '—';
+          const agCode = (rawCode && rawCode !== '—') ? rawCode : 'AG-01';
+          const userNameDisplay = r.userName || (user && (user.name || user.username)) || 'Admin';
+
+          return `
+            <tr>
+              <td>
+                <div class="bold" style="color:var(--text-primary); font-size:13px;">${r.agentName}</div>
+                <div style="font-size:11px; color:var(--text-muted); font-family:monospace; margin-top:2px;">Code (${agCode})</div>
+              </td>
+              <td>
+                <div style="line-height:1.35;">
+                  <div class="bold" style="color:var(--text-primary); font-size:13px;">${dateStr}</div>
+                  <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">
+                    ${dayStr ? dayStr + ', ' : ''}${timeStr}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <div style="width:22px; height:22px; border-radius:50%; background:rgba(99,102,241,0.15); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">
+                    ${(userNameDisplay.charAt(0) || 'U').toUpperCase()}
+                  </div>
+                  <span style="font-weight:600; color:var(--text-primary); font-size:12px;">${userNameDisplay}</span>
+                </div>
+              </td>
+              <td class="bold text-success" style="text-align:right;">${fmt(closeHand)}</td>
+              <td class="bold text-danger" style="text-align:right;">${fmt(closingBal)}</td>
+              <td>${r.description || r.category || 'Daily Cash Book'}</td>
+              <td style="text-align:center;">
+                <div class="flex gap-4 items-center justify-center">
+                  ${r.sheetData ? `<button class="btn btn-ghost btn-sm btn-icon" title="View Full Sheet" onclick="viewSheet('${r.id}')"><i class="ri-file-text-line"></i></button>` : ''}
+                  ${canEdit ? `<button class="btn btn-danger btn-sm btn-icon" onclick="del('${r.id}')" title="Delete"><i class="ri-delete-bin-line"></i></button>` : ''}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      const total = Math.ceil(filteredData.length / PER_PAGE);
+      const pag = document.getElementById('pagination');
+      if (total <= 1) { pag.innerHTML = ''; return; }
+      pag.innerHTML = Array.from({ length: total }, (_, i) => `<div class="page-btn${i + 1 === page ? ' active' : ''}" onclick="goPage(${i + 1})">${i + 1}</div>`).join('');
+    }
+
+    function goPage(p) { page = p; renderTable(); }
+
+    function del(id) {
+      Confirm.show('Delete this cash book entry?', () => { DB.deleteCashbook(id); Toast.success('Deleted!'); load(); });
+    }
+
+
+
+    ['agentSel', 'typeSel', 'dateFrom', 'dateTo'].forEach(id => document.getElementById(id)?.addEventListener('change', applyFilters));
+    document.getElementById('searchInp')?.addEventListener('input', applyFilters);
+    document.getElementById('clearFilters')?.addEventListener('click', () => {
+      ['agentSel', 'typeSel', 'dateFrom', 'dateTo'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('searchInp').value = '';
+      applyFilters();
+    });
+
+    document.querySelectorAll('#chartPairTabs .tab-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#chartPairTabs .tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentChartPair = this.dataset.pair || 'handcash';
+        renderChart();
+      });
+    });
+
+    document.getElementById('chartTypeSel')?.addEventListener('change', renderChart);
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // CASH BOOK CALCULATION & SHEET LOGIC
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function parseNum(v) {
+      if (v === null || v === undefined) return 0;
+      const s = String(v).replace(/,/g, '').replace(/[^\d.\-]/g, '').trim();
+      if (s === '' || s === '-' || s === '.' || s === '-.') return 0;
+      const n = parseFloat(s);
+      return isNaN(n) ? 0 : n;
+    }
+
+    function moneyFormat(n) {
+      const val = parseNum(n);
+      return val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function recalcNotes() {
+      let total = 0;
+      document.querySelectorAll('#notes-table tr').forEach(row => {
+        const input = row.querySelector('input.note-count');
+        const amtCell = row.querySelector('.amt');
+        if (input && amtCell) {
+          // Cheque input: data-value="cheque" — entered value IS the amount directly
+          if (input.dataset.value === 'cheque') {
+            const rawVal = String(input.value || '').trim();
+            if (rawVal === '') {
+              amtCell.textContent = moneyFormat(0);
+            } else {
+              const chequeAmt = parseNum(rawVal);
+              amtCell.textContent = moneyFormat(chequeAmt);
+              total += chequeAmt;
+            }
+          } else {
+            const noteVal = parseFloat(input.dataset.value) || 0;
+            const rawCount = String(input.value || '').trim();
+            if (rawCount === '') {
+              amtCell.textContent = moneyFormat(0);
+            } else {
+              const count = parseFloat(rawCount) || 0;
+              // Round to 2 decimals to fix floating-point issues (e.g. 0.01*3=0.030000000000000002)
+              const subtotal = Math.round(noteVal * count * 100) / 100;
+              amtCell.textContent = moneyFormat(subtotal);
+              total += subtotal;
+            }
+          }
+        }
+      });
+      // Round total to 2 decimals to prevent floating-point accumulation
+      total = Math.round(total * 100) / 100;
+      const totalCell = document.getElementById('total-cash-display');
+      if (totalCell) totalCell.textContent = moneyFormat(total);
+      calcCashBook();
+    }
+
+    function recalcVouchers() {
+      const dr = parseNum(document.getElementById('dr-voucher')?.value || 0);
+      const cr = parseNum(document.getElementById('cr-voucher')?.value || 0);
+      const rem = parseNum(document.getElementById('rem-voucher')?.value || 0);
+      const total = dr + cr + rem;
+      const totalCell = document.getElementById('total-voucher');
+      if (totalCell) totalCell.textContent = (isNaN(total) ? '0' : String(total));
+    }
+
+    function calcCashBook() {
+      const val = (id) => parseNum(document.getElementById(id)?.value);
+      const format = (n) => moneyFormat(n);
+
+      const payClients = val('cb-pay-clients');
+      const agw = val('cb-agw');
+      const agentW = val('cb-agent-withdraw');
+      const profit = val('cb-profit');
+      const openSettle = val('cb-opening-settlement');
+      const closeSettle = val('cb-closing-settlement');
+      const enhance = val('cb-enhance');
+      const openHand = val('cb-opening-hand');
+
+      // Right side totals
+      const totalPaymentRight = Math.round((payClients + agw + agentW - profit - openSettle) * 100) / 100;
+      const receivedWithdraw = Math.round((payClients - closeSettle) * 100) / 100;
+
+      // Left side
+      const totalReceive = Math.round((receivedWithdraw + enhance) * 100) / 100;
+      const closingHand = Math.round((openHand + totalReceive - totalPaymentRight) * 100) / 100;
+
+      // Update displays
+      const setText = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = format(n); };
+      setText('cb-total-payment-right', totalPaymentRight);
+      setText('cb-received-withdraw', receivedWithdraw);
+      setText('cb-total-receive-1', totalReceive);
+      setText('cb-total-receive', totalReceive);
+      setText('cb-total-payment', totalPaymentRight);
+      setText('cb-closing', closingHand);
+      setText('cb-rfc', receivedWithdraw);
+
+      // Agent's Capital
+      const capTotal = Math.round((openSettle + enhance + openHand + profit - agw - agentW) * 100) / 100;
+      const totalCash = parseNum(document.getElementById('total-cash-display')?.textContent);
+      const capAgentBalance = closeSettle;
+      const capClosing = Math.round((totalCash + capAgentBalance) * 100) / 100;
+      setText('cap-open-settle', openSettle);
+      setText('cap-enhance', enhance);
+      setText('cap-open-hand', openHand);
+      setText('cap-profit', profit);
+      setText('cap-agw', agw);
+      setText('cap-agent-withdraw', agentW);
+      setText('cap-total', capTotal);
+      setText('cap-total-cash', totalCash);
+      setText('cap-agent-balance', capAgentBalance);
+      setText('cap-closing', capClosing);
+
+      // Differ: DIFFER = Closing Balance - Total; DIFFER CASH = Total Cash - CLOSING BALANCE
+      // Round to 2 decimals to eliminate floating-point artifacts (e.g. POISA 0.01 * count)
+      const diff = Math.round((capClosing - capTotal) * 100) / 100;
+      const diffCash = Math.round((totalCash - closingHand) * 100) / 100;
+      const paint = (id, value) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = format(value);
+        // 0 = default/black text, positive = yellow, negative = red
+        let clr;
+        if (value > 0) clr = '#f59e0b';
+        else if (value < 0) clr = '#ef4444';
+        else clr = '';
+        el.style.removeProperty('color');
+        if (clr) {
+          el.style.setProperty('color', clr, 'important');
+        }
+      };
+      paint('cap-differ', diff);
+      paint('cap-differ-cash', diffCash);
+
+      // In-Word
+      const inwordEl = document.getElementById('cap-inword');
+      if (inwordEl) inwordEl.textContent = numberToWords(capClosing);
+    }
+
+    function numberToWords(num) {
+      num = Math.round((num + Number.EPSILON) * 100) / 100;
+      if (num === 0) return "Zero";
+      const a = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+      const b = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+      const parts = (n) => n < 20 ? a[n] : b[Math.floor(n / 10)] + (n % 10 ? " " + a[n % 10] : "");
+      const formatGroup = (n, label) => n ? parts(n) + (label ? " " + label : "") : "";
+      let n = Math.floor(num);
+      let dec = Math.round((num - n) * 100);
+      let sn = ("000000000" + n).slice(-9);
+      let crore = parseInt(sn.slice(0, 2), 10);
+      let lakh = parseInt(sn.slice(2, 4), 10);
+      let thousand = parseInt(sn.slice(4, 6), 10);
+      let hundred = parseInt(sn.slice(6, 7), 10);
+      let last = parseInt(sn.slice(7, 9), 10);
+      let out = [];
+      out.push(formatGroup(crore, "Crore"));
+      out.push(formatGroup(lakh, "Lakh"));
+      out.push(formatGroup(thousand, "Thousand"));
+      out.push(formatGroup(hundred, "Hundred"));
+      if (last) out.push((out.join("").length ? "and " : "") + parts(last));
+      let words = out.filter(Boolean).join(" ").trim();
+      if (dec > 0) words += " and " + parts(dec) + " Paisa";
+      return words || "Zero";
+    }
+
+    function buildCashBookState() {
+      const state = { fields: {}, notes: [] };
+      const ids = [
+        'cb-enhance', 'cb-opening-hand', 'cb-pay-clients', 'cb-agw',
+        'cb-agent-withdraw', 'cb-profit', 'cb-opening-settlement', 'cb-closing-settlement',
+        'dr-voucher', 'cr-voucher', 'rem-voucher'
+      ];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) state.fields[id] = el.value.trim();
+      });
+      document.querySelectorAll('#notes-table input.note-count').forEach(inp => {
+        state.notes.push({
+          val: inp.dataset.value,
+          count: inp.value.trim()
+        });
+      });
+      state.calculated = {
+        totalReceive: document.getElementById('cb-total-receive')?.textContent || '0.00',
+        totalPayment: document.getElementById('cb-total-payment')?.textContent || '0.00',
+        totalPaymentRight: document.getElementById('cb-total-payment-right')?.textContent || '0.00',
+        receivedWithdraw: document.getElementById('cb-received-withdraw')?.textContent || '0.00',
+        closingHand: document.getElementById('cb-closing')?.textContent || '0.00',
+        totalCash: document.getElementById('total-cash-display')?.textContent || '0.00',
+        capTotal: document.getElementById('cap-total')?.textContent || '0.00',
+        capClosing: document.getElementById('cap-closing')?.textContent || '0.00',
+        capAgentBalance: document.getElementById('cap-agent-balance')?.textContent || '0.00',
+        differ: document.getElementById('cap-differ')?.textContent || '0.00',
+        differCash: document.getElementById('cap-differ-cash')?.textContent || '0.00',
+        inword: document.getElementById('cap-inword')?.textContent || 'Zero',
+        totalVoucher: document.getElementById('total-voucher')?.textContent || '0'
+      };
+      return state;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // MULTI-AGENT DRAFT PERSISTENCE (CASH BOOK)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const DRAFT_STORAGE_KEY = 'teNte_agent_cashbook_drafts_v1';
+    let currentDraftAgentId = '';
+    let draftDebounceTimer = null;
+
+    function getAllCashBookDrafts() {
+      try {
+        return JSON.parse(localStorage.getItem(DRAFT_STORAGE_KEY) || '{"lastAgentId":"","drafts":{}}');
+      } catch (e) {
+        return { lastAgentId: '', drafts: {} };
+      }
+    }
+
+    function saveCurrentCashBookDraft(agentId) {
+      if (!agentId) return;
+      const store = getAllCashBookDrafts();
+      if (!store.drafts) store.drafts = {};
+
+      const ids = [
+        'cb-enhance', 'cb-opening-hand', 'cb-pay-clients', 'cb-agw',
+        'cb-agent-withdraw', 'cb-profit', 'cb-opening-settlement', 'cb-closing-settlement',
+        'dr-voucher', 'cr-voucher', 'rem-voucher'
+      ];
+      const fields = {};
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) fields[id] = el.value.trim();
+      });
+
+      const notes = [];
+      document.querySelectorAll('#notes-table input.note-count').forEach(inp => {
+        if (inp.value.trim() !== '') {
+          notes.push({
+            val: inp.dataset.value,
+            count: inp.value.trim()
+          });
+        }
+      });
+
+      const capClosingText = document.getElementById('cap-closing')?.textContent || '';
+      const capClosingNum = parseNum(capClosingText);
+      const totalCashNum = parseNum(document.getElementById('total-cash-display')?.textContent || '');
+      const closeSettleNum = parseNum(fields['cb-closing-settlement'] || '');
+      const finalCapClosing = !isNaN(capClosingNum) ? capClosingNum : (totalCashNum + closeSettleNum);
+
+      store.lastAgentId = agentId;
+      store.drafts[agentId] = {
+        agentId: agentId,
+        date: document.getElementById('entDate')?.value || '',
+        description: document.getElementById('entDesc')?.value || '',
+        fields: fields,
+        notes: notes,
+        capClosing: finalCapClosing,
+        agentCapitalClosing: finalCapClosing,
+        calculated: {
+          capClosing: capClosingText || String(finalCapClosing),
+          totalCash: document.getElementById('total-cash-display')?.textContent || '0.00'
+        },
+        updatedAt: new Date().toISOString()
+      };
+
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(store));
+    }
+
+    function scheduleCashBookDraftSave() {
+      if (draftDebounceTimer) clearTimeout(draftDebounceTimer);
+      draftDebounceTimer = setTimeout(() => {
+        const agId = document.getElementById('entAgent')?.value;
+        if (agId) saveCurrentCashBookDraft(agId);
+      }, 150);
+    }
+
+    function loadCashBookDraft(agentId) {
+      if (!agentId) return;
+      const store = getAllCashBookDrafts();
+      const draft = store.drafts ? store.drafts[agentId] : null;
+
+      if (draft) {
+        if (draft.date && document.getElementById('entDate')) {
+          document.getElementById('entDate').value = draft.date;
+        }
+        if (draft.description !== undefined && document.getElementById('entDesc')) {
+          document.getElementById('entDesc').value = draft.description;
+        }
+
+        const ids = [
+          'cb-enhance', 'cb-opening-hand', 'cb-pay-clients', 'cb-agw',
+          'cb-agent-withdraw', 'cb-profit', 'cb-opening-settlement', 'cb-closing-settlement',
+          'dr-voucher', 'cr-voucher', 'rem-voucher'
+        ];
+        ids.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.value = (draft.fields && draft.fields[id] !== undefined) ? draft.fields[id] : '';
+          }
+        });
+
+        const noteInputs = document.querySelectorAll('#notes-table input.note-count');
+        noteInputs.forEach(inp => {
+          const match = draft.notes?.find(n => String(n.val) === String(inp.dataset.value));
+          inp.value = match ? match.count : '';
+        });
+      } else {
+        // Clear fields for new agent without draft
+        const ids = [
+          'cb-enhance', 'cb-opening-hand', 'cb-pay-clients', 'cb-agw',
+          'cb-agent-withdraw', 'cb-profit', 'cb-opening-settlement', 'cb-closing-settlement',
+          'dr-voucher', 'cr-voucher', 'rem-voucher', 'entDesc'
+        ];
+        ids.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        document.querySelectorAll('#notes-table input.note-count').forEach(inp => {
+          inp.value = '';
+        });
+        if (document.getElementById('entDate') && !document.getElementById('entDate').value) {
+          document.getElementById('entDate').value = new Date().toISOString().slice(0, 10);
+        }
+      }
+
+      recalcNotes();
+      recalcVouchers();
+      calcCashBook();
+    }
+
+    function resetCashBookForm(clearDraft = false) {
+      if (clearDraft) {
+        const agId = document.getElementById('entAgent')?.value;
+        if (agId) {
+          const store = getAllCashBookDrafts();
+          if (store.drafts) delete store.drafts[agId];
+          localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(store));
+        }
+      }
+      const ids = [
+        'cb-enhance', 'cb-opening-hand', 'cb-pay-clients', 'cb-agw',
+        'cb-agent-withdraw', 'cb-profit', 'cb-opening-settlement', 'cb-closing-settlement',
+        'dr-voucher', 'cr-voucher', 'rem-voucher', 'entDesc'
+      ];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      document.querySelectorAll('#notes-table input.note-count').forEach(inp => {
+        inp.value = '';
+      });
+      recalcNotes();
+      recalcVouchers();
+      calcCashBook();
+    }
+
+    function bindCashBookEvents() {
+      // Notes inputs
+      document.querySelectorAll('input.note-count').forEach(inp => {
+        inp.addEventListener('input', () => {
+          // Cheque input allows decimal amounts; other note-counts are integer only
+          if (inp.dataset.value === 'cheque') {
+            inp.value = String(inp.value || '').replace(/[^0-9.]/g, '');
+          } else {
+            inp.value = String(inp.value || '').replace(/[^0-9]/g, '');
+          }
+          recalcNotes();
+          scheduleCashBookDraftSave();
+        });
+      });
+
+      // Voucher inputs
+      ['dr-voucher', 'cr-voucher', 'rem-voucher'].forEach(id => {
+        document.getElementById(id)?.addEventListener('input', function () {
+          this.value = String(this.value || '').replace(/[^0-9]/g, '');
+          recalcVouchers();
+          scheduleCashBookDraftSave();
+        });
+      });
+
+      // Money inputs in tables
+      const nums = document.querySelectorAll('.cb-table input[type="text"]');
+      nums.forEach(inp => {
+        if (inp.classList.contains('note-count')) return;
+        if (inp.dataset && inp.dataset.noformat === '1') return;
+        inp.addEventListener('focus', () => {
+          inp.value = String(inp.value || '').replace(/,/g, '');
+        });
+        inp.addEventListener('blur', () => {
+          const raw = String(inp.value || '').replace(/,/g, '').trim();
+          if (raw === '') { inp.value = ''; scheduleCashBookDraftSave(); return; }
+          const n = parseNum(raw);
+          inp.value = moneyFormat(n);
+          scheduleCashBookDraftSave();
+        });
+        inp.addEventListener('input', () => {
+          calcCashBook();
+          scheduleCashBookDraftSave();
+        });
+      });
+
+      // Meta inputs
+      document.getElementById('entDate')?.addEventListener('change', scheduleCashBookDraftSave);
+      document.getElementById('entDesc')?.addEventListener('input', scheduleCashBookDraftSave);
+
+      // Agent selector changes
+      document.getElementById('entAgent')?.addEventListener('change', function () {
+        const newAgentId = this.value;
+        if (currentDraftAgentId && currentDraftAgentId !== newAgentId) {
+          saveCurrentCashBookDraft(currentDraftAgentId);
+        }
+        currentDraftAgentId = newAgentId;
+        if (newAgentId) {
+          loadCashBookDraft(newAgentId);
+        } else {
+          resetCashBookForm(false);
+        }
+      });
+    }
+
+    // View full sheet modal
+    window.viewSheet = function (id) {
+      const rec = allData.find(r => r.id === id);
+      if (!rec) return;
+
+      const titleEl = document.getElementById('viewSheetTitle');
+      if (titleEl) titleEl.innerHTML = `<i class="ri-book-open-line"></i> Cash Book: ${rec.agentName} (${fmtDate(rec.date)})`;
+
+      const sd = rec.sheetData || {};
+      const fields = sd.fields || {};
+      const notes = sd.notes || [];
+      const calc = sd.calculated || {};
+
+      let notesRows = '';
+      notes.forEach(n => {
+        if (parseFloat(n.count) > 0 || (String(n.val) === 'cheque' && parseNum(n.count) > 0)) {
+          let sub;
+          if (String(n.val) === 'cheque') {
+            // Cheque: the count IS the amount directly
+            sub = parseNum(n.count);
+          } else {
+            sub = (parseFloat(n.val) || 0) * (parseFloat(n.count) || 0);
+          }
+          notesRows += `
+            <tr>
+              <td style="text-align:center;">${String(n.val) === 'cheque' ? 'Cheque' : n.val}</td>
+              <td style="text-align:center;">${String(n.val) === 'cheque' ? moneyFormat(sub) : n.count}</td>
+              <td style="text-align:right;">${moneyFormat(sub)}</td>
+            </tr>
+          `;
+        }
+      });
+      if (!notesRows) {
+        notesRows = `<tr><td colspan="3" class="text-center text-muted" style="padding:15px">No notes entered</td></tr>`;
+      }
+
+      const totalCashNum = parseNum(calc.totalCash || 0);
+      const closingHandNum = parseNum(calc.closingHand || 0);
+      const calculatedDiffCash = totalCashNum - closingHandNum;
+      const diffCashVal = (calc.differCash !== undefined && calc.differCash !== 'NaN' && !isNaN(parseNum(calc.differCash)))
+        ? parseNum(calc.differCash)
+        : calculatedDiffCash;
+
+      const capTotalNum = parseNum(calc.capTotal || 0);
+      const capClosingNum = parseNum(calc.capClosing || 0);
+      const calculatedDiff = capClosingNum - capTotalNum;
+      const diffVal = (calc.differ !== undefined && calc.differ !== 'NaN' && !isNaN(parseNum(calc.differ)))
+        ? parseNum(calc.differ)
+        : calculatedDiff;
+
+      const diffColor = diffVal > 0 ? '#f59e0b' : (diffVal < 0 ? '#ef4444' : 'inherit');
+      const diffCashColor = diffCashVal > 0 ? '#f59e0b' : (diffCashVal < 0 ? '#ef4444' : 'inherit');
+
+      const modalBody = document.getElementById('viewSheetBody');
+      modalBody.innerHTML = `
+        <div class="cb-wrap" style="padding:0; background:transparent;">
+          <div class="cb-meta" style="margin-bottom:16px;">
+            <div><strong>Agent:</strong> ${rec.agentName}</div>
+            <div><strong>Outlet Code:</strong> ${rec.agentCode || '—'}</div>
+            <div><strong>Date:</strong> ${fmtDate(rec.date)}</div>
+          </div>
+
+          <div class="cb-sheet-wrap">
+          <div class="cb-grid">
+            <!-- Card 1: Calculate Hand Cash -->
+            <div class="cb-card">
+              <div class="cb-card-header"><i class="ri-hand-coin-line"></i> Calculate Hand Cash</div>
+              <div class="cb-card-body">
+                <table class="cb-table fixed-table">
+                  <tr class="highlight-red"><th colspan="2">Received From Clients</th><td>${calc.receivedWithdraw || moneyFormat(parseNum(fields['cb-pay-clients']) - parseNum(fields['cb-closing-settlement']))}</td></tr>
+                  <tr><th colspan="2">Enhance Cash</th><td>${moneyFormat(fields['cb-enhance'] || 0)}</td></tr>
+                  <tr class="highlight-green"><th colspan="2">Total Receive</th><td>${calc.totalReceive || '0.00'}</td></tr>
+                </table>
+                <table class="cb-table fixed-table">
+                  <tr><th colspan="2">Opening Balance (Hand Cash)</th><td>${moneyFormat(fields['cb-opening-hand'] || 0)}</td></tr>
+                  <tr><th colspan="2" class="red">Total Receive</th><td class="red">${calc.totalReceive || '0.00'}</td></tr>
+                  <tr><th colspan="2">Total Payment</th><td>${calc.totalPayment || '0.00'}</td></tr>
+                  <tr class="highlight-green"><th colspan="2">CLOSING BALANCE =</th><td class="blue" style="font-size:14px;"><strong>${calc.closingHand || '0.00'}</strong></td></tr>
+                </table>
+              </div>
+            </div>
+
+            <!-- Card 2: Daily Transaction & Balance Details -->
+            <div class="cb-card">
+              <div class="cb-card-header"><i class="ri-exchange-funds-line"></i> Daily Transaction &amp; Balance Details</div>
+              <div class="cb-card-body">
+                <table class="cb-table fixed-table">
+                  <tr><th colspan="2">PAYMENT CLIENTS (Deposit)</th><td>${moneyFormat(fields['cb-pay-clients'] || 0)}</td></tr>
+                  <tr><th colspan="2">AG W (Daily & Monthly Expenses)</th><td>${moneyFormat(fields['cb-agw'] || 0)}</td></tr>
+                  <tr><th colspan="2">Agent's Withdraw (Personal Usage)</th><td>${moneyFormat(fields['cb-agent-withdraw'] || 0)}</td></tr>
+                  <tr><th colspan="2">Profit (Commission)</th><td>${moneyFormat(fields['cb-profit'] || 0)}</td></tr>
+                  <tr><th colspan="2" class="red">OPENING BALANCE (Settlement)</th><td>${moneyFormat(fields['cb-opening-settlement'] || 0)}</td></tr>
+                  <tr class="yellow"><th colspan="2">TOTAL PAYMENT</th><td class="red">${calc.totalPaymentRight || calc.totalPayment || '0.00'}</td></tr>
+                  <tr class="highlight-red"><th colspan="2">RECEIVED FROM CLIENTS (Withdraw)</th><td>${calc.receivedWithdraw || moneyFormat(parseNum(fields['cb-pay-clients']) - parseNum(fields['cb-closing-settlement']))}</td></tr>
+                  <tr><th colspan="2">CLOSING BALANCE (Settlement)</th><td>${moneyFormat(fields['cb-closing-settlement'] || 0)}</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="cb-grid">
+            <!-- Card 3: Cash Notes -->
+            <div class="cb-card">
+              <div class="cb-card-header"><i class="ri-money-dollar-box-line"></i> Cash Notes</div>
+              <div class="cb-card-body">
+                <table class="cb-table" style="width:100%;">
+                  <thead>
+                    <tr><th style="text-align:center;">Note</th><th style="text-align:center;">Count</th><th style="text-align:right;">Amount</th></tr>
+                  </thead>
+                  <tbody>${notesRows}</tbody>
+                  <tfoot>
+                    <tr style="background:rgba(255,255,255,0.05);"><td colspan="2" style="text-align:right; font-weight:700;">Total Cash =</td><td class="blue" style="font-size:14px; font-weight:bold;">${calc.totalCash || '0.00'}</td></tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+
+            <!-- Card 4: AGENT'S CAPITAL -->
+            <div class="cb-card">
+              <div class="cb-card-header red-header"><i class="ri-bank-card-line"></i> AGENT'S CAPITAL</div>
+              <div class="cb-card-body">
+                <table class="cb-table fixed-table">
+                  <tr><th colspan="2">Opening Balance (Settlement)</th><td>${moneyFormat(fields['cb-opening-settlement'] || 0)}</td></tr>
+                  <tr><th colspan="2">Enhance Cash</th><td>${moneyFormat(fields['cb-enhance'] || 0)}</td></tr>
+                  <tr><th colspan="2">Opening Hand Cash</th><td>${moneyFormat(fields['cb-opening-hand'] || 0)}</td></tr>
+                  <tr><th colspan="2">Profit (Commission)</th><td>${moneyFormat(fields['cb-profit'] || 0)}</td></tr>
+                  <tr><th colspan="2">AG W (Daily & Monthly Expenses)</th><td>${moneyFormat(fields['cb-agw'] || 0)}</td></tr>
+                  <tr><th colspan="2">Agent's Withdraw (Personal Usage)</th><td>${moneyFormat(fields['cb-agent-withdraw'] || 0)}</td></tr>
+                  <tr class="highlight-green"><th colspan="2">Total =</th><td>${calc.capTotal || '0.00'}</td></tr>
+                  <tr class="highlight-blue"><th colspan="2">Total Cash =</th><td>${calc.totalCash || '0.00'}</td></tr>
+                  <tr><th colspan="2">Agent Balance =</th><td>${calc.capAgentBalance || moneyFormat(fields['cb-closing-settlement'] || 0)}</td></tr>
+                  <tr class="highlight-red"><th colspan="2">Closing Balance =</th><td>${calc.capClosing || '0.00'}</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 5: Voucher & Differ -->
+          <div class="cb-card mb-0">
+            <div class="cb-card-header"><i class="ri-file-shield-line"></i> Voucher &amp; Differ</div>
+            <div class="cb-card-body">
+              <table class="cb-table inword-table" style="width:100%; margin-bottom:12px;">
+                <tr>
+                  <th style="text-align:left; width:100px; color:var(--text-muted);">In-Word :</th>
+                  <td style="text-align:left; color:var(--gold); font-size:13px; font-weight:700;">${calc.inword || 'Zero'}</td>
+                </tr>
+              </table>
+              <div class="voucher-differ-grid">
+                <table class="cb-table voucher-table">
+                  <tr><th colspan="2" style="text-align:center; background:rgba(255,255,255,0.05);">Voucher</th></tr>
+                  <tr><th>Dr Voucher</th><td style="text-align:center;">${fields['dr-voucher'] || '0'}</td></tr>
+                  <tr><th>Cr Voucher</th><td style="text-align:center;">${fields['cr-voucher'] || '0'}</td></tr>
+                  <tr><th>Remittance Vr =</th><td style="text-align:center;">${fields['rem-voucher'] || '0'}</td></tr>
+                  <tr class="highlight-grey"><th>Total Voucher =</th><td style="text-align:center; font-weight:bold;">${calc.totalVoucher || '0'}</td></tr>
+                </table>
+                <table class="cb-table differ-table">
+                  <tr><th colspan="2" style="text-align:center; background:rgba(255,255,255,0.05);">Differ</th></tr>
+                  <tr><th>DIFFER</th><td style="color:${diffColor}; font-weight:700; text-align:right;">${moneyFormat(diffVal)}</td></tr>
+                  <tr><th>DIFFER CASH</th><td style="color:${diffCashColor}; font-weight:700; text-align:right;">${moneyFormat(diffCashVal)}</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      Modal.open('viewSheetModal');
+    };
+
+    if (canEdit) {
+      document.getElementById('addBtn').style.display = '';
+      document.getElementById('addBtn').addEventListener('click', () => {
+        const store = getAllCashBookDrafts();
+        const entAgent = document.getElementById('entAgent');
+
+        // Restore last selected agent if available
+        if (!entAgent.value && store.lastAgentId) {
+          const opt = Array.from(entAgent.options).find(o => o.value === store.lastAgentId);
+          if (opt) entAgent.value = store.lastAgentId;
+        }
+
+        if (entAgent.value) {
+          currentDraftAgentId = entAgent.value;
+          loadCashBookDraft(entAgent.value);
+        } else {
+          currentDraftAgentId = '';
+          if (!document.getElementById('entDate').value) {
+            document.getElementById('entDate').value = new Date().toISOString().slice(0, 10);
+          }
+          recalcNotes();
+          recalcVouchers();
+          calcCashBook();
+        }
+
+        Modal.open('addModal');
+      });
+
+      document.getElementById('resetCbBtn')?.addEventListener('click', () => {
+        resetCashBookForm(true);
+        Toast.info('Cash Book sheet reset for current agent.');
+      });
+
+      document.getElementById('saveBtn').addEventListener('click', () => {
+        const agentId = document.getElementById('entAgent').value;
+        const date = document.getElementById('entDate').value;
+        if (!agentId) { Toast.error('Select an agent.'); return; }
+        if (!date) { Toast.error('Select a date.'); return; }
+
+        recalcNotes();
+        recalcVouchers();
+        calcCashBook();
+        saveCurrentCashBookDraft(agentId); // Keep draft preserved upon save
+
+        const totalRx = parseNum(document.getElementById('cb-total-receive')?.textContent);
+        const totalPay = parseNum(document.getElementById('cb-total-payment')?.textContent);
+        const closingHand = parseNum(document.getElementById('cb-closing')?.textContent);
+        const openingHand = parseNum(document.getElementById('cb-opening-hand')?.value);
+        const openingSettlement = parseNum(document.getElementById('cb-opening-settlement')?.value);
+        const closingSettlement = parseNum(document.getElementById('cb-closing-settlement')?.value);
+        const agentCapitalClosing = parseNum(document.getElementById('cap-closing')?.textContent);
+        const totalCash = parseNum(document.getElementById('total-cash-display')?.textContent);
+
+        const state = buildCashBookState();
+
+        DB.addCashbook({
+          agentId,
+          date,
+          type: totalRx >= totalPay ? 'in' : 'out',
+          amount: closingHand.toFixed(2),
+          totalRx: totalRx.toFixed(2),
+          totalPay: totalPay.toFixed(2),
+          openingHand: openingHand.toFixed(2),
+          closingHand: closingHand.toFixed(2),
+          openingSettlement: openingSettlement.toFixed(2),
+          closingSettlement: closingSettlement.toFixed(2),
+          agentCapitalClosing: agentCapitalClosing.toFixed(2),
+          totalCash: totalCash.toFixed(2),
+          description: document.getElementById('entDesc')?.value.trim() || 'Daily Cash Book',
+          category: 'Daily Cash Book',
+          userName: (user && (user.name || user.username)) || 'Admin',
+          sheetData: state
+        });
+
+        Modal.close('addModal');
+        Toast.success('Cash Book sheet entry added successfully!');
+        load();
+      });
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // CASH BOOK SUMMARY STATEMENT (MODAL, PRINT & PDF)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    let cbSummaryDateFrom = '', cbSummaryDateTo = '';
+
+    function initCbSummaryDateRange() {
+      const d = new Date();
+      cbSummaryDateTo = d.toISOString().slice(0, 10);
+      const fromD = new Date();
+      fromD.setDate(fromD.getDate() - 30);
+      cbSummaryDateFrom = fromD.toISOString().slice(0, 10);
+      const df = document.getElementById('cbSummaryDateFrom');
+      const dt = document.getElementById('cbSummaryDateTo');
+      if (df) df.value = cbSummaryDateFrom;
+      if (dt) dt.value = cbSummaryDateTo;
+    }
+
+    window.setCbSummaryDatePreset = function (preset) {
+      const now = new Date();
+      cbSummaryDateTo = now.toISOString().slice(0, 10);
+      if (preset === '30d') {
+        const d = new Date(); d.setDate(d.getDate() - 30);
+        cbSummaryDateFrom = d.toISOString().slice(0, 10);
+      } else if (preset === '6m') {
+        const d = new Date(); d.setMonth(d.getMonth() - 6);
+        cbSummaryDateFrom = d.toISOString().slice(0, 10);
+      } else if (preset === 'fy') {
+        const curYr = now.getFullYear();
+        cbSummaryDateFrom = `${curYr}-01-01`;
+        cbSummaryDateTo = `${curYr}-12-31`;
+      } else if (preset === 'all') {
+        cbSummaryDateFrom = '2020-01-01';
+      }
+      const df = document.getElementById('cbSummaryDateFrom');
+      const dt = document.getElementById('cbSummaryDateTo');
+      if (df) df.value = cbSummaryDateFrom;
+      if (dt) dt.value = cbSummaryDateTo;
+      renderCashbookSummary();
+    };
+
+    window.openCashbookSummaryModal = function () {
+      if (!cbSummaryDateFrom || !cbSummaryDateTo) {
+        initCbSummaryDateRange();
+      }
+      const agentSel = document.getElementById('cbSummaryAgent');
+      if (agentSel) {
+        const curAg = document.getElementById('agentSel')?.value || '';
+        agentSel.innerHTML = '<option value="">All Agents (সকল এজেন্ট)</option>' +
+          agents.map(a => `<option value="${a.id}" ${a.id === curAg ? 'selected' : ''}>${a.name} (${a.code || a.outletCode || '—'})</option>`).join('');
+      }
+      renderCashbookSummary();
+      Modal.open('cbSummaryModal');
+    };
+
+    function getRecCategoryValue(r, catKey) {
+      if (!r) return 0;
+      if (catKey === 'openingHand') return getRecOpeningHand(r);
+      if (catKey === 'closingHand') return getRecClosingHand(r);
+      if (catKey === 'totalRx') return getRecTotalReceive(r);
+      if (catKey === 'totalPay') return getRecTotalPayment(r);
+      if (catKey === 'openingSettle') return getRecOpeningSettlement(r);
+      if (catKey === 'closingSettle') return getRecClosingSettlement(r);
+      if (catKey === 'closingBal') return getRecClosingBalance(r);
+      return 0;
+    }
+
+    function renderCashbookSummary() {
+      const agentId = document.getElementById('cbSummaryAgent')?.value || '';
+      const category = document.getElementById('cbSummaryCategory')?.value || 'all';
+      const from = document.getElementById('cbSummaryDateFrom')?.value || cbSummaryDateFrom;
+      const to = document.getElementById('cbSummaryDateTo')?.value || cbSummaryDateTo;
+
+      let list = allData.filter(r => {
+        if (agentId && r.agentId !== agentId) return false;
+        const d = r.date || (r.createdAt ? r.createdAt.slice(0, 10) : '');
+        if (from && d && d < from) return false;
+        if (to && d && d > to) return false;
+        return true;
+      });
+
+      const selAgent = agents.find(a => a.id === agentId);
+      const agentLabel = selAgent ? `${selAgent.name} (${selAgent.code || selAgent.outletCode || '—'})` : 'All Agents (সকল এজেন্ট)';
+
+      const catLabels = {
+        'all': 'All Category (সকল ক্যাটাগরি)',
+        'openingHand': 'Opening Hand',
+        'closingHand': 'Closing Hand',
+        'totalRx': 'Total Receive',
+        'totalPay': 'Total Payment',
+        'openingSettle': 'Opening Settle',
+        'closingSettle': 'Closing Settle',
+        'closingBal': 'Closing Balance ='
+      };
+
+      const isSingleCategory = category !== 'all' && Boolean(catLabels[category]);
+      const catLabel = catLabels[category] || 'All Category';
+
+      const printHeaderAgentTitle = selAgent
+        ? `${selAgent.name} (${selAgent.code || selAgent.outletCode || '—'})`
+        : 'MS TECHNO ENTERPRISE';
+
+      const generatedAt = new Date().toLocaleString('en-BD', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+      document.getElementById('cbSummaryModalTitle').textContent = `Cash Book Summary: ${isSingleCategory ? catLabel : 'All Metrics'} — ${agentLabel}`;
+      document.getElementById('cbSummaryFooterMeta').textContent = `Period: ${fmtDate(from)} to ${fmtDate(to)} • Records: ${list.length} • Generated: ${generatedAt}`;
+
+      const body = document.getElementById('cbSummaryModalBody');
+      if (!body) return;
+
+      // Helper to format date with date on top, Day and Time below
+      function formatCbDate(r) {
+        let dateObj = null;
+        if (r.createdAt) {
+          const t = new Date(r.createdAt);
+          if (!isNaN(t)) dateObj = t;
+        }
+        if (!dateObj && r.date) {
+          const t = new Date(r.date + 'T12:00:00');
+          if (!isNaN(t)) dateObj = t;
+        }
+        const dateStr = dateObj ? dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : (r.date || '—');
+        const dayStr = dateObj ? dateObj.toLocaleDateString('en-GB', { weekday: 'long' }) : '';
+        const timeStr = (r.createdAt && !isNaN(new Date(r.createdAt)))
+          ? new Date(r.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+          : (r.time || '10:00 AM');
+
+        return `
+          <div style="line-height:1.35;">
+            <div style="font-weight:600; color:var(--text-primary); font-size:12px;">${dateStr}</div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${dayStr ? dayStr + ', ' : ''}${timeStr}</div>
+          </div>
+        `;
+      }
+
+      function getAgentCodeStr(r) {
+        const rawCode = r.agentCode || (agents.find(a => a.id === r.agentId)?.code) || (agents.find(a => a.id === r.agentId)?.outletCode) || '—';
+        const code = (rawCode && rawCode !== '—') ? rawCode : 'AG-01';
+        return `
+          <div>
+            <div style="font-weight:600; color:var(--text-primary); font-size:12px;">${r.agentName}</div>
+            <div style="font-size:11px; color:var(--text-muted); font-family:monospace; margin-top:2px;">Code (${code})</div>
+          </div>
+        `;
+      }
+
+      let contentHtml = `
+        <!-- Print Header (Company Letterhead) -->
+        <div class="summary-print-header" style="border-bottom:2px solid #0f172a; padding-bottom:12px; margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <h2 style="margin:0; font-size:22px; font-weight:800; font-family:'Outfit',sans-serif; color:#0f172a; letter-spacing:0.5px; text-transform:uppercase;">MS TECHNO ENTERPRISE</h2>
+              <div style="font-size:13px; font-weight:700; color:#b45309; margin-top:3px; letter-spacing:0.3px;">DAILY CASH BOOK STATEMENT &amp; FINANCIAL AUDIT REPORT</div>
+              <p style="margin:4px 0 0 0; font-size:11px; color:#475569;">
+                Agent / Branch: <strong>${selAgent ? `${selAgent.name} (${selAgent.code || selAgent.outletCode || '—'})` : 'All Accessible Agents'}</strong> &nbsp;|&nbsp; Category: <strong>${catLabel}</strong> &nbsp;|&nbsp; Total Records: <strong>${list.length}</strong>
+              </p>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:12px; font-weight:800; color:#0f172a; text-transform:uppercase; letter-spacing:0.5px;">${isSingleCategory ? catLabel.toUpperCase() : 'CASH BOOK'} STATEMENT</div>
+              <div style="font-size:11px; color:#475569; margin-top:3px;">Period: <strong>${fmtDate(from)}</strong> ~ <strong>${fmtDate(to)}</strong></div>
+              <div style="font-size:11px; color:#64748b; margin-top:2px;">Generated: ${generatedAt}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      if (isSingleCategory) {
+        // ── SINGLE CATEGORY VIEW (3 COLUMNS: Agent, Date, Category Name) ──
+        // NOTE: As requested: "নিচে Total = রো-তে সিলেক্টেড ক্যাটাগরির মোট যোগফল প্রদর্শিত হবে না" -> NO bottom Total row!
+        contentHtml += `
+          <!-- Screen KPI Row -->
+          <div class="summary-kpi-row screen-only" style="margin-bottom:16px;">
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--blue-bright);">${list.length}</div>
+              <div class="summary-kpi-lbl">Total Records</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--success); font-size:13px;">${selAgent ? selAgent.name : 'All Agents'}</div>
+              <div class="summary-kpi-lbl">Selected Agent</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--gold); font-size:13px;">${catLabel}</div>
+              <div class="summary-kpi-lbl">Selected Category</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--text-muted); font-size:12px;">${fmtDate(from)} ~ ${fmtDate(to)}</div>
+              <div class="summary-kpi-lbl">Date Range</div>
+            </div>
+          </div>
+
+          <!-- Single Category Table (3 Columns - No bottom Total row) -->
+          <div class="summary-report-card">
+            <div class="summary-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <i class="ri-file-list-3-line" style="color:var(--gold);"></i>
+                <span style="font-weight:700;">${catLabel} Statement</span>
+              </div>
+              <span style="font-size:11px; color:var(--text-muted);">${list.length} Records Found</span>
+            </div>
+            <div class="table-wrapper" style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                <thead>
+                  <tr style="background:rgba(255,255,255,0.03);">
+                    <th style="padding:10px 14px; text-align:left; width:35%;">Agent</th>
+                    <th style="padding:10px 14px; text-align:left; width:35%;">Date</th>
+                    <th style="padding:10px 14px; text-align:right; width:30%;" class="col-highlight">${catLabel}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${list.length > 0 ? list.map(r => `
+                    <tr>
+                      <td style="padding:8px 14px; font-weight:600; color:var(--text-primary);">${getAgentCodeStr(r)}</td>
+                      <td style="padding:8px 14px;">${formatCbDate(r)}</td>
+                      <td style="padding:8px 14px; text-align:right; font-weight:700;" class="col-highlight">${fmt(getRecCategoryValue(r, category))}</td>
+                    </tr>
+                  `).join('') : `
+                    <tr>
+                      <td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">
+                        <i class="ri-inbox-line" style="font-size:24px; display:block; margin-bottom:6px;"></i>
+                        No records found for ${catLabel} in the selected range.
+                      </td>
+                    </tr>
+                  `}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      } else {
+        // ── ALL CATEGORY VIEW (9 COLUMNS: Agent, Date, Opening Hand, Closing Hand, Total Receive, Total Payment, Opening Settle, Closing Settle, Closing Balance =) ──
+        // NOTE: Total Receive and Total Payment KPI boxes removed as requested. NO bottom total row.
+        contentHtml += `
+          <!-- Screen KPI Row -->
+          <div class="summary-kpi-row screen-only" style="margin-bottom:16px;">
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--blue-bright);">${list.length}</div>
+              <div class="summary-kpi-lbl">Total Records</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--success); font-size:13px;">${selAgent ? selAgent.name : 'All Agents'}</div>
+              <div class="summary-kpi-lbl">Selected Agent</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--gold); font-size:13px;">All Metrics</div>
+              <div class="summary-kpi-lbl">Category Scope</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--text-muted); font-size:12px;">${fmtDate(from)} ~ ${fmtDate(to)}</div>
+              <div class="summary-kpi-lbl">Date Range</div>
+            </div>
+          </div>
+
+          <!-- All Category Table (9 Columns, NO bottom total row) -->
+          <div class="summary-report-card">
+            <div class="summary-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <i class="ri-book-2-line" style="color:var(--gold);"></i>
+                <span style="font-weight:700;">Cash Book All Metrics Summary Statement</span>
+              </div>
+              <span style="font-size:11px; color:var(--text-muted);">${list.length} Records</span>
+            </div>
+            <div class="table-wrapper" style="overflow-x:auto; width:100%;">
+              <table style="width:100%; border-collapse:collapse; font-size:10px; table-layout:fixed;">
+                <thead>
+                  <tr style="background:rgba(255,255,255,0.03);">
+                    <th style="width:16%; padding:8px 4px; text-align:left;">Agent</th>
+                    <th style="width:14%; padding:8px 4px; text-align:left;">Date</th>
+                    <th style="width:9%; padding:8px 4px; text-align:right;">Opening Hand</th>
+                    <th style="width:9.5%; padding:8px 4px; text-align:right;">Closing Hand</th>
+                    <th style="width:10%; padding:8px 4px; text-align:right;">Total Receive</th>
+                    <th style="width:10%; padding:8px 4px; text-align:right;">Total Payment</th>
+                    <th style="width:9.5%; padding:8px 4px; text-align:right;">Opening Settle</th>
+                    <th style="width:9.5%; padding:8px 4px; text-align:right;">Closing Settle</th>
+                    <th style="width:12.5%; padding:8px 4px; text-align:right; color:#dc2626;">Closing Balance =</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${list.length > 0 ? list.map(r => `
+                    <tr>
+                      <td style="width:16%; padding:6px 4px; font-weight:600; color:var(--text-primary); word-break:break-word;">${getAgentCodeStr(r)}</td>
+                      <td style="width:14%; padding:6px 4px; word-break:break-word;">${formatCbDate(r)}</td>
+                      <td style="width:9%; padding:6px 4px; text-align:right; font-size:10px;">${fmt(getRecOpeningHand(r))}</td>
+                      <td style="width:9.5%; padding:6px 4px; text-align:right; font-weight:600; color:var(--success); font-size:10px;">${fmt(getRecClosingHand(r))}</td>
+                      <td style="width:10%; padding:6px 4px; text-align:right; font-weight:600; color:#0d9488; font-size:10px;">${fmt(getRecTotalReceive(r))}</td>
+                      <td style="width:10%; padding:6px 4px; text-align:right; font-weight:600; color:#e11d48; font-size:10px;">${fmt(getRecTotalPayment(r))}</td>
+                      <td style="width:9.5%; padding:6px 4px; text-align:right; font-size:10px;">${fmt(getRecOpeningSettlement(r))}</td>
+                      <td style="width:9.5%; padding:6px 4px; text-align:right; font-weight:600; color:#0284c7; font-size:10px;">${fmt(getRecClosingSettlement(r))}</td>
+                      <td style="width:12.5%; padding:6px 4px; text-align:right; font-weight:700; color:#dc2626; font-size:10px;">${fmt(getRecClosingBalance(r))}</td>
+                    </tr>
+                  `).join('') : `
+                    <tr>
+                      <td colspan="9" style="text-align:center; padding:30px; color:var(--text-muted);">
+                        <i class="ri-inbox-line" style="font-size:24px; display:block; margin-bottom:6px;"></i>
+                        No cash book records found in the selected range.
+                      </td>
+                    </tr>
+                  `}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      // Print Signatures Section (Table Layout for 100% Horizontal Alignment in Print and PDF)
+      contentHtml += `
+        <div class="audit-sign-wrapper" style="margin-top:45px; padding-top:10px; page-break-inside:avoid; break-inside:avoid; width:100%;">
+          <table class="audit-sign-table" style="width:100%; border:none; border-collapse:collapse; background:transparent;">
+            <tr>
+              <td style="width:32%; border:none; text-align:center; vertical-align:top; padding:0 15px;">
+                <div class="audit-sign-box" style="border-top:1.5px solid #0f172a; padding-top:6px; font-size:11px; color:#0f172a; text-align:center; line-height:1.4;">
+                  Prepared By<br>
+                  <strong style="font-size:12px; font-weight:700; color:#0f172a;">Accountant</strong>
+                </div>
+              </td>
+              <td style="width:36%; border:none; text-align:center; vertical-align:top; padding:0 25px;">
+                <div class="audit-sign-box" style="border-top:1.5px solid #0f172a; padding-top:6px; font-size:11px; color:#0f172a; text-align:center; line-height:1.4;">
+                  Verified By<br>
+                  <strong style="font-size:12px; font-weight:700; color:#0f172a;">Internal Auditor</strong>
+                </div>
+              </td>
+              <td style="width:32%; border:none; text-align:center; vertical-align:top; padding:0 15px;">
+                <div class="audit-sign-box" style="border-top:1.5px solid #0f172a; padding-top:6px; font-size:11px; color:#0f172a; text-align:center; line-height:1.4;">
+                  Approved By<br>
+                  <strong style="font-size:12px; font-weight:700; color:#0f172a;">Managing Director</strong>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      `;
+
+      body.innerHTML = contentHtml;
+    }
+
+    window.printCashbookSummary = function () {
+      const content = document.getElementById('cbSummaryModalBody');
+      if (!content) { window.print(); return; }
+
+      const printIframe = document.createElement('iframe');
+      printIframe.style.position = 'fixed';
+      printIframe.style.right = '0';
+      printIframe.style.bottom = '0';
+      printIframe.style.width = '0';
+      printIframe.style.height = '0';
+      printIframe.style.border = '0';
+      document.body.appendChild(printIframe);
+
+      const doc = printIframe.contentWindow.document;
+      doc.open();
+      doc.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Cash Book Statement - MS Techno Enterprise</title>
+          <style>
+            @page { size: A4 landscape; margin: 10mm 12mm 12mm 12mm; }
+            * { box-sizing: border-box; }
+            body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; color: #0f172a; background: #ffffff; }
+            .screen-only { display: none !important; }
+            .summary-print-header { display: block !important; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #0f172a !important; }
+            .summary-report-card { border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; margin-bottom: 20px; page-break-inside: avoid; }
+            .summary-card-header { padding: 8px 12px; background: #f8fafc; border-bottom: 1px solid #cbd5e1; font-weight: 700; font-size: 12px; display: flex; justify-content: space-between; }
+            table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+            th, td { border: 1px solid #cbd5e1; padding: 6px 4px; font-size: 10px; color: #0f172a; }
+            th { background: #f1f5f9; font-weight: 700; color: #0f172a; }
+            .audit-sign-wrapper { margin-top: 45px !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+            .audit-sign-table { width: 100% !important; border: none !important; border-collapse: collapse !important; background: transparent !important; }
+            .audit-sign-table td { border: none !important; padding: 0 15px !important; vertical-align: top !important; }
+            .audit-sign-box { border-top: 1.5px solid #0f172a !important; padding-top: 6px; font-size: 11px; color: #0f172a !important; text-align: center; line-height: 1.4; }
+            .audit-sign-box strong { font-size: 12px; font-weight: 700; color: #0f172a !important; }
+            .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+            .badge-neutral { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; font-family: monospace; }
+          </style>
+        </head>
+        <body>
+          ${content.innerHTML}
+        </body>
+        </html>
+      `);
+      doc.close();
+
+      setTimeout(() => {
+        printIframe.contentWindow.focus();
+        printIframe.contentWindow.print();
+        setTimeout(() => {
+          if (document.body.contains(printIframe)) {
+            document.body.removeChild(printIframe);
+          }
+        }, 1500);
+      }, 250);
+    };
+
+    window.downloadCashbookSummaryPDF = function () {
+      const element = document.getElementById('cbSummaryModalBody');
+      if (!element) return;
+      const agentSel = document.getElementById('cbSummaryAgent');
+      const agentText = agentSel && agentSel.value ? (agents.find(a => a.id === agentSel.value)?.name || 'Agent').replace(/\s+/g, '_') : 'All_Agents';
+      const catSel = document.getElementById('cbSummaryCategory');
+      const catText = catSel && catSel.value && catSel.value !== 'all' ? catSel.value : 'All_Category';
+      const filename = `CashBook_Summary_${agentText}_${catText}.pdf`;
+
+      if (window.html2pdf) {
+        const opt = {
+          margin: [8, 8, 8, 8],
+          filename: filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            backgroundColor: '#ffffff',
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: 1200,
+            onclone: (clonedDoc) => {
+              // Hide screen-only elements in PDF
+              clonedDoc.querySelectorAll('.screen-only').forEach(el => el.remove());
+
+              // Unconstrain cloned container for full A4 landscape rendering
+              const clonedBody = clonedDoc.getElementById('cbSummaryModalBody');
+              if (clonedBody) {
+                clonedBody.style.width = '1060px';
+                clonedBody.style.maxWidth = '1060px';
+                clonedBody.style.color = '#0f172a';
+                clonedBody.style.background = '#ffffff';
+                clonedBody.style.padding = '0';
+                clonedBody.style.overflow = 'visible';
+                clonedBody.style.maxHeight = 'none';
+                clonedBody.querySelectorAll('h1, h2, h3, h4, th, strong').forEach(el => {
+                  el.style.color = '#0f172a';
+                });
+              }
+
+              // Ensure table-wrapper and report card do not cut off columns
+              clonedDoc.querySelectorAll('.table-wrapper').forEach(w => {
+                w.style.overflow = 'visible';
+                w.style.width = '100%';
+              });
+              clonedDoc.querySelectorAll('.summary-report-card').forEach(c => {
+                c.style.overflow = 'visible';
+                c.style.width = '100%';
+                c.style.borderColor = '#cbd5e1';
+                c.style.background = '#ffffff';
+              });
+
+              // Style data tables
+              clonedDoc.querySelectorAll('table').forEach(tbl => {
+                tbl.style.width = '100%';
+                tbl.style.tableLayout = 'fixed';
+                tbl.style.borderCollapse = 'collapse';
+              });
+              clonedDoc.querySelectorAll('th, td').forEach(cell => {
+                cell.style.borderColor = '#cbd5e1';
+                if (cell.tagName === 'TH') {
+                  cell.style.background = '#f1f5f9';
+                  cell.style.color = '#0f172a';
+                }
+              });
+
+              // Format company letterhead for PDF
+              const printHeader = clonedDoc.querySelector('.summary-print-header');
+              if (printHeader) {
+                printHeader.style.display = 'block';
+                printHeader.style.visibility = 'visible';
+                printHeader.style.borderBottom = '2px solid #0f172a';
+                printHeader.style.paddingBottom = '12px';
+                printHeader.style.marginBottom = '16px';
+                printHeader.querySelectorAll('*').forEach(el => {
+                  if (el.tagName === 'H2') el.style.color = '#0f172a';
+                  else if (el.style && (el.style.color === 'rgb(180, 83, 9)' || el.style.color === '#b45309')) el.style.color = '#b45309';
+                  else el.style.color = '#334155';
+                });
+              }
+
+              // Format Audit Signatures Table for PDF (stays strictly horizontal in 3 columns)
+              const signWrapper = clonedDoc.querySelector('.audit-sign-wrapper');
+              if (signWrapper) {
+                signWrapper.style.display = 'block';
+                signWrapper.style.visibility = 'visible';
+                signWrapper.style.marginTop = '45px';
+                signWrapper.style.paddingTop = '10px';
+                signWrapper.style.width = '100%';
+              }
+              const signTable = clonedDoc.querySelector('.audit-sign-table');
+              if (signTable) {
+                signTable.style.width = '100%';
+                signTable.style.border = 'none';
+                signTable.style.borderCollapse = 'collapse';
+                signTable.style.background = 'transparent';
+                signTable.querySelectorAll('td').forEach(td => {
+                  td.style.border = 'none';
+                  td.style.verticalAlign = 'top';
+                });
+                signTable.querySelectorAll('.audit-sign-box').forEach(box => {
+                  box.style.borderTop = '1.5px solid #0f172a';
+                  box.style.paddingTop = '6px';
+                  box.style.color = '#0f172a';
+                  box.style.textAlign = 'center';
+                  box.querySelectorAll('strong').forEach(s => {
+                    s.style.color = '#0f172a';
+                    s.style.fontSize = '12px';
+                    s.style.fontWeight = '700';
+                  });
+                });
+              }
+            }
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(element).save().then(() => {
+          Toast.success('PDF সফলভাবে ডাউনলোড হয়েছে!');
+        }).catch(err => {
+          console.warn('html2pdf failed, falling back to print', err);
+          window.printCashbookSummary();
+        });
+      } else {
+        window.printCashbookSummary();
+      }
+    };
+
+    bindCashBookEvents();
+    load();
+
+    // Auto-restore draft on initial page load if agent was previously active
+    setTimeout(() => {
+      const store = getAllCashBookDrafts();
+      const entAgent = document.getElementById('entAgent');
+      if (entAgent && store.lastAgentId) {
+        const opt = Array.from(entAgent.options).find(o => o.value === store.lastAgentId);
+        if (opt) {
+          entAgent.value = store.lastAgentId;
+          currentDraftAgentId = store.lastAgentId;
+          loadCashBookDraft(store.lastAgentId);
+        }
+      }
+    }, 100);
+  </script>
+</body>
+
+</html>

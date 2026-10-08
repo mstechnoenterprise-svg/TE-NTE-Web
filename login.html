@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — TE & NTE Portal</title>
+  <meta name="description" content="Secure login portal for MS Techno Enterprise management system">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    (function () {
+      try {
+        const theme = localStorage.getItem('teNte_theme');
+        if (theme === 'light') {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch (e) { }
+    })();
+  </script>
+  <style>
+    .login-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: var(--r-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--danger);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .login-success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      border-radius: var(--r-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .divider-text {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: 18px 0 14px;
+      position: relative;
+    }
+
+    .divider-text::before,
+    .divider-text::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 38%;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider-text::before {
+      left: 0;
+    }
+
+    .divider-text::after {
+      right: 0;
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(0, 0, 0, 0.2);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Panel slide animation */
+    .auth-panels {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-panel {
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .auth-panel.hidden-left {
+      opacity: 0;
+      transform: translateX(-30px);
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .auth-panel.hidden-right {
+      opacity: 0;
+      transform: translateX(30px);
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+    }
+
+    /* Animated grid bg */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridMove 30s linear infinite;
+    }
+
+    @keyframes gridMove {
+      from {
+        background-position: 0 0;
+      }
+
+      to {
+        background-position: 60px 60px;
+      }
+    }
+
+    .toggle-pw {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 16px;
+      transition: color var(--t-fast);
+      z-index: 1;
+    }
+
+    .toggle-pw:hover {
+      color: var(--gold);
+    }
+
+    .switch-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--gold);
+      background: var(--gold-subtle);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--r-sm);
+      padding: 10px 18px;
+      width: 100%;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--t-fast);
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+    }
+
+    .switch-link:hover {
+      background: rgba(245, 166, 35, 0.14);
+      color: var(--gold-light);
+    }
+
+    /* Signup card can be taller & wider for photo and fields */
+    .login-card.wide {
+      max-width: 520px;
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      20% {
+        transform: translateX(-8px);
+      }
+
+      40% {
+        transform: translateX(8px);
+      }
+
+      60% {
+        transform: translateX(-5px);
+      }
+
+      80% {
+        transform: translateX(5px);
+      }
+    }
+
+    .login-logo-wrap {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 16px;
+      border-radius: 20px;
+      background: #ffffff;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35), 0 0 20px rgba(245, 166, 35, 0.25);
+      border: 2px solid rgba(245, 166, 35, 0.45);
+      transition: all 0.3s ease;
+    }
+
+    .login-logo-wrap:hover {
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), 0 0 28px rgba(245, 166, 35, 0.4);
+      border-color: var(--gold);
+    }
+
+    .login-logo {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 14px;
+      display: block;
+    }
+
+    .login-instructions {
+      font-size: 13px !important;
+      color: var(--text-secondary, #94a3b8) !important;
+      margin-top: 8px !important;
+      margin-bottom: 0 !important;
+      line-height: 1.45 !important;
+      font-weight: 400;
+    }
+
+    .remember-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 12px 0 6px;
+    }
+
+    .remember-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-secondary, #94a3b8);
+      user-select: none;
+      transition: color var(--t-fast);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .remember-label:hover {
+      color: var(--text-primary);
+    }
+
+    .remember-label input[type="checkbox"] {
+      appearance: auto;
+      accent-color: var(--gold);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .btn-career {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gold-light, #ffd580);
+      background: rgba(245, 166, 35, 0.08);
+      border: 1px dashed var(--border-gold);
+      border-radius: var(--r-sm);
+      padding: 10px 18px;
+      width: 100%;
+      cursor: pointer;
+      transition: all var(--t-fast);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-career:hover {
+      background: rgba(245, 166, 35, 0.16);
+      border-color: var(--gold);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(245, 166, 35, 0.2);
+    }
+
+    .career-bottom-bar {
+      margin-top: 14px;
+      text-align: center;
+    }
+
+    .career-bottom-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 8px 22px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid var(--border-gold);
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'Outfit', 'Inter', sans-serif;
+    }
+
+    .career-bottom-link:hover {
+      background: rgba(245, 166, 35, 0.2);
+      border-color: var(--gold);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 18px rgba(245, 166, 35, 0.3);
+      color: #fff;
+    }
+
+    .career-review-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .career-review-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .career-review-item {
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+    }
+
+    .career-review-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .career-review-val {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 2px;
+      word-break: break-word;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-animated"></div>
+  <div class="grid-bg"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="login-particles" id="particles" aria-hidden="true"></div>
+
+  <main class="login-page" role="main">
+    <div class="login-card" id="loginCard">
+      <!-- Brand -->
+      <div class="login-brand">
+        <div class="login-logo-wrap">
+          <img src="logot.jpg" alt="TE &amp; NTE Enterprise logo" class="login-logo" />
+        </div>
+        <h1>TE &amp; NTE Enterprise</h1>
+        <p id="brandSubtitle">Management Portal — Secure Access</p>
+        <p id="brandInstructions" class="login-instructions">Enter your valid email and password to access the
+          dashboard.</p>
+      </div>
+
+      <!-- ═══ PANELS ═══ -->
+      <div class="auth-panels" id="authPanels">
+
+        <!-- ── LOGIN PANEL ── -->
+        <div class="auth-panel" id="loginPanel">
+          <div id="loginNotice" class="login-error" style="display:none;background:rgba(245,166,35,0.12);border:1px solid rgba(245,166,35,0.4);color:var(--gold-light);margin-bottom:14px;">
+            <i class="ri-time-line" style="font-size:18px;color:var(--gold);flex-shrink:0"></i>
+            <span id="loginNoticeMsg"></span>
+          </div>
+
+          <div id="loginError" class="login-error" style="display:none">
+            <i class="ri-error-warning-line"></i>
+            <span id="loginErrorMsg"></span>
+          </div>
+
+          <form id="loginForm" autocomplete="off" novalidate>
+            <div style="position:relative; margin-bottom:12px">
+              <i class="ri-mail-line"
+                style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:16px;z-index:1"></i>
+              <input type="email" id="loginEmail" class="form-control" placeholder="Email address" autocomplete="email"
+                required style="padding-left:44px;height:50px;font-size:14px;">
+            </div>
+            <div style="position:relative; margin-bottom:8px">
+              <i class="ri-lock-line"
+                style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:16px;z-index:1"></i>
+              <input type="password" id="loginPassword" class="form-control" placeholder="Password"
+                autocomplete="current-password" required
+                style="padding-left:44px;padding-right:44px;height:50px;font-size:14px;">
+              <span class="toggle-pw" id="togglePwLogin"><i class="ri-eye-off-line"></i></span>
+            </div>
+            <div class="remember-row">
+              <label class="remember-label" for="rememberMe">
+                <input type="checkbox" id="rememberMe">
+                <span>Remember Me</span>
+              </label>
+            </div>
+            <div style="display:flex;justify-content:center;margin-top:14px;">
+              <button type="submit" class="btn btn-primary" id="loginBtn" style="min-width:200px;max-width:280px;width:70%;height:48px;font-size:15px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+                              background:linear-gradient(135deg,var(--gold),var(--gold-dark),#8b5e0a);
+                              background-size:200%;animation:gradientShift 3s ease infinite;">
+                <span id="loginBtnText">Sign In</span>
+              </button>
+            </div>
+          </form>
+
+          <div class="divider-text">OR</div>
+
+          <div class="switch-link" id="goSignup">
+            <i class="ri-user-add-line"></i> Create New Account (Sign Up)
+          </div>
+
+          <!-- Career button at the very bottom of login page -->
+          <div style="margin-top:10px">
+            <button type="button" class="btn-career" id="openCareerModal">
+              <i class="ri-briefcase-4-line"></i> Career — Apply for Job
+            </button>
+          </div>
+
+          <div class="login-footer">&copy; MS Techno Enterprise &mdash; All rights reserved</div>
+        </div>
+
+        <!-- ── SIGNUP PANEL ── -->
+        <div class="auth-panel hidden-right" id="signupPanel">
+          <div id="signupError" class="login-error" style="display:none">
+            <i class="ri-error-warning-line"></i><span id="signupErrorMsg"></span>
+          </div>
+          <div id="signupSuccess" class="login-success" style="display:none">
+            <i class="ri-checkbox-circle-line"></i><span id="signupSuccessMsg"></span>
+          </div>
+
+          <form id="signupForm" autocomplete="off" novalidate>
+            <!-- Row 1: Agent & Outlet Code -->
+            <div class="form-row" style="margin-bottom:10px">
+              <div style="position:relative">
+                <i class="ri-store-2-line"
+                  style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:15px;z-index:1"></i>
+                <input type="text" id="suOutletName" class="form-control" placeholder="Full Agent Name *"
+                  style="padding-left:38px;height:44px;font-size:13px;" required>
+              </div>
+              <div style="position:relative">
+                <i class="ri-qr-code-line"
+                  style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:15px;z-index:1"></i>
+                <input type="text" id="suOutletCode" class="form-control" placeholder="Outlet Code *"
+                  style="padding-left:38px;height:44px;font-size:13px;" required>
+              </div>
+            </div>
+
+            <!-- Row 2: Employee ID & Full Name -->
+            <div class="form-row" style="margin-bottom:10px">
+              <div style="position:relative">
+                <i class="ri-id-card-line"
+                  style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:15px;z-index:1"></i>
+                <input type="text" id="suEmployeeId" class="form-control" placeholder="Employee ID *"
+                  style="padding-left:38px;height:44px;font-size:13px;" required>
+              </div>
+              <div style="position:relative">
+                <i class="ri-user-line"
+                  style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:15px;z-index:1"></i>
+                <input type="text" id="suFullName" class="form-control" placeholder="Full Name *"
+                  style="padding-left:38px;height:44px;font-size:13px;" required>
+              </div>
+            </div>
+
+            <!-- Row 3: E-mail Address -->
+            <div style="position:relative;margin-bottom:10px">
+              <i class="ri-mail-line"
+                style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:15px;z-index:1"></i>
+              <input type="email" id="suEmail" class="form-control" placeholder="E-mail Address *"
+                style="padding-left:38px;height:44px;font-size:13px;" required>
+            </div>
+
+            <!-- Row 4: Password -->
+            <div style="position:relative;margin-bottom:10px">
+              <i class="ri-lock-password-line"
+                style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:15px;z-index:1"></i>
+              <input type="password" id="suPassword" class="form-control" placeholder="New Password *"
+                style="padding-left:38px;padding-right:44px;height:44px;font-size:13px;" required>
+              <span class="toggle-pw" id="togglePwSignup"><i class="ri-eye-off-line"></i></span>
+            </div>
+
+            <!-- Row 5: Upload Photo -->
+            <div
+              style="margin-bottom:12px;padding:8px 12px;background:rgba(255,255,255,0.03);border:1px dashed var(--border-gold);border-radius:var(--r-sm);display:flex;align-items:center;gap:12px">
+              <div
+                style="position:relative;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--border-gold);flex-shrink:0;">
+                <img id="suPhotoPreview" src="" alt="Photo"
+                  style="display:none;width:100%;height:100%;object-fit:cover;">
+                <i id="suPhotoPlaceholderIcon" class="ri-user-smile-line"
+                  style="font-size:22px;color:var(--text-muted);"></i>
+              </div>
+              <div style="flex:1">
+                <div style="font-size:12px;font-weight:600;color:var(--text-primary);margin-bottom:1px">Upload Photo
+                </div>
+                <div style="font-size:10px;color:var(--text-muted)" id="suPhotoStatus">JPG, PNG or WebP</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <input type="file" id="suPhotoInput" accept="image/*" style="display:none">
+                <button type="button" class="btn btn-outline btn-sm" id="suPhotoBtn"
+                  style="height:30px;font-size:11px;padding:0 10px;">
+                  <i class="ri-upload-2-line"></i> Browse
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm" id="suPhotoRemoveBtn"
+                  style="display:none;height:30px;width:30px;padding:0;color:var(--danger);" title="Remove photo">
+                  <i class="ri-close-line" style="font-size:16px"></i>
+                </button>
+              </div>
+            </div>
+
+            <div
+              style="padding:8px 12px;background:var(--gold-subtle);border:1px solid var(--border-gold);border-radius:var(--r-sm);font-size:11px;color:var(--text-muted);margin-bottom:14px">
+              <i class="ri-information-line" style="color:var(--gold)"></i>
+              Your account will be verified against Employee records and reviewed by admin before activation.
+            </div>
+
+            <div style="display:flex;justify-content:center;margin-top:12px;">
+              <button type="submit" class="btn btn-primary" id="signupBtn"
+                style="min-width:200px;max-width:280px;width:70%;height:46px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
+                <span id="signupBtnText"><i class="ri-send-plane-line"></i> Submit</span>
+              </button>
+            </div>
+          </form>
+
+          <div class="divider-text" style="margin:12px 0"></div>
+
+          <div class="switch-link" id="goLogin">
+            <i class="ri-arrow-left-line"></i> Back to Login
+          </div>
+        </div>
+
+      </div><!-- end auth-panels -->
+    </div><!-- end login-card -->
+
+    <!-- ═══ Career Application Modal ═══ -->
+    <div class="modal-overlay" id="careerModal" style="display:none">
+      <div class="modal" style="max-width:720px;width:95%;max-height:90vh;display:flex;flex-direction:column;">
+        <div class="modal-header">
+          <div class="modal-title" style="display:flex;align-items:center;gap:8px;">
+            <i class="ri-briefcase-4-line" style="color:var(--gold)"></i>
+            <span>Job Application & Career Form</span>
+          </div>
+          <div class="modal-close" id="careerModalClose"><i class="ri-close-line"></i></div>
+        </div>
+        <div class="modal-body" style="overflow-y:auto;padding:24px;flex:1;">
+          <!-- Status closed notice -->
+          <div id="careerClosedNotice" style="display:none;text-align:center;padding:36px 16px;">
+            <i class="ri-lock-2-line" style="font-size:52px;color:var(--danger);display:block;margin-bottom:12px;"></i>
+            <h3 style="font-size:20px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">Applications Closed
+            </h3>
+            <p style="font-size:13px;color:var(--text-muted);max-width:440px;margin:0 auto 20px;line-height:1.6">
+              We are not currently accepting new job applications. Please contact the administrator or check back later.
+            </p>
+            <button type="button" class="btn btn-outline" id="careerClosedCloseBtn"><i class="ri-close-line"></i>
+              Close</button>
+          </div>
+
+          <!-- Form Step 1: Input Fields -->
+          <div id="careerFormStep">
+            <div
+              style="background:linear-gradient(135deg,rgba(245,166,35,0.1),rgba(79,195,247,0.05));border:1px solid var(--border-gold);border-radius:var(--r-md);padding:14px 18px;margin-bottom:18px;">
+              <div
+                style="font-size:14px;font-weight:700;color:var(--gold);margin-bottom:3px;display:flex;align-items:center;gap:6px">
+                <i class="ri-article-line"></i> MS Techno Enterprise &mdash; New Employee Application
+              </div>
+              <div style="font-size:12px;color:var(--text-muted)">
+                Please complete all required fields. After submitting, your application will be submitted for Admin
+                approval.
+              </div>
+            </div>
+
+            <div id="crError" class="login-error" style="display:none;margin-bottom:16px;">
+              <i class="ri-error-warning-line"></i>
+              <span id="crErrorMsg"></span>
+            </div>
+
+            <form id="careerForm" novalidate>
+              <!-- 1. Name & Father's Name -->
+              <div class="form-row" style="margin-bottom:12px">
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">Name *</label>
+                  <input type="text" id="crName" class="form-control" placeholder="Full name" required>
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">Father's Name *</label>
+                  <input type="text" id="crFatherName" class="form-control" placeholder="Father's full name" required>
+                </div>
+              </div>
+
+              <!-- 2. Mother's Name & Spouse -->
+              <div class="form-row" style="margin-bottom:12px">
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">Mother's Name *</label>
+                  <input type="text" id="crMotherName" class="form-control" placeholder="Mother's full name" required>
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">Spouse</label>
+                  <input type="text" id="crSpouse" class="form-control" placeholder="Spouse name (if applicable)">
+                </div>
+              </div>
+
+              <!-- 3. NID No & Mobile -->
+              <div class="form-row" style="margin-bottom:12px">
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">NID No *</label>
+                  <input type="text" id="crNid" class="form-control" placeholder="National ID number" required>
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">Mobile *</label>
+                  <input type="tel" id="crMobile" class="form-control" placeholder="e.g. 017xxxxxxxx" required>
+                </div>
+              </div>
+
+              <!-- 4. Email Address & Desired Position -->
+              <div class="form-row" style="margin-bottom:12px">
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">Email Address *</label>
+                  <input type="email" id="crEmail" class="form-control" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">Desired Position *</label>
+                  <input type="text" id="crPosition" class="form-control"
+                    placeholder="e.g. Accounts Officer / Field Executive" required>
+                </div>
+              </div>
+
+              <!-- 5. Last Education & Address -->
+              <div class="form-row" style="margin-bottom:12px">
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">Last Education *</label>
+                  <input type="text" id="crEducation" class="form-control" placeholder="e.g. B.Sc / BBA / HSC" required>
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">Address *</label>
+                  <input type="text" id="crAddress" class="form-control" placeholder="Present & Permanent address"
+                    required>
+                </div>
+              </div>
+
+              <!-- 6. Last Job Info -->
+              <div class="form-group" style="margin-bottom:14px">
+                <label class="form-label">Last Job Info</label>
+                <textarea id="crLastJob" class="form-control" rows="2"
+                  placeholder="Previous organization, designation, experience or write 'Fresher'"></textarea>
+              </div>
+
+              <!-- 7. Upload Photo -->
+              <div
+                style="margin-bottom:14px;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px dashed var(--border-gold);border-radius:var(--r-sm);display:flex;align-items:center;gap:14px">
+                <div
+                  style="position:relative;width:52px;height:52px;border-radius:var(--r-sm);background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--border-gold);flex-shrink:0;">
+                  <img id="crPhotoPreview" src="" alt="Photo"
+                    style="display:none;width:100%;height:100%;object-fit:cover;">
+                  <i id="crPhotoPlaceholder" class="ri-user-smile-line"
+                    style="font-size:28px;color:var(--text-muted);"></i>
+                </div>
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:2px">Upload Photo
+                    (ছবি আপলোড)</div>
+                  <div style="font-size:11px;color:var(--text-muted)" id="crPhotoStatus">JPG, PNG or WebP (Max 3MB)
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <input type="file" id="crPhotoInput" accept="image/*" style="display:none">
+                  <button type="button" class="btn btn-outline btn-sm" id="crPhotoBtn"
+                    style="height:34px;font-size:12px;padding:0 12px;">
+                    <i class="ri-upload-2-line"></i> Browse Photo
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="crPhotoRemoveBtn"
+                    style="display:none;height:34px;width:34px;padding:0;color:var(--danger);" title="Remove photo">
+                    <i class="ri-close-line" style="font-size:18px"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 8. Driving Licence & CV Upload -->
+              <div class="form-row" style="margin-bottom:16px;align-items:flex-end">
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">Driving Licence</label>
+                  <label
+                    style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--r-sm);cursor:pointer;user-select:none;margin:0">
+                    <input type="checkbox" id="crDrivingLicence"
+                      style="width:18px;height:18px;accent-color:var(--gold);cursor:pointer">
+                    <span style="font-size:13px;color:var(--text-primary);font-weight:500">Yes (Driving Licence)</span>
+                  </label>
+                </div>
+
+                <div class="form-group" style="margin-bottom:0">
+                  <label class="form-label">CV Upload * (PDF / Image / Doc)</label>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <input type="file" id="crCvFile" accept=".pdf,.doc,.docx,image/*" style="display:none">
+                    <button type="button" class="btn btn-outline" id="crCvBtn"
+                      style="flex:1;height:42px;justify-content:space-between;padding:0 12px;font-size:12px">
+                      <span id="crCvLabel"
+                        style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted)">
+                        <i class="ri-upload-2-line" style="color:var(--gold);margin-right:4px"></i> Select CV file...
+                      </span>
+                      <span class="badge badge-gold" style="font-size:10px">Browse</span>
+                    </button>
+                    <button type="button" class="btn btn-ghost btn-sm" id="crCvRemoveBtn"
+                      style="display:none;color:var(--danger);padding:0 6px" title="Remove CV">
+                      <i class="ri-close-line" style="font-size:16px"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Notice & Submit Button -->
+              <div
+                style="padding:10px 14px;background:var(--gold-subtle);border:1px solid var(--border-gold);border-radius:var(--r-sm);font-size:12px;color:var(--text-muted);margin-bottom:18px">
+                <i class="ri-information-line" style="color:var(--gold)"></i>
+                সাবমিট করার পর তথ্য যাচাই করে "Confirm Submit" করতে হবে। এরপর অ্যাডমিনের Approve waiting তালিকায় জমা
+                হবে।
+              </div>
+
+              <div style="display:flex;justify-content:flex-end;gap:12px">
+                <button type="button" class="btn btn-ghost" id="crCancelBtn">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="crSubmitBtn" style="min-width:140px">
+                  <i class="ri-arrow-right-line"></i> Submit
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Step 2: Confirmation Step ("Confirm Submit") -->
+          <div id="careerConfirmStep" style="display:none">
+            <div
+              style="background:rgba(245,166,35,0.08);border:1px solid var(--border-gold);border-radius:var(--r-md);padding:14px 18px;margin-bottom:16px;text-align:center;">
+              <i class="ri-checkbox-circle-line"
+                style="font-size:36px;color:var(--gold);display:block;margin-bottom:6px"></i>
+              <h3 style="font-size:17px;font-weight:700;color:var(--text-primary);margin-bottom:4px">Review Your
+                Application</h3>
+              <p style="font-size:12px;color:var(--text-muted);margin:0">দয়া করে আপনার দেওয়া সকল তথ্য মিলিয়ে দেখুন
+                এবং "Confirm Submit" বাটনে ক্লিক করুন।</p>
+            </div>
+
+            <div class="career-review-grid mb-16" id="careerReviewGrid">
+              <!-- Dynamically populated -->
+            </div>
+
+            <div
+              style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px;padding-top:14px;border-top:1px solid var(--border)">
+              <button type="button" class="btn btn-outline" id="crBackBtn">
+                <i class="ri-arrow-left-line"></i> Back & Edit
+              </button>
+              <button type="button" class="btn btn-primary" id="crConfirmSubmitBtn"
+                style="background:linear-gradient(135deg,var(--gold),var(--gold-dark));min-width:170px;">
+                <span id="crConfirmText"><i class="ri-send-plane-fill"></i> Confirm Submit</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 3: Success Screen -->
+          <div id="careerSuccessStep" style="display:none;text-align:center;padding:36px 16px;">
+            <div
+              style="width:70px;height:70px;border-radius:50%;background:rgba(16,185,129,0.15);border:2px solid var(--success);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+              <i class="ri-check-line" style="font-size:40px;color:var(--success)"></i>
+            </div>
+            <h3 style="font-size:22px;font-weight:700;color:var(--text-primary);margin-bottom:8px">Application
+              Submitted!</h3>
+            <p style="font-size:14px;color:var(--text-muted);max-width:460px;margin:0 auto 20px;line-height:1.6">
+              আপনার আবেদনটি সফলভাবে গৃহীত হয়েছে! এটি এখন অ্যাডমিনের <strong style="color:var(--gold)">Approve
+                Waiting</strong> তালিকায় জমা রয়েছে। অ্যাডমিন কর্তৃক যাচাই শেষে অনুমোদন দেওয়া হবে।
+            </p>
+            <button type="button" class="btn btn-primary" id="crSuccessDoneBtn" style="min-width:140px">
+              <i class="ri-checkbox-circle-line"></i> Done
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    DB.seed();
+
+    // Check if auto-logged out due to 10 minutes inactivity
+    (function () {
+      try {
+        const reason = sessionStorage.getItem('mste_logout_reason');
+        if (reason === 'inactive') {
+          sessionStorage.removeItem('mste_logout_reason');
+          const noticeDiv = document.getElementById('loginNotice');
+          const noticeMsg = document.getElementById('loginNoticeMsg');
+          if (noticeDiv && noticeMsg) {
+            noticeMsg.innerHTML = '<strong>অটো লগআউট:</strong> ১০ মিনিট নিষ্ক্রিয় (Inactive) থাকার কারণে আপনার অ্যাকাউন্ট স্বয়ংক্রিয়ভাবে লগআউট হয়েছে। অনুগ্রহ করে পুনরায় লগইন করুন।';
+            noticeDiv.style.display = 'flex';
+          }
+        }
+      } catch (_) {}
+    })();
+
+    if (Auth.isLoggedIn()) {
+      window.location.href = 'dashboard.html';
+    }
+
+    // ── Panel switching ────────────────────────────────────────
+    let currentPanel = 'login'; // 'login' | 'signup'
+
+    function showPanel(panel) {
+      const loginPanel = document.getElementById('loginPanel');
+      const signupPanel = document.getElementById('signupPanel');
+      const card = document.getElementById('loginCard');
+      const brandSub = document.getElementById('brandSubtitle');
+      const brandInst = document.getElementById('brandInstructions');
+
+      if (panel === 'signup') {
+        loginPanel.classList.add('hidden-left');
+        loginPanel.classList.remove('hidden-right');
+        signupPanel.classList.remove('hidden-right', 'hidden-left');
+        card.classList.add('wide');
+        brandSub.textContent = 'Create Your Account';
+        if (brandInst) brandInst.style.display = 'none';
+        currentPanel = 'signup';
+        // Clear errors
+        document.getElementById('signupError').style.display = 'none';
+        document.getElementById('signupSuccess').style.display = 'none';
+      } else {
+        signupPanel.classList.add('hidden-right');
+        signupPanel.classList.remove('hidden-left');
+        loginPanel.classList.remove('hidden-left', 'hidden-right');
+        card.classList.remove('wide');
+        brandSub.textContent = 'Management Portal — Secure Access';
+        if (brandInst) brandInst.style.display = '';
+        currentPanel = 'login';
+        document.getElementById('loginError').style.display = 'none';
+      }
+    }
+
+    document.getElementById('goSignup').addEventListener('click', () => showPanel('signup'));
+    document.getElementById('goLogin').addEventListener('click', () => showPanel('login'));
+
+    // ── Auto-fill remembered email ──────────────────────────────
+    (function () {
+      const savedEmail = localStorage.getItem('teNte_remember_email');
+      const emailInp = document.getElementById('loginEmail');
+      const remBox = document.getElementById('rememberMe');
+      if (savedEmail && emailInp) {
+        emailInp.value = savedEmail;
+        if (remBox) remBox.checked = true;
+      }
+    })();
+
+    document.getElementById('rememberMe')?.addEventListener('change', function () {
+      if (!this.checked) {
+        localStorage.removeItem('teNte_remember_email');
+      } else {
+        const email = document.getElementById('loginEmail')?.value.trim();
+        if (email) localStorage.setItem('teNte_remember_email', email);
+      }
+    });
+
+    // ── Password toggles ───────────────────────────────────────
+    ['togglePwLogin', 'togglePwSignup'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('click', function () {
+        const input = this.previousElementSibling;
+        const icon = this.querySelector('i');
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.className = 'ri-eye-line';
+        } else {
+          input.type = 'password';
+          icon.className = 'ri-eye-off-line';
+        }
+      });
+    });
+
+    // ── LOGIN ──────────────────────────────────────────────────
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const isRemember = document.getElementById('rememberMe')?.checked;
+      const btn = document.getElementById('loginBtn');
+      const btnText = document.getElementById('loginBtnText');
+      const errDiv = document.getElementById('loginError');
+      const errMsg = document.getElementById('loginErrorMsg');
+      const noticeDiv = document.getElementById('loginNotice');
+
+      btn.disabled = true;
+      btnText.innerHTML = '<span class="spinner"></span>&nbsp;Signing in...';
+      errDiv.style.display = 'none';
+      if (noticeDiv) noticeDiv.style.display = 'none';
+
+      setTimeout(() => {
+        const result = Auth.login(email, password);
+
+        if (result.ok) {
+          if (isRemember) {
+            localStorage.setItem('teNte_remember_email', email);
+          } else {
+            localStorage.removeItem('teNte_remember_email');
+          }
+          btnText.innerHTML = '<i class="ri-checkbox-circle-line"></i> Success!';
+          btn.style.background = 'linear-gradient(135deg,var(--success),#065f46)';
+          setTimeout(() => window.location.href = 'dashboard.html', 600);
+        } else {
+          btn.disabled = false;
+          btnText.innerHTML = 'Sign In';
+          errMsg.textContent = result.msg;
+          errDiv.style.display = 'flex';
+          const card = document.getElementById('loginCard');
+          card.style.animation = 'shake 0.4s ease';
+          card.addEventListener('animationend', () => card.style.animation = '', { once: true });
+        }
+      }, 700);
+    });
+
+    // Helper to safely escape HTML
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // ── Photo Upload ───────────────────────────────────────────
+    let suPhotoData = '';
+    const suPhotoInput = document.getElementById('suPhotoInput');
+    const suPhotoBtn = document.getElementById('suPhotoBtn');
+    const suPhotoRemoveBtn = document.getElementById('suPhotoRemoveBtn');
+    const suPhotoPreview = document.getElementById('suPhotoPreview');
+    const suPhotoPlaceholderIcon = document.getElementById('suPhotoPlaceholderIcon');
+    const suPhotoStatus = document.getElementById('suPhotoStatus');
+
+    if (suPhotoBtn && suPhotoInput) {
+      suPhotoBtn.addEventListener('click', () => suPhotoInput.click());
+    }
+
+    if (suPhotoInput) {
+      suPhotoInput.addEventListener('change', function () {
+        const file = this.files && this.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+          alert('Please select a valid image file (JPG, PNG, WebP).');
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Image size exceeds 5MB. Please choose a smaller image.');
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function () {
+            // Resize to maximum 256x256 to optimize localStorage
+            const maxDim = 256;
+            let w = img.width, h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+              else { w = Math.round(w * maxDim / h); h = maxDim; }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            suPhotoData = canvas.toDataURL('image/jpeg', 0.85);
+
+            suPhotoPreview.src = suPhotoData;
+            suPhotoPreview.style.display = 'block';
+            suPhotoPlaceholderIcon.style.display = 'none';
+            suPhotoRemoveBtn.style.display = 'inline-flex';
+            suPhotoStatus.textContent = file.name.length > 18 ? file.name.slice(0, 15) + '...' : file.name;
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (suPhotoRemoveBtn) {
+      suPhotoRemoveBtn.addEventListener('click', () => {
+        suPhotoData = '';
+        if (suPhotoInput) suPhotoInput.value = '';
+        suPhotoPreview.src = '';
+        suPhotoPreview.style.display = 'none';
+        suPhotoPlaceholderIcon.style.display = 'block';
+        suPhotoRemoveBtn.style.display = 'none';
+        suPhotoStatus.textContent = 'JPG, PNG or WebP';
+      });
+    }
+
+    // ── SIGN UP WITH EMPLOYEE VERIFICATION ────────────────────
+    document.getElementById('signupForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const outletName = document.getElementById('suOutletName').value.trim();
+      const outletCode = document.getElementById('suOutletCode').value.trim();
+      const employeeId = document.getElementById('suEmployeeId').value.trim();
+      const fullName = document.getElementById('suFullName').value.trim();
+      const email = document.getElementById('suEmail').value.trim().toLowerCase();
+      const password = document.getElementById('suPassword').value;
+
+      const errDiv = document.getElementById('signupError');
+      const errMsg = document.getElementById('signupErrorMsg');
+      const sucDiv = document.getElementById('signupSuccess');
+      const sucMsg = document.getElementById('signupSuccessMsg');
+      const btn = document.getElementById('signupBtn');
+      const btnText = document.getElementById('signupBtnText');
+
+      errDiv.style.display = 'none';
+      sucDiv.style.display = 'none';
+
+      // 1. Basic validation
+      if (!outletName) { errMsg.textContent = 'Full Agent Name is required.'; errDiv.style.display = 'flex'; return; }
+      if (!outletCode) { errMsg.textContent = 'Outlet Code is required.'; errDiv.style.display = 'flex'; return; }
+      if (!employeeId) { errMsg.textContent = 'Employee ID is required.'; errDiv.style.display = 'flex'; return; }
+      if (!fullName) { errMsg.textContent = 'Full Name is required.'; errDiv.style.display = 'flex'; return; }
+      if (!email) { errMsg.textContent = 'Email is required.'; errDiv.style.display = 'flex'; return; }
+      if (!password || password.length < 6) { errMsg.textContent = 'Password must be at least 6 characters.'; errDiv.style.display = 'flex'; return; }
+
+      // 2. Check if already registered
+      const allUsers = DB.getUsers();
+      if (allUsers.some(u => (u.employeeId || '').trim().toLowerCase() === employeeId.toLowerCase())) {
+        errMsg.innerHTML = `⚠️ <strong>Warning:</strong> Employee ID "<strong>${escapeHtml(employeeId)}</strong>" দিয়ে ইতোমধ্যে একটি অ্যাকাউন্ট খোলা হয়েছে!`;
+        errDiv.style.display = 'flex';
+        return;
+      }
+      if (DB.getUserByEmail(email)) {
+        errMsg.textContent = 'এই ইমেল অ্যাড্রেসটি ইতোমধ্যে সিস্টেমে রেজিস্টার্ড রয়েছে।';
+        errDiv.style.display = 'flex';
+        return;
+      }
+
+      // 3. Verifying against Employee records in Employee menu
+      const allEmps = DB.getHREmployees();
+      const allAgents = DB.getAgents();
+
+      if (!allEmps || allEmps.length === 0) {
+        errMsg.innerHTML = `⚠️ <strong>Verification Warning:</strong> সিস্টেমে কোনো Employee রেকর্ড পাওয়া যায়নি। অ্যাকাউন্ট খোলার পূর্বে অ্যাডমিনকে Employees মেনু থেকে Employee যুক্ত করতে বলুন।`;
+        errDiv.style.display = 'flex';
+        return;
+      }
+
+      // Find matching employee by Employee ID (case-insensitive)
+      const emp = allEmps.find(e => (e.employeeId || '').trim().toLowerCase() === employeeId.toLowerCase());
+      if (!emp) {
+        errMsg.innerHTML = `⚠️ <strong>Verification Warning:</strong> Employee ID "<strong>${escapeHtml(employeeId)}</strong>" Employee তালিকায় পাওয়া যায়নি! অনুগ্রহ করে সঠিক Employee ID দিন।`;
+        errDiv.style.display = 'flex';
+        return;
+      }
+
+      // Check agent affiliation
+      const assignedAgent = allAgents.find(a => a.id === emp.agentId);
+      if (assignedAgent) {
+        const assignedCode = (assignedAgent.code || '').trim().toLowerCase();
+        const inputCode = outletCode.toLowerCase();
+        const assignedName = (assignedAgent.name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+        const inputName = outletName.toLowerCase().replace(/\s+/g, ' ');
+
+        const codeMatch = assignedCode && (assignedCode === inputCode);
+        const nameMatch = assignedName && (assignedName === inputName || assignedName.includes(inputName) || inputName.includes(assignedName));
+
+        // If employee belongs to another agent or outlet code
+        if (!codeMatch || !nameMatch) {
+          errMsg.innerHTML = `⚠️ <strong>Verification Warning:</strong> এই Employee ID (<strong>${escapeHtml(emp.employeeId || employeeId)}</strong>) অন্য এজেন্ট "<strong>${escapeHtml(assignedAgent.name)}</strong>" (কোড: <strong>${escapeHtml(assignedAgent.code)}</strong>)-এর সাথে রেজিস্টার্ড! আপনি "<strong>${escapeHtml(outletName)}</strong>" এজেন্টে সাবমিট করতে পারবেন না।`;
+          errDiv.style.display = 'flex';
+          return;
+        }
+      }
+
+      // Check employee name match
+      const empNameClean = (emp.name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+      const inputNameClean = fullName.toLowerCase().replace(/\s+/g, ' ');
+      if (empNameClean !== inputNameClean && !empNameClean.includes(inputNameClean) && !inputNameClean.includes(empNameClean)) {
+        errMsg.innerHTML = `⚠️ <strong>Verification Warning:</strong> আপনার দেওয়া নাম "<strong>${escapeHtml(fullName)}</strong>" এর সাথে Employee রেকর্ডের নাম "<strong>${escapeHtml(emp.name)}</strong>" মিলছে না!`;
+        errDiv.style.display = 'flex';
+        return;
+      }
+
+      // All verified! Submit account creation
+      btn.disabled = true;
+      btnText.innerHTML = '<span class="spinner"></span>&nbsp;Verifying & Creating...';
+
+      setTimeout(() => {
+        DB.addUser({
+          name: fullName,
+          email,
+          password: btoa(password),
+          employeeId: emp.employeeId || employeeId,
+          outletName: assignedAgent ? assignedAgent.name : outletName,
+          outletCode: assignedAgent ? assignedAgent.code : outletCode,
+          agentId: assignedAgent ? assignedAgent.id : (emp.agentId || ''),
+          photo: suPhotoData || '',
+          designation: emp.designation || '',
+          phone: emp.phone || '',
+          role: 'user',
+          status: 'pending',
+          menuPermissions: [],
+          writePermissions: [],
+        });
+
+        btn.disabled = false;
+        btnText.innerHTML = '<i class="ri-send-plane-line"></i> Submit';
+        document.getElementById('signupForm').reset();
+        if (suPhotoRemoveBtn) suPhotoRemoveBtn.click();
+
+        sucMsg.textContent = `Account successfully verified & created! Admin will review and approve your access.`;
+        sucDiv.style.display = 'flex';
+      }, 700);
+    });
+
+    // ── Career Modal & Form Handling ───────────────────────────
+    const careerModal = document.getElementById('careerModal');
+    const openCareerBtns = [
+      document.getElementById('openCareerModal'),
+      document.getElementById('openCareerModalBottom')
+    ];
+    const careerModalClose = document.getElementById('careerModalClose');
+    const crCancelBtn = document.getElementById('crCancelBtn');
+    const careerClosedCloseBtn = document.getElementById('careerClosedCloseBtn');
+    const crSuccessDoneBtn = document.getElementById('crSuccessDoneBtn');
+
+    let crCvData = '';
+    let crCvName = '';
+    let crPhotoData = '';
+
+    function openCareerDialog() {
+      const settings = DB.getSettings();
+      const isActive = settings.applicationLinkActive;
+      const closedNotice = document.getElementById('careerClosedNotice');
+      const formStep = document.getElementById('careerFormStep');
+      const confirmStep = document.getElementById('careerConfirmStep');
+      const successStep = document.getElementById('careerSuccessStep');
+      const errorDiv = document.getElementById('crError');
+
+      if (errorDiv) errorDiv.style.display = 'none';
+
+      if (!isActive) {
+        if (closedNotice) closedNotice.style.display = 'block';
+        if (formStep) formStep.style.display = 'none';
+        if (confirmStep) confirmStep.style.display = 'none';
+        if (successStep) successStep.style.display = 'none';
+      } else {
+        if (closedNotice) closedNotice.style.display = 'none';
+        if (formStep) formStep.style.display = 'block';
+        if (confirmStep) confirmStep.style.display = 'none';
+        if (successStep) successStep.style.display = 'none';
+      }
+
+      careerModal.style.display = 'flex';
+      setTimeout(() => careerModal.classList.add('open'), 10);
+    }
+
+    function closeCareerDialog() {
+      careerModal.classList.remove('open');
+      setTimeout(() => {
+        careerModal.style.display = 'none';
+      }, 250);
+    }
+
+    openCareerBtns.forEach(btn => {
+      if (btn) btn.addEventListener('click', openCareerDialog);
+    });
+
+    [careerModalClose, crCancelBtn, careerClosedCloseBtn].forEach(el => {
+      if (el) el.addEventListener('click', closeCareerDialog);
+    });
+
+    if (crSuccessDoneBtn) {
+      crSuccessDoneBtn.addEventListener('click', () => {
+        document.getElementById('careerForm').reset();
+        resetCvUpload();
+        resetPhotoUpload();
+        closeCareerDialog();
+      });
+    }
+
+    careerModal.addEventListener('click', function (e) {
+      if (e.target === this) closeCareerDialog();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && careerModal.classList.contains('open')) {
+        closeCareerDialog();
+      }
+    });
+
+    // Photo Upload Handling
+    const crPhotoInput = document.getElementById('crPhotoInput');
+    const crPhotoBtn = document.getElementById('crPhotoBtn');
+    const crPhotoRemoveBtn = document.getElementById('crPhotoRemoveBtn');
+    const crPhotoPreview = document.getElementById('crPhotoPreview');
+    const crPhotoPlaceholder = document.getElementById('crPhotoPlaceholder');
+    const crPhotoStatus = document.getElementById('crPhotoStatus');
+
+    if (crPhotoBtn && crPhotoInput) {
+      crPhotoBtn.addEventListener('click', () => crPhotoInput.click());
+    }
+
+    if (crPhotoInput) {
+      crPhotoInput.addEventListener('change', function () {
+        const file = this.files && this.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+          alert('Please select an image file (JPG, PNG, WebP).');
+          this.value = '';
+          return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+          alert('Photo size exceeds 5MB. Please choose a smaller photo.');
+          this.value = '';
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function () {
+            const maxDim = 256;
+            let w = img.width, h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+              else { w = Math.round(w * maxDim / h); h = maxDim; }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            crPhotoData = canvas.toDataURL('image/jpeg', 0.85);
+
+            crPhotoPreview.src = crPhotoData;
+            crPhotoPreview.style.display = 'block';
+            if (crPhotoPlaceholder) crPhotoPlaceholder.style.display = 'none';
+            if (crPhotoRemoveBtn) crPhotoRemoveBtn.style.display = 'inline-flex';
+            if (crPhotoStatus) crPhotoStatus.textContent = file.name.length > 20 ? file.name.slice(0, 17) + '...' : file.name;
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function resetPhotoUpload() {
+      crPhotoData = '';
+      if (crPhotoInput) crPhotoInput.value = '';
+      if (crPhotoPreview) {
+        crPhotoPreview.src = '';
+        crPhotoPreview.style.display = 'none';
+      }
+      if (crPhotoPlaceholder) crPhotoPlaceholder.style.display = 'block';
+      if (crPhotoRemoveBtn) crPhotoRemoveBtn.style.display = 'none';
+      if (crPhotoStatus) crPhotoStatus.textContent = 'JPG, PNG or WebP (Max 3MB)';
+    }
+
+    if (crPhotoRemoveBtn) {
+      crPhotoRemoveBtn.addEventListener('click', resetPhotoUpload);
+    }
+
+    // CV Upload Handling
+    const crCvFile = document.getElementById('crCvFile');
+    const crCvBtn = document.getElementById('crCvBtn');
+    const crCvLabel = document.getElementById('crCvLabel');
+    const crCvRemoveBtn = document.getElementById('crCvRemoveBtn');
+
+    if (crCvBtn && crCvFile) {
+      crCvBtn.addEventListener('click', () => crCvFile.click());
+    }
+
+    if (crCvFile) {
+      crCvFile.addEventListener('change', function () {
+        const file = this.files && this.files[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+          alert('File size exceeds 5MB. Please choose a smaller file.');
+          this.value = '';
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          crCvData = e.target.result;
+          crCvName = file.name;
+          crCvLabel.innerHTML = `<i class="ri-file-text-line" style="color:var(--gold);margin-right:4px"></i> ${escapeHtml(file.name)}`;
+          crCvRemoveBtn.style.display = 'inline-flex';
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function resetCvUpload() {
+      crCvData = '';
+      crCvName = '';
+      if (crCvFile) crCvFile.value = '';
+      if (crCvLabel) crCvLabel.innerHTML = `<i class="ri-upload-2-line" style="color:var(--gold);margin-right:4px"></i> Select CV file...`;
+      if (crCvRemoveBtn) crCvRemoveBtn.style.display = 'none';
+    }
+
+    if (crCvRemoveBtn) {
+      crCvRemoveBtn.addEventListener('click', resetCvUpload);
+    }
+
+    // Step 1: Submit button validates & shows Review Step
+    let pendingApplicantData = null;
+
+    document.getElementById('careerForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const errDiv = document.getElementById('crError');
+      const errMsg = document.getElementById('crErrorMsg');
+      errDiv.style.display = 'none';
+
+      // Re-verify application link status
+      if (!DB.getSettings().applicationLinkActive) {
+        errMsg.textContent = 'Applications have been closed by the administrator.';
+        errDiv.style.display = 'flex';
+        return;
+      }
+
+      const name = document.getElementById('crName').value.trim();
+      const fatherName = document.getElementById('crFatherName').value.trim();
+      const motherName = document.getElementById('crMotherName').value.trim();
+      const spouse = document.getElementById('crSpouse').value.trim();
+      const nid = document.getElementById('crNid').value.trim();
+      const mobile = document.getElementById('crMobile').value.trim();
+      const email = document.getElementById('crEmail').value.trim().toLowerCase();
+      const position = document.getElementById('crPosition').value.trim();
+      const lastEducation = document.getElementById('crEducation').value.trim();
+      const address = document.getElementById('crAddress').value.trim();
+      const lastJobInfo = document.getElementById('crLastJob').value.trim();
+      const drivingLicence = document.getElementById('crDrivingLicence').checked;
+
+      // Validation
+      if (!name) { errMsg.textContent = 'Name is required.'; errDiv.style.display = 'flex'; return; }
+      if (!fatherName) { errMsg.textContent = "Father's Name is required."; errDiv.style.display = 'flex'; return; }
+      if (!motherName) { errMsg.textContent = "Mother's Name is required."; errDiv.style.display = 'flex'; return; }
+      if (!nid) { errMsg.textContent = 'NID No is required.'; errDiv.style.display = 'flex'; return; }
+      if (!mobile) { errMsg.textContent = 'Mobile number is required.'; errDiv.style.display = 'flex'; return; }
+      if (!email) { errMsg.textContent = 'Email address is required.'; errDiv.style.display = 'flex'; return; }
+      if (!position) { errMsg.textContent = 'Desired Position is required.'; errDiv.style.display = 'flex'; return; }
+      if (!lastEducation) { errMsg.textContent = 'Last Education is required.'; errDiv.style.display = 'flex'; return; }
+      if (!address) { errMsg.textContent = 'Address is required.'; errDiv.style.display = 'flex'; return; }
+
+      // Check existing email
+      if (DB.getUserByEmail(email)) {
+        errMsg.textContent = 'This email address is already registered in the system.';
+        errDiv.style.display = 'flex';
+        return;
+      }
+
+      pendingApplicantData = {
+        name,
+        fatherName,
+        motherName,
+        spouse: spouse || '—',
+        nid,
+        mobile,
+        phone: mobile,
+        email,
+        position,
+        desiredPosition: position,
+        lastEducation,
+        address,
+        lastJobInfo: lastJobInfo || 'Fresher / None',
+        drivingLicence: drivingLicence ? 'Yes' : 'No',
+        photo: crPhotoData || '',
+        cvName: crCvName || 'Not uploaded',
+        cvData: crCvData || '',
+      };
+
+      // Populate Review Screen
+      const reviewGrid = document.getElementById('careerReviewGrid');
+      reviewGrid.innerHTML = `
+        <div class="career-review-item" style="grid-column:1/-1;display:flex;align-items:center;gap:14px;background:rgba(245,166,35,0.06);border:1px solid var(--border-gold);">
+          <div style="width:50px;height:50px;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border-gold);background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            ${crPhotoData ? `<img src="${crPhotoData}" alt="Photo" style="width:100%;height:100%;object-fit:cover;">` : `<i class="ri-user-smile-line" style="font-size:26px;color:var(--text-muted)"></i>`}
+          </div>
+          <div>
+            <div class="career-review-label">Applicant Photo</div>
+            <div class="career-review-val" style="color:var(--gold);font-size:12px;">${crPhotoData ? '✓ Photo Uploaded' : 'No Photo Uploaded'}</div>
+          </div>
+        </div>
+        <div class="career-review-item"><div class="career-review-label">Name</div><div class="career-review-val">${escapeHtml(pendingApplicantData.name)}</div></div>
+        <div class="career-review-item"><div class="career-review-label">Father's Name</div><div class="career-review-val">${escapeHtml(pendingApplicantData.fatherName)}</div></div>
+        <div class="career-review-item"><div class="career-review-label">Mother's Name</div><div class="career-review-val">${escapeHtml(pendingApplicantData.motherName)}</div></div>
+        <div class="career-review-item"><div class="career-review-label">Spouse</div><div class="career-review-val">${escapeHtml(pendingApplicantData.spouse)}</div></div>
+        <div class="career-review-item"><div class="career-review-label">NID No</div><div class="career-review-val">${escapeHtml(pendingApplicantData.nid)}</div></div>
+        <div class="career-review-item"><div class="career-review-label">Mobile</div><div class="career-review-val">${escapeHtml(pendingApplicantData.mobile)}</div></div>
+        <div class="career-review-item"><div class="career-review-label">Email Address</div><div class="career-review-val">${escapeHtml(pendingApplicantData.email)}</div></div>
+        <div class="career-review-item"><div class="career-review-label">Desired Position</div><div class="career-review-val" style="color:var(--gold)">${escapeHtml(pendingApplicantData.position)}</div></div>
+        <div class="career-review-item"><div class="career-review-label">Last Education</div><div class="career-review-val">${escapeHtml(pendingApplicantData.lastEducation)}</div></div>
+        <div class="career-review-item"><div class="career-review-label">Driving Licence</div><div class="career-review-val" style="color:${drivingLicence ? 'var(--success)' : 'var(--text-muted)'}">${pendingApplicantData.drivingLicence}</div></div>
+        <div class="career-review-item" style="grid-column:1/-1"><div class="career-review-label">Address</div><div class="career-review-val">${escapeHtml(pendingApplicantData.address)}</div></div>
+        <div class="career-review-item" style="grid-column:1/-1"><div class="career-review-label">Last Job Info</div><div class="career-review-val">${escapeHtml(pendingApplicantData.lastJobInfo)}</div></div>
+        <div class="career-review-item" style="grid-column:1/-1"><div class="career-review-label">CV File</div><div class="career-review-val"><i class="ri-attachment-line" style="color:var(--gold)"></i> ${escapeHtml(pendingApplicantData.cvName)}</div></div>
+      `;
+
+      // Switch to Confirmation view
+      document.getElementById('careerFormStep').style.display = 'none';
+      document.getElementById('careerConfirmStep').style.display = 'block';
+    });
+
+    // Back & Edit
+    document.getElementById('crBackBtn').addEventListener('click', () => {
+      document.getElementById('careerConfirmStep').style.display = 'none';
+      document.getElementById('careerFormStep').style.display = 'block';
+    });
+
+    // Step 2: Confirm Submit
+    document.getElementById('crConfirmSubmitBtn').addEventListener('click', function () {
+      if (!pendingApplicantData) return;
+      const btn = this;
+      const txt = document.getElementById('crConfirmText');
+
+      btn.disabled = true;
+      txt.innerHTML = '<span class="spinner"></span> Submitting...';
+
+      setTimeout(() => {
+        // Save to DB as applicant with status pending (Approve waiting for admin)
+        DB.addUser({
+          ...pendingApplicantData,
+          role: 'applicant',
+          status: 'pending',
+          password: btoa('123456'), // Default password
+          menuPermissions: [],
+          writePermissions: [],
+        });
+
+        btn.disabled = false;
+        txt.innerHTML = '<i class="ri-send-plane-fill"></i> Confirm Submit';
+
+        document.getElementById('careerConfirmStep').style.display = 'none';
+        document.getElementById('careerSuccessStep').style.display = 'block';
+      }, 600);
+    });
+
+    // ── Particles ──────────────────────────────────────────────
+    (function () {
+      const c = document.getElementById('particles');
+      for (let i = 0; i < 30; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.cssText = `left:${Math.random() * 100}%;width:${Math.random() * 3 + 1}px;height:${Math.random() * 3 + 1}px;animation-duration:${Math.random() * 10 + 8}s;animation-delay:${Math.random() * 10}s;background:${Math.random() > 0.6 ? 'var(--gold)' : 'var(--blue-bright)'};`;
+        c.appendChild(p);
+      }
+    })();
+  </script>
+  <style>
+    @keyframes gradientShift {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+  </style>
+</body>
+
+</html>

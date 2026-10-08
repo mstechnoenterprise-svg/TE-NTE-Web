@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agents List — TE & NTE Portal</title>
+  <meta name="description" content="View and manage all registered agents in MS Techno Enterprise">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .agent-stat-row {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .agent-stat {
+      flex: 1;
+      min-width: 80px;
+      text-align: center;
+      padding: 10px;
+      background: var(--bg-glass);
+      border-radius: var(--r-sm);
+      border: 1px solid var(--border);
+    }
+
+    .agent-stat .val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .agent-stat .lbl {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .agent-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .agent-name-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .agent-code {
+      font-size: 11px;
+      color: var(--text-muted);
+      background: var(--bg-glass);
+      padding: 2px 8px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-animated"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <div class="main-content" id="mainContent">
+      <header class="top-header" id="topHeader">
+        <button class="header-toggle" id="sidebarToggle"><i class="ri-menu-line"></i></button>
+        <div class="header-title">
+          <h1 id="headerTitle">Agents List</h1>
+          <p id="headerSubtitle">Manage all registered agents</p>
+        </div>
+        <div class="header-actions">
+          <div class="header-btn" title="Notifications"><i class="ri-notification-3-line"></i>
+            <div class="header-notif-dot"></div>
+          </div>
+          <div class="header-btn header-btn-settings" id="settingsBtn" title="Settings"><i
+              class="ri-settings-3-line"></i><span class="header-btn-label">Settings</span></div>
+        </div>
+      </header>
+
+      <div class="page-wrapper">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb animate-in" id="pageBreadcrumb"></nav>
+
+        <div class="page-header animate-in">
+          <div class="page-header-left">
+            <h2><i class="ri-team-line"></i> Agents</h2>
+            <p>Total: <span id="agentCount">0</span> agents registered</p>
+          </div>
+          <div class="flex gap-8" id="adminControls" style="display:none">
+            <button class="btn btn-primary" id="addAgentBtn"><i class="ri-user-add-line"></i> Add Agent</button>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="search-bar animate-in anim-delay-1">
+          <div class="search-input-wrap">
+            <i class="ri-search-line"></i>
+            <input type="search" id="searchInput" class="form-control" placeholder="Search agents...">
+          </div>
+          <select class="form-control" id="statusFilter" style="max-width:150px">
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        <!-- Agents Grid -->
+        <div class="agents-grid" id="agentsGrid">
+          <div class="empty-state"><i class="ri-loader-4-line"></i>
+            <p>Loading agents...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Agent Modal -->
+  <div class="modal-overlay" id="addAgentModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title"><i class="ri-user-add-line"></i> Add New Agent</div>
+        <div class="modal-close"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body">
+        <form id="addAgentForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Agent Name *</label>
+              <input type="text" id="agName" class="form-control" placeholder="Agent name" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bank Name</label>
+              <input type="text" id="agBank" class="form-control" placeholder="e.g. Dutch-Bangla Bank, Islami Bank">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Agent Code</label>
+              <input type="text" id="agCode" class="form-control" placeholder="e.g. AGT-004">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Agent Opening Date</label>
+              <input type="date" id="agOpeningDate" class="form-control">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input type="tel" id="agPhone" class="form-control" placeholder="+880 ...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" id="agEmail" class="form-control" placeholder="agent@example.com">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Area / Region</label>
+              <input type="text" id="agArea" class="form-control" placeholder="e.g. Dhaka North">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Address</label>
+              <input type="text" id="agAddress" class="form-control" placeholder="Full address">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <textarea id="agNotes" class="form-control" rows="2" placeholder="Any additional notes"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Agent Logo / Picture</label>
+            <div class="logo-upload-wrap">
+              <div class="logo-preview" id="agLogoPreview">
+                <i class="ri-image-add-line"></i>
+              </div>
+              <div style="flex:1">
+                <div class="flex gap-8" style="align-items:center">
+                  <label class="btn btn-outline btn-sm" for="agLogoInput" style="cursor:pointer;margin:0">
+                    <i class="ri-upload-2-line"></i> Choose Logo
+                  </label>
+                  <button type="button" class="btn btn-ghost btn-sm" id="removeAgLogoBtn"
+                    style="display:none;color:var(--danger)">
+                    <i class="ri-delete-bin-line"></i> Remove
+                  </button>
+                </div>
+                <input type="file" id="agLogoInput" accept="image/*" style="display:none">
+                <p style="font-size:11px;color:var(--text-muted);margin-top:4px">Upload agent/organization logo (PNG,
+                  JPG, WebP)</p>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost modal-close"><i class="ri-close-line"></i> Cancel</button>
+        <button class="btn btn-primary" id="saveAgentBtn"><i class="ri-save-line"></i> Save Agent</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Agent Modal -->
+  <div class="modal-overlay" id="editAgentModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title"><i class="ri-edit-line"></i> Edit Agent</div>
+        <div class="modal-close"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body">
+        <form id="editAgentForm">
+          <input type="hidden" id="editAgId">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Agent Name *</label>
+              <input type="text" id="editAgName" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bank Name</label>
+              <input type="text" id="editAgBank" class="form-control" placeholder="e.g. Dutch-Bangla Bank">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Agent Code</label>
+              <input type="text" id="editAgCode" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Agent Opening Date</label>
+              <input type="date" id="editAgOpeningDate" class="form-control">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input type="tel" id="editAgPhone" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" id="editAgEmail" class="form-control" placeholder="agent@example.com">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Area</label>
+              <input type="text" id="editAgArea" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Address</label>
+              <input type="text" id="editAgAddress" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes</label>
+              <textarea id="editAgNotes" class="form-control" rows="2" placeholder="Any additional notes"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select id="editAgStatus" class="form-control">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Agent Logo / Picture</label>
+              <div class="logo-upload-wrap">
+                <div class="logo-preview" id="editAgLogoPreview">
+                  <i class="ri-image-add-line"></i>
+                </div>
+                <div style="flex:1">
+                  <div class="flex gap-8" style="align-items:center">
+                    <label class="btn btn-outline btn-sm" for="editAgLogoInput" style="cursor:pointer;margin:0">
+                      <i class="ri-upload-2-line"></i> Change Logo
+                    </label>
+                    <button type="button" class="btn btn-ghost btn-sm" id="removeEditAgLogoBtn"
+                      style="display:none;color:var(--danger)">
+                      <i class="ri-delete-bin-line"></i> Remove
+                    </button>
+                  </div>
+                  <input type="file" id="editAgLogoInput" accept="image/*" style="display:none">
+                  <p style="font-size:11px;color:var(--text-muted);margin-top:4px">Upload agent/organization logo (PNG,
+                    JPG, WebP)</p>
+                </div>
+              </div>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost modal-close"><i class="ri-close-line"></i> Cancel</button>
+        <button class="btn btn-primary" id="updateAgentBtn"><i class="ri-save-line"></i> Update</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const user = App.init('agents-list', 'Agents List', 'Manage all registered agents');
+    if (!user) throw new Error('Not authenticated');
+
+    UIEnhancements.setBreadcrumb('pageBreadcrumb', [{ label: 'Agents List' }]);
+
+    const isAdmin = user.role === 'admin' || user.role === 'sub-admin';
+    const canEdit = isAdmin || Auth.canEdit('agents-list');
+    if (canEdit) {
+      const adminControls = document.getElementById('adminControls');
+      if (adminControls) adminControls.style.display = 'flex';
+    }
+
+    // FAB for mobile
+    if (canEdit) {
+      UIEnhancements.initFAB('Add Agent', () => Modal.open('addAgentModal'));
+    }
+
+    let agents = [];
+    let searchTerm = '';
+    let statusFilter = 'all';
+    let agLogoData = '';
+    let editAgLogoData = '';
+
+    // Logo upload listeners
+    document.getElementById('agLogoInput')?.addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        agLogoData = evt.target.result;
+        document.getElementById('agLogoPreview').innerHTML = `<img src="${agLogoData}" alt="Logo">`;
+        document.getElementById('removeAgLogoBtn').style.display = 'inline-flex';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('removeAgLogoBtn')?.addEventListener('click', function () {
+      agLogoData = '';
+      const inp = document.getElementById('agLogoInput');
+      if (inp) inp.value = '';
+      document.getElementById('agLogoPreview').innerHTML = `<i class="ri-image-add-line"></i>`;
+      this.style.display = 'none';
+    });
+
+    document.getElementById('editAgLogoInput')?.addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        editAgLogoData = evt.target.result;
+        document.getElementById('editAgLogoPreview').innerHTML = `<img src="${editAgLogoData}" alt="Logo">`;
+        document.getElementById('removeEditAgLogoBtn').style.display = 'inline-flex';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('removeEditAgLogoBtn')?.addEventListener('click', function () {
+      editAgLogoData = '';
+      const inp = document.getElementById('editAgLogoInput');
+      if (inp) inp.value = '';
+      document.getElementById('editAgLogoPreview').innerHTML = `<i class="ri-image-add-line"></i>`;
+      this.style.display = 'none';
+    });
+
+    function render() {
+      let filtered = agents;
+      if (searchTerm) {
+        filtered = filtered.filter(a =>
+          a.name.toLowerCase().includes(searchTerm) ||
+          (a.bank || '').toLowerCase().includes(searchTerm) ||
+          (a.code || '').toLowerCase().includes(searchTerm) ||
+          (a.area || '').toLowerCase().includes(searchTerm)
+        );
+      }
+      if (statusFilter !== 'all') filtered = filtered.filter(a => a.status === statusFilter);
+
+      document.getElementById('agentCount').textContent = filtered.length;
+      const grid = document.getElementById('agentsGrid');
+
+      if (!filtered.length) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><i class="ri-team-line"></i><h3>No agents found</h3><p>Add a new agent to get started.</p></div>`;
+        return;
+      }
+
+      const colorClasses = ['av-1', 'av-2', 'av-3', 'av-4', 'av-5', 'av-6', 'av-7', 'av-8', 'av-9', 'av-10'];
+
+      grid.innerHTML = filtered.map((a, i) => {
+        const stats = DB.getAgentStats(a.id);
+        const color = colorClasses[i % colorClasses.length];
+        const initials = a.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+        const avatarHTML = a.logo
+          ? `<div class="agent-avatar has-logo" style="width:48px;height:48px;margin-bottom:0"><img src="${a.logo}" alt="${a.name}"></div>`
+          : `<div class="agent-avatar ${color}" style="width:48px;height:48px;font-size:16px;margin-bottom:0">${initials}</div>`;
+
+        return `
+        <div class="agent-card animate-in" style="animation-delay:${i * 0.05}s">
+          <div class="agent-name-row">
+            ${avatarHTML}
+            <div style="flex:1;min-width:0">
+              <div style="font-family:'Outfit',sans-serif;font-size:15.5px;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.name}</div>
+              <div class="agent-bank-name" title="${a.bank || 'No Bank Assigned'}">
+                <i class="ri-bank-line"></i> <span>${a.bank || 'No Bank Assigned'}</span>
+              </div>
+              <div class="flex gap-8" style="margin-top:6px;align-items:center;flex-wrap:wrap">
+                <span class="agent-code">${a.code || 'No Code'}</span>
+                <span class="badge ${a.status === 'active' ? 'badge-success' : 'badge-warning'}">${a.status}</span>
+                <a href="employees.html?agent=${a.id}" class="badge badge-purple" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px" title="View ${stats.employeeCount} Employees">
+                  <i class="ri-group-line"></i> ${stats.employeeCount} Staff
+                </a>
+              </div>
+            </div>
+          </div>
+          ${a.area ? `<div style="font-size:12px;color:var(--text-muted);margin-top:8px"><i class="ri-map-pin-line"></i> ${a.area}</div>` : ''}
+          ${a.phone ? `<div style="font-size:12px;color:var(--text-muted)"><i class="ri-phone-line"></i> ${a.phone}</div>` : ''}
+          ${a.openingDate ? `<div style="font-size:12px;color:var(--text-muted)"><i class="ri-calendar-line"></i> Opening: ${fmtDate(a.openingDate)}</div>` : ''}
+          <div class="agent-stat-row">
+            <div class="agent-stat">
+              <div class="val">${fmt(stats.totalBalance)}</div>
+              <div class="lbl">Balance</div>
+            </div>
+            <div class="agent-stat">
+              <div class="val" style="color:var(--success)">${fmt(stats.netCash)}</div>
+              <div class="lbl">Net Cash</div>
+            </div>
+            <div class="agent-stat">
+              <div class="val" style="color:var(--blue-bright)">${fmt(stats.totalCapital)}</div>
+              <div class="lbl">Capital</div>
+            </div>
+            <div class="agent-stat" style="border-color:rgba(168,85,247,0.3);background:rgba(168,85,247,0.06)">
+              <div class="val" style="color:#c084fc"><i class="ri-group-line"></i> ${stats.employeeCount}</div>
+              <div class="lbl">Employees</div>
+            </div>
+          </div>
+          <div class="agent-actions">
+            <a href="agent-details.html?id=${a.id}" class="btn btn-ghost btn-sm" style="flex:1"><i class="ri-external-link-line"></i> View</a>
+            ${canEdit ? `
+              <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); openEdit('${a.id}', event)" title="Edit Agent"><i class="ri-edit-line"></i></button>
+              <button class="btn btn-danger btn-sm" onclick="deleteAgent('${a.id}')" title="Delete Agent"><i class="ri-delete-bin-line"></i></button>
+            ` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function loadAgents() {
+      agents = Auth.getAccessibleAgents(DB.getAgents());
+      render();
+    }
+
+    // Search / filter
+    document.getElementById('searchInput').addEventListener('input', e => { searchTerm = e.target.value.toLowerCase(); render(); });
+    document.getElementById('statusFilter').addEventListener('change', e => { statusFilter = e.target.value; render(); });
+
+    // Add agent
+    const addBtn = document.getElementById('addAgentBtn');
+    if (addBtn) {
+      addBtn.addEventListener('click', () => {
+        if (!canEdit) {
+          Toast.error('You do not have permission to add agents.');
+          return;
+        }
+        agLogoData = '';
+        document.getElementById('addAgentForm')?.reset();
+        const dateInput = document.getElementById('agOpeningDate');
+        if (dateInput) dateInput.value = new Date().toISOString().slice(0, 10);
+        const preview = document.getElementById('agLogoPreview');
+        if (preview) preview.innerHTML = `<i class="ri-image-add-line"></i>`;
+        const removeBtn = document.getElementById('removeAgLogoBtn');
+        if (removeBtn) removeBtn.style.display = 'none';
+        Modal.open('addAgentModal');
+      });
+    }
+
+    // Form submit listener (in case user hits Enter inside any input)
+    document.getElementById('addAgentForm')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      document.getElementById('saveAgentBtn')?.click();
+    });
+
+    document.getElementById('saveAgentBtn')?.addEventListener('click', () => {
+      if (!canEdit) {
+        Toast.error('You do not have permission to add agents.');
+        return;
+      }
+      const name = document.getElementById('agName')?.value?.trim();
+      if (!name) { Toast.error('Agent name is required.'); return; }
+
+      const newAgent = DB.addAgent({
+        name,
+        bank: document.getElementById('agBank')?.value?.trim() || '',
+        code: document.getElementById('agCode')?.value?.trim() || '',
+        openingDate: document.getElementById('agOpeningDate')?.value || new Date().toISOString().slice(0, 10),
+        phone: document.getElementById('agPhone')?.value?.trim() || '',
+        email: document.getElementById('agEmail')?.value?.trim() || '',
+        area: document.getElementById('agArea')?.value?.trim() || '',
+        address: document.getElementById('agAddress')?.value?.trim() || '',
+        notes: document.getElementById('agNotes')?.value?.trim() || '',
+        logo: agLogoData || '',
+      });
+
+      // If user has restricted agent permissions, ensure newly created agent is accessible to them
+      if (user && !isAdmin && Array.isArray(user.agentPermissions) && !user.agentPermissions.includes('*')) {
+        user.agentPermissions.push(newAgent.id);
+        DB.updateUser(user.id, { agentPermissions: user.agentPermissions });
+      }
+
+      Modal.close('addAgentModal');
+      document.getElementById('addAgentForm')?.reset();
+      agLogoData = '';
+      const preview = document.getElementById('agLogoPreview');
+      if (preview) preview.innerHTML = `<i class="ri-image-add-line"></i>`;
+      const removeBtn = document.getElementById('removeAgLogoBtn');
+      if (removeBtn) removeBtn.style.display = 'none';
+      Toast.success('Agent added successfully!');
+      loadAgents();
+    });
+
+    function openEdit(id, evt) {
+      if (evt && typeof evt.stopPropagation === 'function') evt.stopPropagation();
+      const a = DB.getAgentById(id);
+      if (!a) {
+        Toast.error('Agent not found.');
+        return;
+      }
+
+      const setVal = (elId, val) => {
+        const el = document.getElementById(elId);
+        if (el) el.value = (val !== undefined && val !== null) ? val : '';
+      };
+
+      setVal('editAgId', a.id);
+      setVal('editAgName', a.name);
+      setVal('editAgBank', a.bank || '');
+      setVal('editAgCode', a.code || '');
+      setVal('editAgOpeningDate', a.openingDate ? a.openingDate.slice(0, 10) : (a.createdAt ? a.createdAt.slice(0, 10) : ''));
+      setVal('editAgPhone', a.phone || '');
+      setVal('editAgEmail', a.email || '');
+      setVal('editAgArea', a.area || '');
+      setVal('editAgAddress', a.address || '');
+      setVal('editAgNotes', a.notes || '');
+      setVal('editAgStatus', a.status || 'active');
+
+      editAgLogoData = a.logo || '';
+      const preview = document.getElementById('editAgLogoPreview');
+      const removeBtn = document.getElementById('removeEditAgLogoBtn');
+      if (editAgLogoData) {
+        if (preview) preview.innerHTML = `<img src="${editAgLogoData}" alt="Logo">`;
+        if (removeBtn) removeBtn.style.display = 'inline-flex';
+      } else {
+        if (preview) preview.innerHTML = `<i class="ri-image-add-line"></i>`;
+        if (removeBtn) removeBtn.style.display = 'none';
+      }
+
+      Modal.open('editAgentModal');
+    }
+    window.openEdit = openEdit;
+
+    document.getElementById('updateAgentBtn')?.addEventListener('click', () => {
+      const id = document.getElementById('editAgId').value;
+      const name = document.getElementById('editAgName').value.trim();
+      if (!name) { Toast.error('Agent name is required.'); return; }
+      DB.updateAgent(id, {
+        name,
+        bank: document.getElementById('editAgBank')?.value?.trim() || '',
+        code: document.getElementById('editAgCode')?.value?.trim() || '',
+        openingDate: document.getElementById('editAgOpeningDate')?.value || '',
+        phone: document.getElementById('editAgPhone')?.value?.trim() || '',
+        area: document.getElementById('editAgArea')?.value?.trim() || '',
+        email: document.getElementById('editAgEmail')?.value?.trim() || '',
+        address: document.getElementById('editAgAddress')?.value?.trim() || '',
+        notes: document.getElementById('editAgNotes')?.value?.trim() || '',
+        status: document.getElementById('editAgStatus')?.value || 'active',
+        logo: editAgLogoData,
+      });
+      Modal.close('editAgentModal');
+      Toast.success('Agent updated!');
+      loadAgents();
+    });
+
+    function deleteAgent(id) {
+      Confirm.show('Delete this agent? All associated data will be lost.', () => {
+        DB.deleteAgent(id);
+        Toast.success('Agent deleted.');
+        loadAgents();
+      });
+    }
+    window.deleteAgent = deleteAgent;
+
+    loadAgents();
+  </script>
+</body>
+
+</html>

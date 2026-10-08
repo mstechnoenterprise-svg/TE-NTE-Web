@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Management — TE & NTE Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Permission grid — per-page access + write */
+    .perm-grid-header {
+      display: grid;
+      grid-template-columns: 1fr 90px 100px;
+      gap: 6px;
+      padding: 8px 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .perm-row {
+      display: grid;
+      grid-template-columns: 1fr 90px 100px;
+      gap: 6px;
+      padding: 10px 12px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      align-items: center;
+      margin-bottom: 5px;
+      transition: border-color var(--t-fast);
+    }
+
+    .perm-row:hover {
+      border-color: var(--border-gold);
+    }
+
+    .perm-row.has-access {
+      border-color: rgba(245, 166, 35, 0.3);
+    }
+
+    .perm-row label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .perm-row label i {
+      color: var(--gold);
+      font-size: 15px;
+    }
+
+    .perm-row label:hover {
+      color: var(--text-primary);
+    }
+
+    .perm-check-cell {
+      display: flex;
+      justify-content: center;
+    }
+
+    .perm-check-cell input[type="checkbox"] {
+      accent-color: var(--gold);
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .perm-check-cell.entry-only input[type="checkbox"] {
+      accent-color: var(--blue-bright);
+    }
+
+    .perm-check-cell input[type="checkbox"]:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* Agent permission row */
+    .agent-perm-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      transition: border-color var(--t-fast);
+    }
+
+    .agent-perm-row:hover {
+      border-color: var(--border-gold);
+    }
+
+    .agent-perm-row.has-access {
+      border-color: var(--blue-bright);
+      background: rgba(79, 195, 247, 0.06);
+    }
+
+    .agent-perm-row input[type="checkbox"] {
+      accent-color: var(--blue-bright);
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .role-badge-admin {
+      background: rgba(139, 92, 246, 0.15);
+      color: #a78bfa;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .role-badge-subadmin {
+      background: rgba(79, 195, 247, 0.15);
+      color: var(--blue-bright);
+      border: 1px solid rgba(79, 195, 247, 0.3);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .role-badge-user {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .user-row-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--bg-primary);
+      flex-shrink: 0;
+    }
+
+    .user-info-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .actions-wrap {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .select-all-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    /* Admin control bar */
+    .admin-control-bar {
+      background: rgba(245, 166, 35, 0.08);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--r-md);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .link-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .link-status-badge.on {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .link-status-badge.off {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .link-status-badge .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-animated"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <div class="main-content" id="mainContent">
+      <header class="top-header" id="topHeader">
+        <button class="header-toggle" id="sidebarToggle"><i class="ri-menu-line"></i></button>
+        <div class="header-title">
+          <h1 id="headerTitle">User Management</h1>
+          <p id="headerSubtitle">Manage admins and general users</p>
+        </div>
+        <div class="header-actions">
+          <div class="header-btn header-btn-settings" id="settingsBtn" title="Settings"><i
+              class="ri-settings-3-line"></i><span class="header-btn-label">Settings</span></div>
+        </div>
+      </header>
+
+      <div class="page-wrapper">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb animate-in" id="pageBreadcrumb"></nav>
+
+
+        <div class="page-header animate-in">
+          <div class="page-header-left">
+            <h2><i class="ri-shield-user-line"></i> User Management</h2>
+            <p>Super Admin, Sub-Admin and General Users</p>
+          </div>
+          <div class="flex gap-8">
+            <button class="btn btn-outline" id="addSubAdminBtn" style="display:none"><i
+                class="ri-shield-check-line"></i> Add Sub-Admin</button>
+          </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="grid grid-4 mb-24 animate-in anim-delay-1">
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(139,92,246,0.15)"><i class="ri-vip-crown-line"
+                style="color:#a78bfa"></i></div>
+            <div class="kpi-value" id="kSuperAdmin">0</div>
+            <div class="kpi-label">Super Admin</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon blue"><i class="ri-shield-star-line"></i></div>
+            <div class="kpi-value" id="kSubAdmin">0</div>
+            <div class="kpi-label">Sub Admins</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon green"><i class="ri-checkbox-circle-line"></i></div>
+            <div class="kpi-value" id="kActive">0</div>
+            <div class="kpi-label">Active Users</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon"><i class="ri-time-line"></i></div>
+            <div class="kpi-value" id="kPending">0</div>
+            <div class="kpi-label">Pending Approval</div>
+          </div>
+        </div>
+
+        <!-- Tabs: Admins / General Users / New Job Applications -->
+        <div class="tabs mb-24 animate-in anim-delay-2" id="mainTabs">
+          <button class="tab-btn active" data-tab="admins"><i class="ri-shield-user-line"></i> Admins</button>
+          <button class="tab-btn" data-tab="users"><i class="ri-group-line"></i> General Users</button>
+          <button class="tab-btn" data-tab="applications" id="tabApplicationsBtn">
+            <i class="ri-file-user-line"></i> New Job Applications
+            <span class="badge badge-warning" id="appTabBadge"
+              style="margin-left:6px;font-size:11px;display:none">0</span>
+          </button>
+        </div>
+
+        <!-- ── ADMIN SECTION ── -->
+        <div id="adminsSection" class="animate-in anim-delay-3">
+          <div class="card">
+            <div class="table-wrapper" style="border:none;border-radius:0">
+              <table>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Position</th>
+                    <th>Status</th>
+                    <th>Last Login</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="adminsTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── GENERAL USERS SECTION ── -->
+        <div id="usersSection" style="display:none">
+          <div class="search-bar mb-16 animate-in">
+            <div class="search-input-wrap"><i class="ri-search-line"></i><input type="search" class="form-control"
+                id="searchInp" placeholder="Search users..."></div>
+            <select class="form-control" id="statusFilter" style="max-width:150px">
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="blocked">Blocked</option>
+            </select>
+          </div>
+          <div class="card animate-in anim-delay-1">
+            <div class="table-wrapper" style="border:none;border-radius:0">
+              <table>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Position</th>
+                    <th>Status</th>
+                    <th>Last Login</th>
+                    <th>Pages</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── NEW JOB APPLICATIONS SECTION ── -->
+        <div id="applicationsSection" style="display:none">
+          <!-- Admin: Link toggle + applications table -->
+          <!-- Toggle bar -->
+          <div class="admin-control-bar animate-in anim-delay-1">
+            <div class="flex gap-12 align-items-center" style="align-items:center">
+              <span style="font-size:14px;font-weight:600;color:var(--text-primary)"><i class="ri-links-line"
+                  style="color:var(--gold)"></i> Application Link Status:</span>
+              <span class="link-status-badge" id="linkBadge"><span class="dot"></span> Loading...</span>
+            </div>
+            <div class="flex gap-8" style="align-items:center">
+              <span style="font-size:13px;color:var(--text-muted)">Toggle:</span>
+              <label class="toggle">
+                <input type="checkbox" id="linkToggle">
+                <span class="toggle-slider"></span>
+              </label>
+
+            </div>
+          </div>
+
+          <!-- Applications table -->
+          <div class="card animate-in anim-delay-2 mb-24">
+            <div class="card-header">
+              <div class="card-title"><i class="ri-list-check"></i> Received Applications <span id="appCount"
+                  style="font-size:12px;color:var(--text-muted);font-weight:400"></span></div>
+              <button class="btn btn-ghost btn-sm" id="refreshApps" onclick="loadApplications()"><i
+                  class="ri-refresh-line"></i> Refresh</button>
+            </div>
+            <div class="table-wrapper" style="border:none;border-radius:0">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Position</th>
+                    <th>Applied</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="appsTable">
+                  <tr>
+                    <td colspan="6" class="text-center text-muted" style="padding:30px">Loading...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Selected for Interview Table -->
+          <div class="card animate-in anim-delay-3 mb-24">
+            <div class="card-header">
+              <div class="card-title" style="color:var(--gold)">
+                <i class="ri-user-voice-line"></i> Selected for Interview<span id="interviewCount"
+                  style="font-size:12px;color:var(--text-muted);font-weight:400"></span>
+              </div>
+              <button class="btn btn-ghost btn-sm" id="refreshInterviewApps" onclick="loadApplications()"><i
+                  class="ri-refresh-line"></i> Refresh</button>
+            </div>
+            <div class="table-wrapper" style="border:none;border-radius:0">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Candidate</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Position</th>
+                    <th>Selected Date</th>
+                    <th>Interview Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="interviewTable">
+                  <tr>
+                    <td colspan="6" class="text-center text-muted" style="padding:30px">No candidates selected for
+                      interview yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Public: Application Form / Closed message -->
+        <div id="publicSection" style="display:none">
+          <div class="apply-card animate-in">
+            <div id="formArea"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Job Application Details Modal -->
+  <div class="modal-overlay" id="appDetailModal">
+    <div class="modal" style="max-width:700px;width:95%;max-height:88vh;display:flex;flex-direction:column;">
+      <div class="modal-header">
+        <div class="modal-title"><i class="ri-file-user-line" style="color:var(--gold)"></i> Job Application Details
+        </div>
+        <div class="modal-close"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body" id="appDetailBody" style="overflow-y:auto;padding:20px;flex:1;"></div>
+      <div class="modal-footer" id="appDetailFooter"></div>
+    </div>
+  </div>
+
+  <!-- Add Sub-Admin Modal -->
+  <div class="modal-overlay" id="addSubAdminModal">
+    <div class="modal" style="max-width:500px">
+      <div class="modal-header">
+        <div class="modal-title"><i class="ri-shield-check-line"></i> Add Sub-Admin</div>
+        <div class="modal-close"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Full Name *</label><input type="text" id="saName"
+              class="form-control"></div>
+          <div class="form-group"><label class="form-label">Email *</label><input type="email" id="saEmail"
+              class="form-control"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Password *</label><input type="password" id="saPassword"
+              class="form-control" placeholder="Min. 6 chars"></div>
+          <div class="form-group"><label class="form-label">Position</label><input type="text" id="saPosition"
+              class="form-control" placeholder="e.g. Manager"></div>
+        </div>
+        <div
+          style="padding:10px 14px;background:rgba(79,195,247,0.06);border:1px solid rgba(79,195,247,0.2);border-radius:var(--r-sm);font-size:12px;color:var(--text-muted)">
+          <i class="ri-information-line" style="color:var(--blue-bright)"></i>
+          Sub-Admin gets full access to all pages and data — same as Super Admin, but can be deleted by Super Admin.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost modal-close">Cancel</button>
+        <button class="btn btn-primary" id="saveSABtn"><i class="ri-save-line"></i> Create Sub-Admin</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Permissions Modal (General User) -->
+  <div class="modal-overlay" id="permModal">
+    <div class="modal" style="max-width:640px">
+      <div class="modal-header">
+        <div class="modal-title"><i class="ri-settings-3-line"></i> Manage Access Permissions</div>
+        <div class="modal-close"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body" style="max-height:70vh;overflow-y:auto">
+        <div id="permUserInfo" class="mb-16"
+          style="padding:12px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm)">
+        </div>
+
+        <!-- ── Section 1: Menu Access ── -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div
+            style="font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.6px;flex-shrink:0">
+            <i class="ri-layout-grid-line"></i> Menu Access
+          </div>
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+        </div>
+
+        <!-- Column headers -->
+        <div class="perm-grid-header">
+          <div>Page / Feature</div>
+          <div style="text-align:center"><i class="ri-eye-line" style="color:var(--gold)"></i> Menu Access</div>
+          <div style="text-align:center"><i class="ri-database-2-line" style="color:var(--blue-bright)"></i> Data Entry
+          </div>
+        </div>
+
+        <!-- Check all / uncheck rows -->
+        <div class="select-all-row">
+          <button class="btn btn-ghost btn-sm" id="checkAllAccess"><i class="ri-checkbox-multiple-line"></i> All
+            Access</button>
+          <button class="btn btn-ghost btn-sm" id="checkAllWrite"><i class="ri-database-2-line"></i> All Data
+            Entry</button>
+          <button class="btn btn-ghost btn-sm" id="uncheckAll"><i class="ri-close-line"></i> Clear All</button>
+        </div>
+
+        <div id="permGrid"></div>
+
+        <!-- ── Section 2: Agent Access ── -->
+        <div style="display:flex;align-items:center;gap:10px;margin:20px 0 12px">
+          <div
+            style="font-size:12px;font-weight:700;color:var(--blue-bright);text-transform:uppercase;letter-spacing:0.6px;flex-shrink:0">
+            <i class="ri-team-line"></i> Agent Access
+          </div>
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+          <div class="flex gap-6">
+            <button class="btn btn-ghost btn-sm" id="checkAllAgents"><i class="ri-checkbox-multiple-line"></i>
+              All</button>
+            <button class="btn btn-ghost btn-sm" id="uncheckAllAgents"><i class="ri-close-line"></i> None</button>
+          </div>
+        </div>
+
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">
+          <i class="ri-information-line" style="color:var(--gold)"></i>
+          Select which agents this user can view and interact with.
+        </div>
+
+        <div id="agentPermGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
+
+        <input type="hidden" id="permUserId">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost modal-close">Cancel</button>
+        <button class="btn btn-primary" id="savePermsBtn"><i class="ri-save-line"></i> Save Permissions</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity Modal -->
+  <div class="modal-overlay" id="actModal">
+    <div class="modal" style="max-width:480px">
+      <div class="modal-header">
+        <div class="modal-title" id="actTitle"><i class="ri-history-line"></i> Activity Log</div>
+        <div class="modal-close"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body" id="actBody" style="max-height:380px;overflow-y:auto"></div>
+      <div class="modal-footer"><button class="btn btn-ghost modal-close">Close</button></div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const user = App.init('user-management', 'User Management', 'Admins, Sub-Admins and General Users');
+    UIEnhancements.setBreadcrumb('pageBreadcrumb', [{ label: 'User Management' }]);
+    if (!user) throw new Error();
+    if (!App.requireAdmin()) throw new Error();
+
+    const isSuperAdmin = user.role === 'admin';
+    const COLORS = ['av-1', 'av-2', 'av-3', 'av-4', 'av-5', 'av-6'];
+
+    // Show Add Sub-Admin only for Super Admin
+    if (isSuperAdmin) document.getElementById('addSubAdminBtn').style.display = '';
+
+    // ── Tabs ──────────────────────────────────────────────────
+    let activeTab = 'admins';
+    const headerSubtitleEl = document.getElementById('headerSubtitle');
+    document.querySelectorAll('#mainTabs .tab-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#mainTabs .tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        activeTab = this.dataset.tab;
+        document.getElementById('adminsSection').style.display = activeTab === 'admins' ? '' : 'none';
+        document.getElementById('usersSection').style.display = activeTab === 'users' ? '' : 'none';
+        const appsSec = document.getElementById('applicationsSection');
+        if (appsSec) appsSec.style.display = activeTab === 'applications' ? '' : 'none';
+
+        if (activeTab === 'applications') {
+          if (headerSubtitleEl) headerSubtitleEl.textContent = 'New Employee application management';
+          loadApplications();
+        } else if (activeTab === 'users') {
+          if (headerSubtitleEl) headerSubtitleEl.textContent = 'Manage general users and permissions';
+        } else {
+          if (headerSubtitleEl) headerSubtitleEl.textContent = 'Manage admins and general users';
+        }
+      });
+    });
+
+    // ── Link toggle handling ──────────────────────────────────
+    const linkToggle = document.getElementById('linkToggle');
+    const linkBadge = document.getElementById('linkBadge');
+
+    function updateLinkUI(active) {
+      if (!linkToggle || !linkBadge) return;
+      linkToggle.checked = !!active;
+      linkBadge.className = `link-status-badge ${active ? 'on' : 'off'}`;
+      linkBadge.innerHTML = `<span class="dot"></span> ${active ? 'OPEN — Applications Accepted' : 'CLOSED — Not Accepting'}`;
+    }
+
+    const currentSettings = DB.getSettings();
+    updateLinkUI(currentSettings.applicationLinkActive);
+
+    if (linkToggle) {
+      linkToggle.addEventListener('change', function () {
+        DB.updateSetting('applicationLinkActive', this.checked);
+        updateLinkUI(this.checked);
+        Toast.success(this.checked ? 'Application link is now OPEN.' : 'Application link is now CLOSED.');
+      });
+    }
+
+    document.getElementById('refreshApps')?.addEventListener('click', () => {
+      loadApplications();
+      Toast.info('Applications list refreshed.');
+    });
+
+    document.getElementById('refreshInterviewApps')?.addEventListener('click', () => {
+      loadApplications();
+      Toast.info('Interview candidates refreshed.');
+    });
+
+    // ── Load ──────────────────────────────────────────────────
+    function load() {
+      const allUsers = DB.getUsers();
+      const superAdmins = allUsers.filter(u => u.role === 'admin');
+      const subAdmins = allUsers.filter(u => u.role === 'sub-admin');
+      const generalUsers = allUsers.filter(u => u.role === 'user');
+      const pendingApplicants = allUsers.filter(u => u.role === 'applicant' && (u.status === 'pending' || !u.status));
+      const interviewApplicants = allUsers.filter(u => u.role === 'applicant' && u.status === 'interview');
+
+      const active = generalUsers.filter(u => u.status === 'active').length;
+      const pending = allUsers.filter(u => u.status === 'pending' || u.status === 'interview').length;
+
+      document.getElementById('kSuperAdmin').textContent = superAdmins.length;
+      document.getElementById('kSubAdmin').textContent = subAdmins.length;
+      document.getElementById('kActive').textContent = active;
+      document.getElementById('kPending').textContent = pending;
+
+      // Update badge on Applications tab
+      const appTabBadge = document.getElementById('appTabBadge');
+      if (appTabBadge) {
+        const total = pendingApplicants.length + interviewApplicants.length;
+        if (total > 0) {
+          appTabBadge.textContent = total;
+          appTabBadge.style.display = 'inline-block';
+        } else {
+          appTabBadge.style.display = 'none';
+        }
+      }
+
+      renderAdmins([...superAdmins, ...subAdmins]);
+      renderUsers(allUsers.filter(u => u.role === 'user'));
+      loadApplications();
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // ── Applications Management ──────────────────────────────
+    function loadApplications() {
+      const allUsers = DB.getUsers();
+      const pendingApps = allUsers.filter(u => u.role === 'applicant' && (u.status === 'pending' || !u.status));
+      const interviewApps = allUsers.filter(u => u.role === 'applicant' && u.status === 'interview');
+
+      const appCountEl = document.getElementById('appCount');
+      if (appCountEl) appCountEl.textContent = `(${pendingApps.length})`;
+
+      const interviewCountEl = document.getElementById('interviewCount');
+      if (interviewCountEl) interviewCountEl.textContent = `(${interviewApps.length})`;
+
+      // 1. Render Received Applications Table (Pending)
+      const tbody = document.getElementById('appsTable');
+      if (tbody) {
+        if (!pendingApps.length) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted" style="padding:30px">No new applications waiting.</td></tr>`;
+        } else {
+          tbody.innerHTML = pendingApps.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).map(a => `
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:36px;height:36px;border-radius:50%;overflow:hidden;border:1px solid var(--border-gold);background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  ${a.photo ? `<img src="${a.photo}" alt="${escapeHtml(a.name)}" style="width:100%;height:100%;object-fit:cover;">` : `<i class="ri-user-smile-line" style="color:var(--text-muted);font-size:18px"></i>`}
+                </div>
+                <div>
+                  <div style="font-weight:600;color:var(--text-primary);font-size:13px">${escapeHtml(a.name)}</div>
+                  ${a.nid ? `<div style="font-size:11px;color:var(--text-muted)">NID: ${escapeHtml(a.nid)}</div>` : ''}
+                </div>
+              </div>
+            </td>
+            <td>${escapeHtml(a.email)}</td>
+            <td>${escapeHtml(a.mobile || a.phone || '—')}</td>
+            <td>
+              <span class="badge badge-info" style="font-size:11px">${escapeHtml(a.position || a.desiredPosition || '—')}</span>
+            </td>
+            <td>${fmtDate(a.createdAt)}</td>
+            <td>
+              <div class="actions-wrap">
+                <button class="btn btn-outline btn-sm" onclick="viewAppModal('${a.id}')" title="View Full Details">
+                  <i class="ri-eye-line"></i> View
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="callForInterview('${a.id}')" title="Approve for Interview">
+                  <i class="ri-user-voice-line"></i> Approve
+                </button>
+                <button class="btn btn-danger btn-sm btn-icon" onclick="rejectAppFromTable('${a.id}')" title="Reject / Delete">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </div>
+            </td>
+          </tr>`).join('');
+        }
+      }
+
+      // 2. Render Selected for Interview Table
+      const itbody = document.getElementById('interviewTable');
+      if (itbody) {
+        if (!interviewApps.length) {
+          itbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted" style="padding:30px">No candidates selected for interview yet.</td></tr>`;
+        } else {
+          itbody.innerHTML = interviewApps.sort((a, b) => new Date(b.interviewCallDate || b.createdAt || 0) - new Date(a.interviewCallDate || a.createdAt || 0)).map(a => `
+          <tr style="background:rgba(245,166,35,0.02)">
+            <td>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:36px;height:36px;border-radius:50%;overflow:hidden;border:1px solid var(--border-gold);background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  ${a.photo ? `<img src="${a.photo}" alt="${escapeHtml(a.name)}" style="width:100%;height:100%;object-fit:cover;">` : `<i class="ri-user-smile-line" style="color:var(--text-muted);font-size:18px"></i>`}
+                </div>
+                <div>
+                  <div style="font-weight:600;color:var(--text-primary);font-size:13px">${escapeHtml(a.name)}</div>
+                  <span class="badge badge-warning" style="font-size:10px;padding:1px 6px"><i class="ri-user-voice-line"></i> Interview</span>
+                </div>
+              </div>
+            </td>
+            <td>${escapeHtml(a.email)}</td>
+            <td>${escapeHtml(a.mobile || a.phone || '—')}</td>
+            <td>
+              <span class="badge badge-info" style="font-size:11px">${escapeHtml(a.position || a.desiredPosition || '—')}</span>
+            </td>
+            <td>${fmtDate(a.interviewCallDate || a.createdAt)}</td>
+            <td>
+              <div class="actions-wrap">
+                <button class="btn btn-outline btn-sm" onclick="viewAppModal('${a.id}')" title="View Full Details">
+                  <i class="ri-eye-line"></i> View
+                </button>
+                <button class="btn btn-success btn-sm" onclick="finalApproveEmployee('${a.id}')" title="Final Approve as Employee">
+                  <i class="ri-user-follow-line"></i> Final Hire
+                </button>
+                <button class="btn btn-danger btn-sm btn-icon" onclick="rejectAppFromTable('${a.id}')" title="Drop Candidate">
+                  <i class="ri-close-circle-line"></i>
+                </button>
+              </div>
+            </td>
+          </tr>`).join('');
+        }
+      }
+    }
+
+    window.viewAppModal = function (id) {
+      const a = DB.getUserById(id);
+      if (!a) return;
+      const isPending = a.status === 'pending' || !a.status;
+      const isInterview = a.status === 'interview';
+
+      let statusBadgeHtml = '';
+      if (isPending) {
+        statusBadgeHtml = `<span class="badge badge-warning">⏳ Pending Review</span>`;
+      } else if (isInterview) {
+        statusBadgeHtml = `<span class="badge badge-info" style="background:rgba(79,195,247,0.15);color:var(--blue-bright);border:1px solid rgba(79,195,247,0.3)"><i class="ri-user-voice-line"></i> Selected for Interview</span>`;
+      } else {
+        statusBadgeHtml = `<span class="badge badge-success">✓ Approved Employee</span>`;
+      }
+
+      document.getElementById('appDetailBody').innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;padding:12px 16px;background:rgba(245,166,35,0.06);border:1px solid var(--border-gold);border-radius:var(--r-md);">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:54px;height:54px;border-radius:var(--r-sm);overflow:hidden;border:2px solid var(--border-gold);background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              ${a.photo ? `<img src="${a.photo}" alt="${escapeHtml(a.name)}" style="width:100%;height:100%;object-fit:cover;">` : `<i class="ri-user-smile-line" style="font-size:28px;color:var(--text-muted)"></i>`}
+            </div>
+            <div>
+              <div style="font-size:16px;font-weight:700;color:var(--text-primary)">${escapeHtml(a.name)}</div>
+              <div style="font-size:12px;color:var(--gold);font-weight:600">${escapeHtml(a.position || a.desiredPosition || 'Applicant')}</div>
+            </div>
+          </div>
+          <div>
+            ${statusBadgeHtml}
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+          <div style="padding:10px 12px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm)">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Father's Name</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-top:2px">${escapeHtml(a.fatherName || '—')}</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm)">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Mother's Name</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-top:2px">${escapeHtml(a.motherName || '—')}</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm)">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Spouse</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-top:2px">${escapeHtml(a.spouse || '—')}</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm)">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">NID No</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-top:2px">${escapeHtml(a.nid || '—')}</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm)">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Mobile</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-top:2px">${escapeHtml(a.mobile || a.phone || '—')}</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm)">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Email Address</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-top:2px">${escapeHtml(a.email || '—')}</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm)">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Desired Position</div>
+            <div style="font-size:13px;font-weight:600;color:var(--gold);margin-top:2px">${escapeHtml(a.position || a.desiredPosition || '—')}</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm)">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Last Education</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-top:2px">${escapeHtml(a.lastEducation || '—')}</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:12px;padding:10px 12px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm)">
+          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Address</div>
+          <div style="font-size:13px;color:var(--text-primary);margin-top:3px">${escapeHtml(a.address || '—')}</div>
+        </div>
+
+        <div style="margin-bottom:12px;padding:10px 12px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm)">
+          <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Last Job Info / Experience</div>
+          <div style="font-size:13px;color:var(--text-primary);margin-top:3px;white-space:pre-line">${escapeHtml(a.lastJobInfo || a.message || '—')}</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <div style="padding:10px 12px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm)">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">Driving Licence</div>
+            <div style="font-size:13px;font-weight:600;margin-top:3px;color:${a.drivingLicence === 'Yes' || a.drivingLicence === true ? 'var(--success)' : 'var(--text-muted)'}">
+              <i class="${a.drivingLicence === 'Yes' || a.drivingLicence === true ? 'ri-checkbox-circle-line' : 'ri-close-circle-line'}"></i>
+              ${a.drivingLicence === 'Yes' || a.drivingLicence === true ? 'Yes (Driving Licence আছে)' : 'No (নেই)'}
+            </div>
+          </div>
+          <div style="padding:10px 12px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm)">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;font-weight:600">${isInterview ? 'Shortlisted Date' : 'Applied Date'}</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-top:3px">${fmtDateTime(a.interviewCallDate || a.createdAt)}</div>
+          </div>
+        </div>
+
+        <div style="padding:12px 14px;background:rgba(255,255,255,0.03);border:1px dashed var(--border-gold);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <i class="ri-file-text-line" style="font-size:24px;color:var(--gold)"></i>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-primary)">Attached CV</div>
+              <div style="font-size:11px;color:var(--text-muted)">${escapeHtml(a.cvName || 'No CV file attached')}</div>
+            </div>
+          </div>
+          ${a.cvData ? `
+            <a href="${a.cvData}" download="${escapeHtml(a.cvName || 'applicant_cv')}" class="btn btn-outline btn-sm">
+              <i class="ri-download-2-line"></i> Download CV
+            </a>
+          ` : '<span style="font-size:12px;color:var(--text-muted)">Not provided</span>'}
+        </div>
+      `;
+
+      document.getElementById('appDetailFooter').innerHTML = `
+        <button class="btn btn-ghost modal-close">Close</button>
+        <button class="btn btn-danger btn-sm" onclick="rejectAppFromTable('${a.id}');Modal.close('appDetailModal');">
+          <i class="ri-delete-bin-line"></i> ${isInterview ? 'Drop Candidate' : 'Reject & Delete'}
+        </button>
+        ${isPending ? `
+        <button class="btn btn-primary" onclick="callForInterview('${a.id}');Modal.close('appDetailModal');">
+          <i class="ri-user-voice-line"></i> Approve for Interview
+        </button>` : ''}
+        ${isInterview ? `
+        <button class="btn btn-success" onclick="finalApproveEmployee('${a.id}');Modal.close('appDetailModal');">
+          <i class="ri-user-follow-line"></i> Final Approve as Employee
+        </button>` : ''}
+      `;
+
+      Modal.open('appDetailModal');
+    };
+
+    window.callForInterview = function (id) {
+      const a = DB.getUserById(id);
+      if (!a) return;
+      DB.updateUser(id, {
+        status: 'interview',
+        interviewCallDate: DB.now()
+      });
+      Toast.success(`${a.name} কে ইন্টারভিউ এর জন্য অনুমোদন করা হয়েছে এবং নিচের ইন্টারভিউ তালিকায় যুক্ত করা হয়েছে!`);
+      load();
+    };
+
+    window.finalApproveEmployee = function (id) {
+      const a = DB.getUserById(id);
+      if (!a) return;
+      Confirm.show(`"${a.name}" কে কি নতুন কর্মচারী হিসেবে চূড়ান্ত নিয়োগ ও সক্রিয় ইউজার অনুমোদন করতে চান?`, () => {
+        DB.updateUser(id, {
+          role: 'user',
+          status: 'active',
+          phone: a.mobile || a.phone || '',
+          position: a.position || a.desiredPosition || '',
+          photo: a.photo || '',
+          menuPermissions: [],
+          writePermissions: []
+        });
+        Toast.success(`${a.name} কে সফলভাবে কর্মচারী হিসেবে নিয়োগ দেওয়া হয়েছে!`);
+        load();
+      });
+    };
+
+    window.rejectAppFromTable = function (id) {
+      Confirm.show('এই আবেদনটি কি স্থায়ীভাবে মুছে ফেলতে চান?', () => {
+        DB.deleteUser(id);
+        Toast.success('Application removed.');
+        load();
+      });
+    };
+
+    // ── Render Admins table ───────────────────────────────────
+    function renderAdmins(admins) {
+      const tbody = document.getElementById('adminsTable');
+      if (!admins.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted" style="padding:30px">No admin accounts</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = admins.map((u, i) => {
+        const initials = u.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        const isSelf = u.id === user.id;
+        return `
+        <tr>
+          <td>
+            <div class="user-info-cell">
+              <div class="user-row-avatar ${COLORS[i % COLORS.length]}">${initials}</div>
+              <div>
+                <div style="font-weight:600;color:var(--text-primary);font-size:13px">${u.name}${isSelf ? ' <span class="badge badge-gold" style="font-size:10px">You</span>' : ''}</div>
+                <div style="font-size:11px;color:var(--text-muted)">${u.email}</div>
+              </div>
+            </div>
+          </td>
+          <td>${u.position || '—'}</td>
+          <td><span class="badge badge-success">Active</span></td>
+          <td>${fmtDateTime(u.lastLogin)}</td>
+          <td>
+            <span class="${u.role === 'admin' ? 'role-badge-admin' : 'role-badge-subadmin'}">
+              ${u.role === 'admin' ? '👑 Super Admin' : '🛡 Sub-Admin'}
+            </span>
+          </td>
+          <td>
+            <div class="actions-wrap">
+              <button class="btn btn-ghost btn-sm" onclick="viewActivity('${u.id}','${u.name}')"><i class="ri-history-line"></i></button>
+              ${isSuperAdmin && u.role === 'sub-admin' && !isSelf ? `<button class="btn btn-danger btn-sm btn-icon" onclick="deleteSubAdmin('${u.id}','${u.name}')"><i class="ri-delete-bin-line"></i></button>` : ''}
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ── Render General Users table ────────────────────────────
+    function renderUsers(users) {
+      const search = document.getElementById('searchInp').value.toLowerCase();
+      const status = document.getElementById('statusFilter').value;
+
+      let filtered = users;
+      if (search) filtered = filtered.filter(u => u.name.toLowerCase().includes(search) || u.email.toLowerCase().includes(search) || (u.position || '').toLowerCase().includes(search) || (u.employeeId || '').toLowerCase().includes(search));
+      if (status) filtered = filtered.filter(u => u.status === status);
+
+      const tbody = document.getElementById('usersTable');
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted" style="padding:30px">No users found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map((u, i) => {
+        const initials = u.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        const statusBadge = { active: 'badge-success', pending: 'badge-warning', blocked: 'badge-danger' }[u.status] || 'badge-info';
+        const perms = u.menuPermissions || [];
+        const permCount = perms.includes('*') ? 'All' : perms.length;
+        const isApplicant = u.role === 'applicant';
+        return `
+        <tr>
+          <td>
+            <div class="user-info-cell">
+              <div class="user-row-avatar ${COLORS[i % COLORS.length]}">
+                ${u.photo ? `<img src="${u.photo}" alt="${u.name}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : initials}
+              </div>
+              <div>
+                <div style="font-weight:600;color:var(--text-primary);font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                  ${u.name}
+                  ${u.employeeId ? `<span class="badge badge-info" style="font-size:10px;padding:1px 6px">ID: ${u.employeeId}</span>` : ''}
+                </div>
+                <div style="font-size:11px;color:var(--text-muted)">${u.email}</div>
+                ${u.outletName ? `<div style="font-size:10px;color:var(--gold)">${u.outletName}${u.outletCode ? ' (' + u.outletCode + ')' : ''}</div>` : ''}
+              </div>
+            </div>
+          </td>
+          <td>${u.position || u.designation || '—'}</td>
+          <td>
+            <span class="badge ${statusBadge}">${u.status}</span>
+            ${isApplicant ? '<span class="badge badge-info" style="margin-left:4px;font-size:10px">Applicant</span>' : ''}
+          </td>
+          <td>${fmtDateTime(u.lastLogin)}</td>
+          <td>
+            <span class="badge badge-gold" title="${permCount} pages accessible">
+              <i class="ri-shield-check-line"></i> ${permCount} pages
+            </span>
+          </td>
+          <td>
+            <div class="actions-wrap">
+              ${u.status === 'pending' || isApplicant ? `<button class="btn btn-success btn-sm" onclick="changeStatus('${u.id}','active')"><i class="ri-checkbox-circle-line"></i> Approve</button>` : ''}
+              ${u.status === 'active' && !isApplicant ? `<button class="btn btn-danger btn-sm" onclick="changeStatus('${u.id}','blocked')"><i class="ri-lock-line"></i> Block</button>` : ''}
+              ${u.status === 'blocked' ? `<button class="btn btn-success btn-sm" onclick="changeStatus('${u.id}','active')"><i class="ri-lock-unlock-line"></i> Unblock</button>` : ''}
+              <button class="btn btn-outline btn-sm" onclick="openPerms('${u.id}')"><i class="ri-settings-3-line"></i> Perms</button>
+              <button class="btn btn-ghost btn-sm btn-icon" onclick="viewActivity('${u.id}','${u.name}')"><i class="ri-history-line"></i></button>
+              <button class="btn btn-danger btn-sm btn-icon" onclick="deleteUser('${u.id}')"><i class="ri-delete-bin-line"></i></button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ── Permissions Modal ─────────────────────────────────────
+    function openPerms(id) {
+      const u = DB.getUserById(id);
+      if (!u) return;
+      document.getElementById('permUserId').value = id;
+      document.getElementById('permUserInfo').innerHTML = `
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary)">${u.name}</div>
+        <div style="font-size:11px;color:var(--text-muted)">${u.email}${u.position ? ' &bull; ' + u.position : ''}${u.outletName ? ' &bull; ' + u.outletName : ''}</div>`;
+
+      const menuPerms = u.menuPermissions || [];
+      const writePerms = u.writePermissions || [];
+      const agentPerms = u.agentPermissions || []; // [] = no agents, ['*'] = all agents
+
+      // ── Menu permissions grid ──
+      document.getElementById('permGrid').innerHTML = Auth.ALL_PAGES.map(p => {
+        const hasAccess = menuPerms.includes('*') || menuPerms.includes(p.id);
+        const hasWrite = writePerms.includes('*') || writePerms.includes(p.id);
+        return `
+        <div class="perm-row ${hasAccess ? 'has-access' : ''}" id="permrow-${p.id}">
+          <label>
+            <i class="${p.icon}"></i>
+            ${p.label}
+          </label>
+          <div class="perm-check-cell">
+            <input type="checkbox" name="access" value="${p.id}" id="acc-${p.id}" ${hasAccess ? 'checked' : ''}
+              onchange="onAccessChange('${p.id}', this.checked)">
+          </div>
+          <div class="perm-check-cell entry-only">
+            <input type="checkbox" name="write" value="${p.id}" id="wrt-${p.id}" ${hasWrite ? 'checked' : ''} ${!hasAccess ? 'disabled' : ''}>
+          </div>
+        </div>`;
+      }).join('');
+
+      // ── Agent permissions grid ──
+      const agents = DB.getAgents();
+      const agentGrid = document.getElementById('agentPermGrid');
+
+      if (!agents.length) {
+        agentGrid.innerHTML = `<div style="color:var(--text-muted);font-size:13px;grid-column:1/-1;padding:12px;text-align:center"><i class="ri-information-line"></i> No agents in the system yet.</div>`;
+      } else {
+        agentGrid.innerHTML = agents.map((a, i) => {
+          const hasAgent = agentPerms.includes('*') || agentPerms.includes(a.id);
+          const initials = a.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+          const avColors = ['av-1', 'av-2', 'av-3', 'av-4', 'av-5', 'av-6'];
+          return `
+          <label class="agent-perm-row ${hasAgent ? 'has-access' : ''}" id="agentrow-${a.id}">
+            <input type="checkbox" name="agent" value="${a.id}" ${hasAgent ? 'checked' : ''}
+              onchange="document.getElementById('agentrow-${a.id}').classList.toggle('has-access', this.checked)">
+            <div class="user-row-avatar ${avColors[i % avColors.length]}" style="width:32px;height:32px;font-size:12px;font-weight:700">${initials}</div>
+            <div style="min-width:0">
+              <div style="font-size:13px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.name}</div>
+              <div style="font-size:11px;color:var(--text-muted)">${a.code ? a.code + ' &bull; ' : ''}${a.area || ''}</div>
+            </div>
+          </label>`;
+        }).join('');
+      }
+
+      Modal.open('permModal');
+    }
+
+    // When access checkbox changes, enable/disable write checkbox
+    window.onAccessChange = function (pageId, checked) {
+      const writeBox = document.getElementById('wrt-' + pageId);
+      const row = document.getElementById('permrow-' + pageId);
+      if (writeBox) {
+        writeBox.disabled = !checked;
+        if (!checked) writeBox.checked = false;
+      }
+      if (row) row.classList.toggle('has-access', checked);
+    };
+
+    document.getElementById('checkAllAccess').addEventListener('click', () => {
+      document.querySelectorAll('#permGrid input[name="access"]').forEach(cb => {
+        cb.checked = true; onAccessChange(cb.value, true);
+      });
+    });
+
+    document.getElementById('checkAllWrite').addEventListener('click', () => {
+      document.querySelectorAll('#permGrid input[name="access"]').forEach(cb => {
+        if (!cb.checked) { cb.checked = true; onAccessChange(cb.value, true); }
+      });
+      document.querySelectorAll('#permGrid input[name="write"]').forEach(cb => {
+        if (!cb.disabled) cb.checked = true;
+      });
+    });
+
+    document.getElementById('uncheckAll').addEventListener('click', () => {
+      document.querySelectorAll('#permGrid input[name="access"]').forEach(cb => {
+        cb.checked = false; onAccessChange(cb.value, false);
+      });
+    });
+
+    document.getElementById('checkAllAgents').addEventListener('click', () => {
+      document.querySelectorAll('#agentPermGrid input[name="agent"]').forEach(cb => {
+        cb.checked = true;
+        document.getElementById('agentrow-' + cb.value)?.classList.add('has-access');
+      });
+    });
+
+    document.getElementById('uncheckAllAgents').addEventListener('click', () => {
+      document.querySelectorAll('#agentPermGrid input[name="agent"]').forEach(cb => {
+        cb.checked = false;
+        document.getElementById('agentrow-' + cb.value)?.classList.remove('has-access');
+      });
+    });
+
+    document.getElementById('savePermsBtn').addEventListener('click', () => {
+      const id = document.getElementById('permUserId').value;
+      const menuPerms = [...document.querySelectorAll('#permGrid input[name="access"]:checked')].map(cb => cb.value);
+      const writePerms = [...document.querySelectorAll('#permGrid input[name="write"]:checked')].map(cb => cb.value);
+      const agentPerms = [...document.querySelectorAll('#agentPermGrid input[name="agent"]:checked')].map(cb => cb.value);
+      DB.updateUser(id, {
+        menuPermissions: menuPerms,
+        writePermissions: writePerms,
+        agentPermissions: agentPerms,
+        canWrite: writePerms.length > 0,
+      });
+      Modal.close('permModal');
+      Toast.success('Permissions saved!');
+      load();
+    });
+
+    // ── Actions ───────────────────────────────────────────────
+    function changeStatus(id, status) {
+      const u = DB.getUserById(id);
+      // Approve applicant → promote to user
+      if ((u?.role === 'applicant' || u?.status === 'pending') && status === 'active') {
+        DB.updateUser(id, { status: 'active', role: 'user', menuPermissions: [], writePermissions: [] });
+        Toast.success(`${u.name} approved and activated!`);
+      } else {
+        DB.updateUser(id, { status });
+        Toast.success(`User ${status === 'active' ? 'unblocked' : 'blocked'}.`);
+      }
+      load();
+    }
+
+    function deleteUser(id) {
+      Confirm.show('Delete this user permanently?', () => {
+        DB.deleteUser(id);
+        Toast.success('User deleted.');
+        load();
+      });
+    }
+
+    function deleteSubAdmin(id, name) {
+      Confirm.show(`Delete Sub-Admin "${name}"? They will lose all access.`, () => {
+        DB.deleteUser(id);
+        Toast.success('Sub-Admin deleted.');
+        load();
+      });
+    }
+
+    function viewActivity(id, name) {
+      const logs = DB.getActivityLog(id).slice(-25).reverse();
+      document.getElementById('actTitle').innerHTML = `<i class="ri-history-line"></i> Activity — ${name}`;
+      document.getElementById('actBody').innerHTML = logs.length
+        ? logs.map(l => `<div class="info-row"><span class="label"><i class="ri-time-line"></i> ${fmtDateTime(l.timestamp)}</span><span class="value">${l.action}${l.details ? ' — ' + l.details : ''}</span></div>`).join('')
+        : '<div class="empty-state"><i class="ri-history-line"></i><p>No activity recorded</p></div>';
+      Modal.open('actModal');
+    }
+
+    // ── Add Sub-Admin ─────────────────────────────────────────
+    document.getElementById('addSubAdminBtn').addEventListener('click', () => Modal.open('addSubAdminModal'));
+    document.getElementById('saveSABtn').addEventListener('click', () => {
+      const name = document.getElementById('saName').value.trim();
+      const email = document.getElementById('saEmail').value.trim().toLowerCase();
+      const password = document.getElementById('saPassword').value;
+
+      if (!name) { Toast.error('Name is required.'); return; }
+      if (!email) { Toast.error('Email is required.'); return; }
+      if (!password || password.length < 6) { Toast.error('Password must be at least 6 characters.'); return; }
+      if (DB.getUserByEmail(email)) { Toast.error('Email already registered.'); return; }
+
+      DB.addUser({
+        name, email,
+        password: btoa(password),
+        position: document.getElementById('saPosition').value.trim(),
+        role: 'sub-admin',
+        status: 'active',
+        menuPermissions: ['*'],
+        writePermissions: ['*'],
+      });
+
+      Modal.close('addSubAdminModal');
+      Toast.success('Sub-Admin created!');
+      load();
+    });
+
+    // ── Filters ───────────────────────────────────────────────
+    document.getElementById('searchInp').addEventListener('input', () => {
+      renderUsers(DB.getUsers().filter(u => u.role === 'user' || u.role === 'applicant'));
+    });
+    document.getElementById('statusFilter').addEventListener('change', () => {
+      renderUsers(DB.getUsers().filter(u => u.role === 'user' || u.role === 'applicant'));
+    });
+
+    load();
+  </script>
+</body>
+
+</html>

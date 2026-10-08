@@ -1,0 +1,3771 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Capital — TE & NTE Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    .summary-kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .summary-kpi-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      text-align: center;
+    }
+
+    .summary-kpi-val {
+      font-size: 18px;
+      font-weight: 800;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .summary-kpi-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .summary-report-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .summary-card-header {
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .summary-print-header {
+      display: block;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .summary-print-header h2 {
+      color: var(--text-primary) !important;
+    }
+
+    .summary-print-header p,
+    .summary-print-header div {
+      color: var(--text-muted) !important;
+    }
+
+    select.form-control {
+      cursor: pointer;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    select.form-control option {
+      padding: 8px 12px;
+      font-size: 13px;
+      white-space: normal;
+    }
+
+    .col-highlight {
+      background: rgba(245, 166, 35, 0.12) !important;
+      border-left: 1.5px solid var(--gold) !important;
+      border-right: 1.5px solid var(--gold) !important;
+    }
+
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+
+      .app-layout,
+      .sidebar,
+      .top-header,
+      .main-content,
+      .page-wrapper,
+      .no-print,
+      .orb,
+      .bg-animated,
+      .breadcrumb,
+      .page-header,
+      .grid,
+      .card,
+      #addModal,
+      .modal-backdrop,
+      .toast-container {
+        display: none !important;
+        height: 0 !important;
+        overflow: hidden !important;
+      }
+
+      /* Hide modals in print unless open */
+      #capSummaryModal:not(.open),
+      #fyCompSummaryModal:not(.open),
+      #viewSheetModal:not(.open) {
+        display: none !important;
+        height: 0 !important;
+      }
+
+      #capSummaryModal.open,
+      #fyCompSummaryModal.open,
+      #viewSheetModal.open {
+        position: static !important;
+        display: block !important;
+        background: #fff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        z-index: 9999 !important;
+      }
+
+      #capSummaryModal.open .modal,
+      #fyCompSummaryModal.open .modal,
+      #viewSheetModal.open .modal {
+        max-width: 100% !important;
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        transform: none !important;
+      }
+
+      #capSummaryModal .modal-header,
+      #capSummaryModal .modal-footer,
+      #fyCompSummaryModal .modal-header,
+      #fyCompSummaryModal .modal-footer,
+      .screen-only {
+        display: none !important;
+      }
+
+      .summary-print-header {
+        display: block !important;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #333;
+      }
+
+      .summary-print-header h2 {
+        color: #0f172a !important;
+      }
+
+      .summary-print-header p,
+      .summary-print-header div {
+        color: #475569 !important;
+      }
+
+      #capSummaryModalBody,
+      #fyCompSummaryBody {
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        max-height: none !important;
+        color: #000 !important;
+      }
+
+      #capSummaryModalBody *,
+      #fyCompSummaryBody * {
+        color: #000 !important;
+      }
+
+      .summary-report-card {
+        background: #fff !important;
+        border: 1px solid #ccc !important;
+        color: #000 !important;
+        break-inside: avoid;
+      }
+
+      .summary-kpi-box {
+        background: #f8f8f8 !important;
+        border: 1px solid #ddd !important;
+      }
+
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
+
+      th,
+      td {
+        border: 1px solid #ccc !important;
+        padding: 6px 8px !important;
+        font-size: 11px !important;
+        color: #000 !important;
+      }
+
+      th {
+        background: #eee !important;
+        font-weight: bold !important;
+      }
+
+      .print-sign-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        margin-top: 50px !important;
+        padding-top: 20px !important;
+        break-inside: avoid;
+      }
+
+      .print-sign-box {
+        text-align: center !important;
+        width: 180px !important;
+        border-top: 1px solid #000 !important;
+        font-size: 11px !important;
+        font-weight: 500 !important;
+        color: #333 !important;
+      }
+
+      .print-only {
+        display: block !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-animated"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <div class="main-content" id="mainContent">
+      <header class="top-header" id="topHeader">
+        <button class="header-toggle" id="sidebarToggle"><i class="ri-menu-line"></i></button>
+        <div class="header-title">
+          <h1 id="headerTitle">Agent Capital</h1>
+          <p id="headerSubtitle">Capital tracking for all agents</p>
+        </div>
+        <div class="header-actions">
+          <div class="header-btn header-btn-settings" id="settingsBtn" title="Settings"><i
+              class="ri-settings-3-line"></i><span class="header-btn-label">Settings</span></div>
+        </div>
+      </header>
+      <div class="page-wrapper">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb animate-in" id="pageBreadcrumb"></nav>
+
+
+        <div class="page-header animate-in">
+          <div class="page-header-left">
+            <h2><i class="ri-funds-line"></i> Agent Capital</h2>
+            <p>Capital deposits & withdrawals per agent</p>
+          </div>
+          <div class="flex gap-8">
+            <button class="btn btn-primary" id="capitalSummaryBtn" onclick="openCapitalSummaryModal()"><i
+                class="ri-file-chart-line"></i> Capital Summary</button>
+            <button class="btn btn-primary" id="addBtn" style="display:none"><i class="ri-add-line"></i> Add
+              Entry</button>
+          </div>
+        </div>
+
+        <!-- KPIs Row 1 (Cards 1 to 4) -->
+        <div class="grid grid-4 mb-16 animate-in anim-delay-1">
+          <!-- Card 1: Total Capital -->
+          <div class="kpi-card">
+            <div class="kpi-icon blue"><i class="ri-funds-line"></i></div>
+            <div class="kpi-value" id="totalCap">৳0</div>
+            <div class="kpi-label">Total Capital</div>
+          </div>
+          <!-- Card 2: Monthly Commission -->
+          <div class="kpi-card">
+            <div class="kpi-icon green"><i class="ri-money-dollar-circle-line"></i></div>
+            <div class="kpi-value" id="monthlyCommKpi">৳0</div>
+            <div class="kpi-label">Monthly Commission <span id="commMonthLbl"
+                style="font-size:11px;opacity:0.85;font-weight:600;color:var(--gold);"></span></div>
+          </div>
+          <!-- Card 3: Cost -->
+          <div class="kpi-card">
+            <div class="kpi-icon red"><i class="ri-hand-coin-line"></i></div>
+            <div class="kpi-value" id="monthlyCostKpi">৳0</div>
+            <div class="kpi-label">Cost <span id="costMonthLbl"
+                style="font-size:11px;opacity:0.85;font-weight:600;color:var(--gold);"></span></div>
+          </div>
+          <!-- Card 4: Govt. AIT Charges -->
+          <div class="kpi-card">
+            <div class="kpi-icon purple"><i class="ri-government-line"></i></div>
+            <div class="kpi-value" id="monthlyAitKpi">৳0</div>
+            <div class="kpi-label">Govt. AIT Charges <span id="aitMonthLbl"
+                style="font-size:11px;opacity:0.85;font-weight:600;color:var(--gold);"></span></div>
+          </div>
+        </div>
+
+        <!-- KPIs Row 2 (Cards 5 to 8) -->
+        <div class="grid grid-4 mb-24 animate-in anim-delay-2">
+          <!-- Card 5: Total Commission -->
+          <div class="kpi-card">
+            <div class="kpi-icon green"><i class="ri-coins-line"></i></div>
+            <div class="kpi-value" id="totalCommKpi">৳0</div>
+            <div class="kpi-label">Total Commission <span id="commTotalMonthLbl"
+                style="font-size:11px;opacity:0.85;font-weight:600;color:var(--gold);"></span></div>
+          </div>
+          <!-- Card 6: Total Cost -->
+          <div class="kpi-card">
+            <div class="kpi-icon red"><i class="ri-pie-chart-2-line"></i></div>
+            <div class="kpi-value" id="totalCostKpi">৳0</div>
+            <div class="kpi-label">Total Cost <span id="totCostMonthLbl"
+                style="font-size:11px;opacity:0.85;font-weight:600;color:var(--gold);"></span></div>
+          </div>
+          <!-- Card 7: Total Govt. AIT (Jan to Dec / Fiscal Year) -->
+          <div class="kpi-card" style="border-color:rgba(139,92,246,0.35);">
+            <div class="kpi-icon purple"><i class="ri-scales-3-line"></i></div>
+            <div class="kpi-value" id="totalFyAitKpi" style="color:#a78bfa;">৳0</div>
+            <div class="kpi-label">Total Govt. AIT <span id="fyAitLbl"
+                style="font-size:11px;opacity:0.9;font-weight:700;color:#c4b5fd;"></span></div>
+          </div>
+          <!-- Card 8: Profit -->
+          <div class="kpi-card">
+            <div class="kpi-icon green" id="profitKpiIcon"><i class="ri-line-chart-line"></i></div>
+            <div class="kpi-value" id="totalProfitKpi">৳0</div>
+            <div class="kpi-label" id="profitKpiLabel">Profit <span id="profitMonthLbl"
+                style="font-size:11px;opacity:0.85;font-weight:600;color:var(--gold);"></span></div>
+          </div>
+        </div>
+
+        <!-- Chart + Filters -->
+        <div class="grid grid-2-1 mb-24 animate-in anim-delay-3">
+          <div class="card">
+            <div class="card-header"
+              style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px;">
+              <div class="card-title" id="chartCardTitle"><i class="ri-bar-chart-grouped-line"></i> Capital by Agent
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+                <!-- Metric Selector -->
+                <select class="form-control" id="chartMetricSel"
+                  style="font-size:11px; padding:3px 6px; width:auto; height:30px; font-weight:600;"
+                  title="Select Metric">
+                  <option value="totalCapital">Total Capital</option>
+                  <option value="monthlyCommission">Monthly Commission</option>
+                  <option value="monthlyCost">Cost</option>
+                  <option value="monthlyAit">Govt. AIT Charges</option>
+                  <option value="totalCommission">Total Commission</option>
+                  <option value="profit">Profit</option>
+                  <option value="totalCost">Total Cost</option>
+                  <option value="totalGovtAit">Total Govt. AIT</option>
+                </select>
+                <!-- Month Selector -->
+                <select class="form-control" id="chartMonthSel"
+                  style="font-size:11px; padding:3px 6px; width:auto; height:30px;" title="Select Month">
+                  <option value="all">All Months (সকল মাস)</option>
+                  <option value="January">Jan (জানুয়ারি)</option>
+                  <option value="February">Feb (ফেব্রুয়ারি)</option>
+                  <option value="March">Mar (মার্চ)</option>
+                  <option value="April">Apr (এপ্রিল)</option>
+                  <option value="May">May (মে)</option>
+                  <option value="June">Jun (জুন)</option>
+                  <option value="July">Jul (জুলাই)</option>
+                  <option value="August">Aug (আগস্ট)</option>
+                  <option value="September">Sep (সেপ্টেম্বর)</option>
+                  <option value="October">Oct (অক্টোবর)</option>
+                  <option value="November">Nov (নভেম্বর)</option>
+                  <option value="December">Dec (ডিসেম্বর)</option>
+                </select>
+                <!-- Year Selector -->
+                <select class="form-control" id="chartYearSel"
+                  style="font-size:11px; padding:3px 6px; width:auto; height:30px;" title="Select Year">
+                  <option value="all">All Years</option>
+                </select>
+                <!-- Chart Model Selector -->
+                <select class="form-control" id="chartModelSel"
+                  style="font-size:11px; padding:3px 6px; width:auto; height:30px;" title="Chart Type">
+                  <option value="bar">Bar Chart</option>
+                  <option value="line">Line Chart</option>
+                  <option value="doughnut">Doughnut Chart</option>
+                  <option value="area">Area Chart</option>
+                </select>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" style="position:relative; height:260px; max-height:260px;"><canvas id="capChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="ri-filter-3-line"></i> Filters</div>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label"><i class="ri-user-line"></i> Agent</label>
+                <select class="form-control" id="agentSel">
+                  <option value="">All Agents</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label"><i class="ri-calendar-event-line"></i> Fiscal Year</label>
+                <select class="form-control" id="fiscalYearSel">
+                  <option value="all">All Fiscal Years</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Type</label>
+                <select class="form-control" id="typeSel">
+                  <option value="">All</option>
+                  <option value="deposit">Deposit</option>
+                  <option value="withdrawal">Withdrawal</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">From</label><input type="date" class="form-control"
+                    id="dateFrom"></div>
+                <div class="form-group"><label class="form-label">To</label><input type="date" class="form-control"
+                    id="dateTo"></div>
+              </div>
+              <button class="btn btn-outline w-full" id="clearFilters"><i class="ri-refresh-line"></i> Clear</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fiscal Year Comparison Report (অর্থবছর তুলনা রিপোর্ট) -->
+        <div class="card mb-24 animate-in anim-delay-3"
+          style="border-color:rgba(139,92,246,0.3); background:linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(139,92,246,0.03) 100%);">
+          <div class="card-header"
+            style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.08);">
+            <div>
+              <div class="card-title" style="display:flex; align-items:center; gap:8px;">
+                <i class="ri-scales-line" style="color:#a78bfa; font-size:18px;"></i>
+                <span>Fiscal Year Comparison Report</span>
+              </div>
+              <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+                গত অর্থবছরের সাথে বর্তমান অর্থবছরের ব্যবসায়িক সূচকসমূহের ব্যবধান, প্রবৃদ্ধি ও সামগ্রিক তুলনা
+              </div>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span style="font-size:12px; color:var(--text-muted); font-weight:600;">মূল অর্থবছর:</span>
+                <select class="form-control" id="fyCompBase"
+                  style="width:auto; font-size:12px; padding:4px 8px; height:32px; border-color:rgba(167,139,250,0.4); font-weight:600; color:#c4b5fd;"></select>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span style="font-size:12px; color:var(--text-muted); font-weight:600;">তুলনামূলক অর্থবছর:</span>
+                <select class="form-control" id="fyCompTarget"
+                  style="width:auto; font-size:12px; padding:4px 8px; height:32px; font-weight:600;"></select>
+              </div>
+              <button class="btn btn-primary" id="fyCompSummaryBtn" onclick="openFyCompSummaryModal()"
+                style="height:32px; font-size:12px; padding:0 12px; display:inline-flex; align-items:center; gap:6px;">
+                <i class="ri-file-chart-line"></i> Summary
+              </button>
+            </div>
+          </div>
+          <div class="card-body" style="padding:16px 20px;">
+            <!-- Comparison Summary Strip -->
+            <div id="fyCompSummaryStrip"
+              style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px; margin-bottom:16px;">
+            </div>
+
+            <!-- Comparison Detailed Table -->
+            <div class="table-wrapper"
+              style="border:1px solid rgba(255,255,255,0.06); border-radius:8px; overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                  <tr style="background:rgba(255,255,255,0.03);">
+                    <th style="text-align:left; padding:10px 14px; font-size:12px;">Metric / নির্দেশক</th>
+                    <th style="text-align:right; padding:10px 14px; font-size:12px;" id="thBaseFy">বর্তমান অর্থবছর</th>
+                    <th style="text-align:right; padding:10px 14px; font-size:12px;" id="thTargetFy">পূর্ববর্তী অর্থবছর
+                    </th>
+                    <th style="text-align:right; padding:10px 14px; font-size:12px;">পার্থক্য (কম / বেশি)</th>
+                    <th style="text-align:center; padding:10px 14px; font-size:12px;">পরিবর্তন (%)</th>
+                    <th style="text-align:center; padding:10px 14px; font-size:12px;">সার্বিক ট্রেন্ড</th>
+                  </tr>
+                </thead>
+                <tbody id="fyCompTableBody">
+                  <!-- Rows injected dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card animate-in anim-delay-3">
+          <div class="card-header">
+            <div class="card-title"><i class="ri-table-line"></i> Capital Records <span id="recCount"
+                style="font-size:12px;color:var(--text-muted);font-weight:400"></span></div>
+          </div>
+          <div class="table-wrapper" style="border:none;border-radius:0">
+            <table>
+              <thead>
+                <tr>
+                  <th>Agent</th>
+                  <th>Date</th>
+                  <th>Month</th>
+                  <th>Monthly Commission</th>
+                  <th>Monthly Cost</th>
+                  <th>Total Capital</th>
+                  <th>User Name</th>
+                  <th id="actH" style="display:none">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr>
+                  <td colspan="8" class="text-center text-muted" style="padding:30px">Loading...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Modal -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal" style="max-width:1080px; width:95vw; max-height:92vh; overflow-y:auto;">
+      <div class="modal-header"
+        style="position:sticky; top:0; background:var(--bg-secondary); z-index:10; border-bottom:1px solid var(--border);">
+        <div class="modal-title"><i class="ri-funds-box-line"></i> Add Agent Capital Worksheet</div>
+        <div class="modal-close"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body" style="padding:18px 22px;">
+        <!-- Top Info Row (Agent, Date, Note) -->
+        <div
+          style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:10px; padding:14px 18px; margin-bottom:16px;">
+          <div
+            style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; align-items:flex-end;">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="font-size:12px;font-weight:600"><i class="ri-user-line"></i> Agent
+                *</label>
+              <select id="entAgent" class="form-control">
+                <option value="">Select Agent</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="font-size:12px;font-weight:600"><i class="ri-calendar-line"></i> Date
+                *</label>
+              <input type="date" id="entDate" class="form-control">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="font-size:12px;font-weight:600"><i class="ri-calendar-event-line"></i> Fiscal Year
+                *</label>
+              <select id="entFiscalYear" class="form-control" style="font-weight:600;">
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Agent Capital Worksheet Section -->
+        <div class="ac-sheet-wrap">
+          <!-- Month & Year Selector -->
+          <div class="ac-month-bar">
+            <div class="ac-month-box">
+              <label style="font-weight:700; color:var(--text-muted); font-size:12px;"><i
+                  class="ri-calendar-event-line"></i> Month / Year:</label>
+              <select id="month-select">
+                <option value="January">January</option>
+                <option value="February">February</option>
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <option value="May">May</option>
+                <option value="June">June</option>
+                <option value="July">July</option>
+                <option value="August">August</option>
+                <option value="September">September</option>
+                <option value="October">October</option>
+                <option value="November">November</option>
+                <option value="December">December</option>
+              </select>
+              <input type="number" id="year-input" min="2000" max="2100" />
+            </div>
+          </div>
+
+          <!-- Content Grid (Left & Right Column) -->
+          <div class="ac-grid">
+            <!-- LEFT COLUMN -->
+            <div>
+              <!-- Table 1: Partners (Cash) -->
+              <table class="ac-table" id="table-partners-main">
+                <thead>
+                  <tr>
+                    <th colspan="4" class="red-header" style="position:relative; padding:6px 10px;">
+                      <span>Cash</span>
+                      <button type="button" id="addPartnerBtn" title="Add Partner"
+                        style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.22); border:1px solid rgba(255,255,255,0.35); color:#ffffff; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+                        <i class="ri-user-add-line"></i> Add Partner
+                      </button>
+                    </th>
+                  </tr>
+                  <tr style="background:rgba(255,255,255,0.04);">
+                    <th style="width:10%; text-align:center;">No.</th>
+                    <th style="text-align:left; padding-left:8px;">Name</th>
+                    <th style="width:36%; text-align:right;">TK</th>
+                    <th style="width:8%; text-align:center;"></th>
+                  </tr>
+                </thead>
+                <tbody id="partners-table">
+                  <!-- Dynamic partner rows rendered by JS -->
+                </tbody>
+                <tfoot>
+                  <tr class="total-row">
+                    <td colspan="2" style="text-align:right; font-weight:700;">Total Invest = </td>
+                    <td class="amt red-text" id="total-partners" style="font-weight:700;">0.00</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+
+              <!-- Table 2: Calculations -->
+              <table class="ac-table">
+                <thead>
+                  <tr style="background:rgba(255,255,255,0.04);">
+                    <th style="width:12%; text-align:center;">No.</th>
+                    <th style="text-align:left; padding-left:8px;">Description</th>
+                    <th style="width:38%; text-align:right;">TK</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="center">1</td>
+                    <td><b>Opening Cash</b></td>
+                    <td class="amt"><input type="text" id="opening-cash" placeholder="0.00"></td>
+                  </tr>
+                  <tr>
+                    <td class="center">2</td>
+                    <td>Others Income</td>
+                    <td class="amt"><input type="text" id="other-cash" placeholder="0.00"></td>
+                  </tr>
+                  <tr class="total-row">
+                    <td colspan="2" style="text-align:right;">Total = </td>
+                    <td class="amt red-text" id="total-cash">0.00</td>
+                  </tr>
+
+                  <tr>
+                    <td class="center">3</td>
+                    <td>Total Profit Last <span id="lbl-profit-last">...</span></td>
+                    <td class="amt"><input type="text" id="profit-last" placeholder="0.00"></td>
+                  </tr>
+                  <tr>
+                    <td class="center">4</td>
+                    <td>Profit in <span id="lbl-profit-curr">...</span></td>
+                    <td class="amt"><input type="text" id="profit-nov" placeholder="0.00"></td>
+                  </tr>
+
+                  <tr class="total-row">
+                    <td colspan="2" style="text-align:right;">Total Profit = </td>
+                    <td class="amt red-text" id="total-profit">0.00</td>
+                  </tr>
+                  <tr class="total-row" style="background:rgba(239,68,68,0.12);">
+                    <td colspan="2" style="text-align:right;"><b>Total Cash = </b></td>
+                    <td class="amt red-text" id="grand-capital" style="font-size:14px;">0.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div>
+              <!-- Table 3: Summary -->
+              <table class="ac-table">
+                <thead>
+                  <tr>
+                    <th class="teal-header" style="text-align:left; padding-left:8px;">Opening Balance (<span
+                        id="balance-month">...</span>/<span id="balance-year">...</span>)</th>
+                    <th class="teal-header" style="width:38%; text-align:right;" id="top-balance">0.00</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="text-align:center; font-weight:bold;" id="profit-label">Profit</td>
+                    <td class="amt" id="summary-profit-val">0.00</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Table 4: Cost -->
+              <table class="ac-table">
+                <thead>
+                  <tr>
+                    <th colspan="3" class="red-header">Cost</th>
+                  </tr>
+                  <tr style="background:rgba(255,255,255,0.04);">
+                    <th style="width:12%; text-align:center;">No.</th>
+                    <th style="text-align:left; padding-left:8px;">Description</th>
+                    <th style="width:38%; text-align:right;">TK</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="center">1</td>
+                    <td>Total Cost Last <span id="lbl-cost-last">...</span></td>
+                    <td class="amt blue-text"><input type="text" id="cost-last" style="color:#38bdf8;"
+                        placeholder="0.00"></td>
+                  </tr>
+                  <tr>
+                    <td class="center">2</td>
+                    <td>Total Cost in <span id="lbl-cost-curr">...</span></td>
+                    <td class="amt"><input type="text" id="cost-nov" placeholder="0.00"></td>
+                  </tr>
+                  <tr>
+                    <td class="center">3</td>
+                    <td>Govt. AIT Charges <span id="lbl-ait-curr">...</span></td>
+                    <td class="amt"><input type="text" id="cost-govt" placeholder="0.00"></td>
+                  </tr>
+                  <tr>
+                    <td class="center">4</td>
+                    <td>Commission Loss</td>
+                    <td class="amt"><input type="text" id="cost-comm" placeholder="0.00"></td>
+                  </tr>
+                  <tr class="total-row">
+                    <td colspan="2" style="text-align:right;">Total Cost = </td>
+                    <td class="amt red-text" id="total-cost">0.00</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Table 5: Settlement -->
+              <table class="ac-table">
+                <tbody>
+                  <tr>
+                    <td class="center" style="width:12%;">1</td>
+                    <td>Settlement Cash</td>
+                    <td class="amt red-text" style="width:38%;" id="settlement-cash">0.00</td>
+                  </tr>
+                  <tr>
+                    <td class="center">2</td>
+                    <td>Hand Cash for Monthly Exp</td>
+                    <td class="amt"><input type="text" id="hand-cash" placeholder="0.00"></td>
+                  </tr>
+                  <tr class="total-row">
+                    <td colspan="2" style="text-align:right;">Total Capital = </td>
+                    <td class="amt red-text" id="settlement-total">0.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- FOOTER NOTES -->
+          <div class="ac-footer-note">
+            <span style="color:#ef4444;">In-Word:</span> <span id="in-word-text"
+              style="font-weight:normal; margin-left:6px; color:var(--gold);">Zero Taka Only</span>
+          </div>
+          <div class="ac-footer-note secondary-note">
+            <span style="color:#ef4444; font-weight:bold;">Note:</span> We all partners have read and signed the
+            calculations in the above worksheet for the Month of <span id="note-date"
+              style="font-weight:bold; color:var(--text-primary);">...</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer"
+        style="position:sticky; bottom:0; background:var(--bg-secondary); z-index:10; border-top:1px solid var(--border);">
+        <button class="btn btn-ghost modal-close">Cancel</button>
+        <button class="btn btn-outline" id="resetAcBtn"><i class="ri-refresh-line"></i> Reset Sheet</button>
+        <button class="btn btn-primary" id="saveBtn"><i class="ri-save-line"></i> Save Entry</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Full Sheet Modal -->
+  <div class="modal-overlay" id="viewSheetModal">
+    <div class="modal" style="max-width:1080px; width:95vw; max-height:92vh; overflow-y:auto;">
+      <div class="modal-header"
+        style="position:sticky; top:0; background:var(--bg-secondary); z-index:10; border-bottom:1px solid var(--border);">
+        <div class="modal-title" id="viewSheetTitle"><i class="ri-file-text-line"></i> Agent Capital Worksheet Details
+        </div>
+        <div class="flex gap-8 items-center">
+          <button class="btn btn-ghost btn-sm" onclick="window.print()"><i class="ri-printer-line"></i> Print</button>
+          <div class="modal-close"><i class="ri-close-line"></i></div>
+        </div>
+      </div>
+      <div class="modal-body" id="viewSheetBody" style="padding:20px 24px;">
+        <!-- Dynamically rendered read-only sheet -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost modal-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Capital Summary Modal (Print & Download PDF) -->
+  <div class="modal-overlay" id="capSummaryModal">
+    <div class="modal" style="max-width:1150px; width:96vw; max-height:92vh; display:flex; flex-direction:column;">
+      <div class="modal-header no-print" style="padding:16px 20px; border-bottom:1px solid var(--border)">
+        <div class="modal-title"
+          style="font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+          <i class="ri-file-chart-line" style="color:var(--gold); font-size:20px;"></i>
+          <span id="capSummaryModalTitle">Capital Summary Statement</span>
+        </div>
+        <div class="modal-close" onclick="Modal.close('capSummaryModal')"><i class="ri-close-line"></i></div>
+      </div>
+
+      <!-- Controls Bar (Screen Only) -->
+      <div class="screen-only"
+        style="padding:14px 20px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <!-- Left: Agent & Category Filters -->
+          <div class="flex gap-10 items-center flex-wrap">
+            <div class="flex gap-6 items-center">
+              <label
+                style="font-size:12px; font-weight:600; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-store-2-line" style="color:var(--gold)"></i> Agent:
+              </label>
+              <select id="capSummaryAgent" class="form-control"
+                style="min-width:200px; max-width:320px; width:auto; height:38px; padding:6px 12px; font-size:13px;"
+                onchange="onCapSummaryFilterChange()" title="Select Agent">
+                <option value="">All Agents</option>
+              </select>
+            </div>
+            <div class="flex gap-6 items-center">
+              <label
+                style="font-size:12px; font-weight:600; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-list-check-2" style="color:var(--gold)"></i> Category:
+              </label>
+              <select id="capSummaryCategory" class="form-control"
+                style="min-width:210px; max-width:320px; width:auto; height:38px; padding:6px 12px; font-size:13px;"
+                onchange="onCapSummaryFilterChange()" title="Select Category">
+                <option value="">All Category (সকল ক্যাটাগরি)</option>
+                <option value="monthlyCommission">Monthly Commission</option>
+                <option value="monthlyCost">Monthly Cost</option>
+                <option value="monthlyAit">Govt. AIT Charges</option>
+                <option value="totalCommission">Total Commission</option>
+                <option value="totalCost">Total Cost</option>
+                <option value="totalGovtAit">Total Govt. AIT</option>
+                <option value="profit">Profit</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Date Range Filter & Quick Presets -->
+        <div
+          style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding-top:10px; border-top:1px dashed var(--border);">
+          <div class="flex gap-8 items-center flex-wrap">
+            <span
+              style="font-size:12px; font-weight:600; color:var(--text-primary); display:flex; align-items:center; gap:4px;">
+              <i class="ri-calendar-line" style="color:var(--gold);"></i> Date Range:
+            </span>
+            <div class="flex gap-6 items-center">
+              <input type="date" id="capSummaryDateFrom" class="form-control"
+                style="height:32px; font-size:12px; max-width:145px;" onchange="onCapSummaryDateChange()">
+              <span style="color:var(--text-muted); font-size:12px;">to</span>
+              <input type="date" id="capSummaryDateTo" class="form-control"
+                style="height:32px; font-size:12px; max-width:145px;" onchange="onCapSummaryDateChange()">
+            </div>
+          </div>
+          <div class="flex gap-6 items-center flex-wrap">
+            <button class="btn btn-ghost btn-sm" onclick="setCapSummaryDatePreset('6m')"
+              style="height:30px; font-size:11px; padding:0 10px;">Last 6 Months</button>
+            <button class="btn btn-ghost btn-sm" onclick="setCapSummaryDatePreset('1y')"
+              style="height:30px; font-size:11px; padding:0 10px;">Last 1 Year</button>
+            <button class="btn btn-ghost btn-sm" onclick="setCapSummaryDatePreset('fy')"
+              style="height:30px; font-size:11px; padding:0 10px;">This Fiscal Year</button>
+            <button class="btn btn-ghost btn-sm" onclick="setCapSummaryDatePreset('all')"
+              style="height:30px; font-size:11px; padding:0 10px;">All Time</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body (Print & PDF Area) -->
+      <div class="modal-body" id="capSummaryModalBody" style="overflow-y:auto; padding:20px; flex:1;">
+        <!-- Dynamic Summary Statement Content rendered by JS -->
+      </div>
+
+      <!-- Modal Footer (Screen Only) -->
+      <div class="modal-footer no-print"
+        style="justify-content:space-between; padding:12px 20px; border-top:1px solid var(--border);">
+        <div id="capSummaryFooterMeta" style="font-size:12px; color:var(--text-muted);">
+          MS Techno Enterprise • Capital Statement System
+        </div>
+        <div class="flex gap-8">
+          <button class="btn btn-outline btn-sm" onclick="printCapitalSummary()" title="Print Capital Statement">
+            <i class="ri-printer-line"></i> Print
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="downloadCapitalSummaryPDF()" title="Download PDF Report">
+            <i class="ri-file-pdf-line"></i> Download PDF
+          </button>
+          <button class="btn btn-ghost btn-sm modal-close" onclick="Modal.close('capSummaryModal')">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fiscal Year Comparison Summary Modal (Print & Download PDF) -->
+  <div class="modal-overlay" id="fyCompSummaryModal">
+    <div class="modal" style="max-width:1150px; width:96vw; max-height:92vh; display:flex; flex-direction:column;">
+      <div class="modal-header no-print" style="padding:16px 20px; border-bottom:1px solid var(--border)">
+        <div class="modal-title"
+          style="font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+          <i class="ri-scales-line" style="color:#a78bfa; font-size:20px;"></i>
+          <span id="fyCompSummaryModalTitle">Fiscal Year Comparison Summary Report</span>
+        </div>
+        <div class="modal-close" onclick="Modal.close('fyCompSummaryModal')"><i class="ri-close-line"></i></div>
+      </div>
+
+      <!-- Controls Bar (Screen Only) -->
+      <div class="screen-only"
+        style="padding:14px 20px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div class="flex gap-10 items-center flex-wrap">
+            <!-- Agent Filter -->
+            <div class="flex gap-6 items-center">
+              <label
+                style="font-size:12px; font-weight:600; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-store-2-line" style="color:#a78bfa"></i> Agent:
+              </label>
+              <select id="fySummaryAgent" class="form-control"
+                style="min-width:180px; max-width:280px; width:auto; height:36px; padding:6px 10px; font-size:12px;"
+                onchange="onFySummaryFilterChange()" title="Select Agent">
+                <option value="">All Agents</option>
+              </select>
+            </div>
+            <!-- Category Filter -->
+            <div class="flex gap-6 items-center">
+              <label
+                style="font-size:12px; font-weight:600; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-list-check-2" style="color:#a78bfa"></i> Category:
+              </label>
+              <select id="fySummaryCategory" class="form-control"
+                style="min-width:200px; max-width:280px; width:auto; height:36px; padding:6px 10px; font-size:12px;"
+                onchange="onFySummaryFilterChange()" title="Select Category">
+                <option value="all">All Categories (সকল ক্যাটাগরি)</option>
+                <option value="monthlyCommission">Monthly Commission</option>
+                <option value="monthlyCost">Monthly Cost</option>
+                <option value="monthlyAit">Govt. AIT Charges</option>
+                <option value="totalCommission">Total Commission</option>
+                <option value="totalCost">Total Cost</option>
+                <option value="totalGovtAit">Total Govt. AIT</option>
+                <option value="profit">Profit</option>
+              </select>
+            </div>
+            <!-- Base Fiscal Year -->
+            <div class="flex gap-6 items-center">
+              <label
+                style="font-size:12px; font-weight:600; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-calendar-event-line" style="color:#a78bfa"></i> Base FY:
+              </label>
+              <select id="fySummaryBase" class="form-control"
+                style="min-width:160px; width:auto; height:36px; padding:6px 10px; font-size:12px; border-color:rgba(167,139,250,0.4); font-weight:600; color:#c4b5fd;"
+                onchange="onFySummaryFilterChange()" title="Select Base Fiscal Year">
+              </select>
+            </div>
+            <!-- Comparison Fiscal Year -->
+            <div class="flex gap-6 items-center">
+              <label
+                style="font-size:12px; font-weight:600; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-scales-3-line" style="color:#a78bfa"></i> Compare FY:
+              </label>
+              <select id="fySummaryTarget" class="form-control"
+                style="min-width:160px; width:auto; height:36px; padding:6px 10px; font-size:12px; font-weight:600;"
+                onchange="onFySummaryFilterChange()" title="Select Comparison Fiscal Year">
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body (Print & PDF Area) -->
+      <div class="modal-body" id="fyCompSummaryBody" style="overflow-y:auto; padding:20px; flex:1;">
+        <!-- Dynamically rendered comparison summary statement -->
+      </div>
+
+      <!-- Modal Footer (Screen Only) -->
+      <div class="modal-footer no-print"
+        style="justify-content:space-between; padding:12px 20px; border-top:1px solid var(--border);">
+        <div id="fyCompSummaryFooterMeta" style="font-size:12px; color:var(--text-muted);">
+          MS Techno Enterprise • Fiscal Year Comparison System
+        </div>
+        <div class="flex gap-8">
+          <button class="btn btn-outline btn-sm" onclick="printFyCompSummary()" title="Print Summary Report">
+            <i class="ri-printer-line"></i> Print
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="downloadFyCompSummaryPDF()" title="Download PDF Report">
+            <i class="ri-file-pdf-line"></i> Download PDF
+          </button>
+          <button class="btn btn-ghost btn-sm modal-close" onclick="Modal.close('fyCompSummaryModal')">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const user = App.init('agent-capital', 'Agent Capital', 'Capital tracking');
+    UIEnhancements.setBreadcrumb('pageBreadcrumb', [{ label: 'Agent Capital' }]);
+    if (!user) throw new Error();
+    const isAdmin = user.role === 'admin' || user.role === 'sub-admin';
+    const canEdit = isAdmin || Auth.canEdit('agent-capital');
+    Chart.defaults.color = '#9ba8cc'; Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+    let allData = [], agents = [], filteredData = [];
+    const PER_PAGE = 15; let page = 1, chart;
+
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const shortMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    function getRecordTotalCapital(r) {
+      if (!r) return 0;
+      if (r.sheetData?.calculated?.settlementTotal) {
+        return parseNumber(r.sheetData.calculated.settlementTotal);
+      }
+      if (r.totalCapital) {
+        return parseNumber(r.totalCapital);
+      }
+      if (r.netBalance) {
+        return parseNumber(r.netBalance);
+      }
+      return parseFloat(r.amount) || 0;
+    }
+
+    function getRecordMonthlyCommission(r) {
+      if (!r) return 0;
+      if (r.monthlyCommission !== undefined && r.monthlyCommission !== null && r.monthlyCommission !== '') {
+        return parseNumber(r.monthlyCommission);
+      }
+      if (r.sheetData?.inputs && r.sheetData.inputs['profit-nov'] !== undefined) {
+        return parseNumber(r.sheetData.inputs['profit-nov']);
+      }
+      return 0;
+    }
+
+    function getRecordTotalCommission(r) {
+      if (!r) return 0;
+      if (r.totalCommission !== undefined && r.totalCommission !== null && r.totalCommission !== '') {
+        return parseNumber(r.totalCommission);
+      }
+      if (r.sheetData?.calculated?.totalProfit) {
+        return parseNumber(r.sheetData.calculated.totalProfit);
+      }
+      if (r.sheetData?.inputs) {
+        const pLast = parseNumber(r.sheetData.inputs['profit-last']);
+        const pNov = parseNumber(r.sheetData.inputs['profit-nov']);
+        if (pLast || pNov) return pLast + pNov;
+      }
+      return 0;
+    }
+
+    function getRecordMonthlyCost(r) {
+      if (!r) return 0;
+      if (r.monthlyCost !== undefined && r.monthlyCost !== null && r.monthlyCost !== '') {
+        return parseNumber(r.monthlyCost);
+      }
+      if (r.sheetData?.inputs && r.sheetData.inputs['cost-nov'] !== undefined) {
+        return parseNumber(r.sheetData.inputs['cost-nov']);
+      }
+      return 0;
+    }
+
+    function getRecordGovtAit(r) {
+      if (!r) return 0;
+      if (r.govtAit !== undefined && r.govtAit !== null && r.govtAit !== '') {
+        return parseNumber(r.govtAit);
+      }
+      if (r.monthlyAit !== undefined && r.monthlyAit !== null && r.monthlyAit !== '') {
+        return parseNumber(r.monthlyAit);
+      }
+      if (r.totalGovtAit !== undefined && r.totalGovtAit !== null && r.totalGovtAit !== '') {
+        return parseNumber(r.totalGovtAit);
+      }
+      if (r.sheetData?.inputs && r.sheetData.inputs['cost-govt'] !== undefined) {
+        return parseNumber(r.sheetData.inputs['cost-govt']);
+      }
+      return 0;
+    }
+
+    function getRecordProfit(r) {
+      if (!r) return 0;
+      if (r.profit !== undefined && r.profit !== null && r.profit !== '') {
+        return parseNumber(r.profit);
+      }
+      if (r.sheetData?.calculated && r.sheetData.calculated.summaryProfit !== undefined) {
+        return parseNumber(r.sheetData.calculated.summaryProfit);
+      }
+      return 0;
+    }
+
+    function getRecordTotalCost(r) {
+      if (!r) return 0;
+      if (r.totalCost !== undefined && r.totalCost !== null && r.totalCost !== '') {
+        return parseNumber(r.totalCost);
+      }
+      if (r.totalCostWorksheet !== undefined && r.totalCostWorksheet !== null && r.totalCostWorksheet !== '') {
+        return parseNumber(r.totalCostWorksheet);
+      }
+      if (r.sheetData?.calculated?.totalCost) return parseNumber(r.sheetData.calculated.totalCost);
+      return 0;
+    }
+
+    function getRecordMonthLabel(r) {
+      if (!r) return '';
+      if (r.month) {
+        const mStr = r.month.slice(0, 3);
+        return r.year ? `(${mStr}/${r.year})` : `(${mStr})`;
+      }
+      if (r.date) {
+        const d = new Date(r.date);
+        if (!isNaN(d)) {
+          return `(${shortMonths[d.getMonth()]}/${d.getFullYear()})`;
+        }
+      }
+      return '';
+    }
+
+    function getRecordTimestamp(r) {
+      if (!r) return 0;
+      if (r.year && r.month) {
+        let mIdx = monthNames.findIndex(m => m.toLowerCase() === r.month.toLowerCase());
+        if (mIdx < 0) mIdx = shortMonths.findIndex(m => m.toLowerCase() === r.month.toLowerCase());
+        if (mIdx >= 0) {
+          const yr = parseInt(r.year);
+          if (!isNaN(yr)) {
+            return new Date(yr, mIdx + 1, 0, 23, 59, 59).getTime();
+          }
+        }
+      }
+      if (r.date) {
+        const t = new Date(r.date).getTime();
+        if (!isNaN(t)) return t;
+      }
+      if (r.createdAt) {
+        const t = new Date(r.createdAt).getTime();
+        if (!isNaN(t)) return t;
+      }
+      return 0;
+    }
+
+    // ── Fiscal Year Helper Functions (Jan-Dec: 2026 to 2040) ────────────
+    function getAllFiscalYearsList() {
+      const set = new Set();
+      // 2026 (Jan-Dec) to 2040 (Jan-Dec)
+      for (let y = 2026; y <= 2040; y++) {
+        set.add(`${y} (Jan-Dec)`);
+      }
+      if (typeof allData !== 'undefined' && Array.isArray(allData)) {
+        allData.forEach(r => {
+          const fy = getRecordFiscalYear(r);
+          if (fy) set.add(fy);
+        });
+      }
+      return Array.from(set).sort((a, b) => {
+        const yA = parseInt(a.match(/\d{4}/)?.[0] || '0');
+        const yB = parseInt(b.match(/\d{4}/)?.[0] || '0');
+        return yA - yB;
+      });
+    }
+
+    function getRecordFiscalYear(r) {
+      if (!r) return null;
+      if (r.fiscalYear) {
+        const m = r.fiscalYear.toString().match(/\d{4}/);
+        if (m) return `${m[0]} (Jan-Dec)`;
+        return r.fiscalYear;
+      }
+      let y = null;
+      if (r.year) y = parseInt(r.year);
+      if ((!y || isNaN(y)) && r.date) {
+        const d = new Date(r.date);
+        if (!isNaN(d)) y = d.getFullYear();
+      }
+      if (!y || isNaN(y)) return null;
+      return `${y} (Jan-Dec)`;
+    }
+
+    function getCurrentFiscalYear() {
+      const y = new Date().getFullYear();
+      return `${y} (Jan-Dec)`;
+    }
+
+    function formatFiscalYearLabel(fy) {
+      if (!fy || fy === 'all') return 'All Fiscal Years';
+      return fy;
+    }
+
+    function populateFiscalYears() {
+      const fySel = document.getElementById('fiscalYearSel');
+      const baseSel = document.getElementById('fyCompBase');
+      const targetSel = document.getElementById('fyCompTarget');
+      if (!fySel) return;
+
+      const currentFY = getCurrentFiscalYear();
+      const fys = getAllFiscalYearsList();
+      const prevVal = fySel.value || 'all';
+
+      fySel.innerHTML = `<option value="all">All Fiscal Years (সকল অর্থবছর)</option>` +
+        fys.map(fy => `<option value="${fy}">${fy}</option>`).join('');
+
+      if (Array.from(fySel.options).some(o => o.value === prevVal)) {
+        fySel.value = prevVal;
+      } else {
+        fySel.value = 'all';
+      }
+
+      // Populate Comparison dropdowns
+      if (baseSel && targetSel) {
+        const prevBase = baseSel.value || currentFY;
+        const curYrNum = parseInt(currentFY.match(/\d{4}/)?.[0] || '2026');
+        const nextYearVal = `${curYrNum + 1} (Jan-Dec)`;
+        const prevTarget = targetSel.value || nextYearVal;
+
+        const compOptionsHtml = fys.map(fy => `<option value="${fy}">${fy}</option>`).join('');
+
+        baseSel.innerHTML = compOptionsHtml;
+        targetSel.innerHTML = compOptionsHtml;
+
+        baseSel.value = Array.from(baseSel.options).some(o => o.value === prevBase) ? prevBase : (Array.from(baseSel.options).some(o => o.value === currentFY) ? currentFY : (fys[0] || ''));
+        targetSel.value = Array.from(targetSel.options).some(o => o.value === prevTarget) ? prevTarget : (fys.find(f => f !== baseSel.value) || fys[1] || currentFY);
+      }
+    }
+
+    function populateAddFormFiscalYears(overrideYear = null) {
+      const fySel = document.getElementById('entFiscalYear');
+      if (!fySel) return;
+
+      const fys = getAllFiscalYearsList();
+      const curFy = getCurrentFiscalYear();
+      const prevVal = fySel.value;
+
+      fySel.innerHTML = fys.map(fy => `<option value="${fy}">${fy}</option>`).join('');
+
+      if (overrideYear) {
+        const m = overrideYear.toString().match(/\d{4}/);
+        const matchFy = m ? `${m[0]} (Jan-Dec)` : null;
+        if (matchFy && Array.from(fySel.options).some(o => o.value === matchFy)) {
+          fySel.value = matchFy;
+          return;
+        }
+      }
+
+      if (prevVal && Array.from(fySel.options).some(o => o.value === prevVal)) {
+        fySel.value = prevVal;
+      } else if (Array.from(fySel.options).some(o => o.value === curFy)) {
+        fySel.value = curFy;
+      } else if (fySel.options.length > 0) {
+        fySel.selectedIndex = 0;
+      }
+    }
+
+    function populateChartYears() {
+      const yrSel = document.getElementById('chartYearSel');
+      if (!yrSel) return;
+      const curYear = new Date().getFullYear();
+      const yrSet = new Set();
+      for (let y = curYear - 4; y <= curYear + 8; y++) {
+        yrSet.add(y);
+      }
+      allData.forEach(r => {
+        if (r.year) yrSet.add(parseInt(r.year));
+        if (r.date) {
+          const d = new Date(r.date);
+          if (!isNaN(d)) yrSet.add(d.getFullYear());
+        }
+      });
+      const sortedYears = Array.from(yrSet).filter(Boolean).sort((a, b) => b - a);
+      const prev = yrSel.value || 'all';
+      yrSel.innerHTML = `<option value="all">All Years</option>` +
+        sortedYears.map(y => `<option value="${y}">${y}</option>`).join('');
+      if (Array.from(yrSel.options).some(o => o.value === prev)) {
+        yrSel.value = prev;
+      }
+    }
+
+    function load() {
+      agents = Auth.getAccessibleAgents(DB.getAgents());
+      const am = {}; agents.forEach(a => am[a.id] = a);
+      allData = DB.getCapital().map(r => ({ ...r, agentName: am[r.agentId]?.name || 'Unknown' }))
+        .sort((a, b) => {
+          const tB = getRecordTimestamp(b);
+          const tA = getRecordTimestamp(a);
+          if (tB !== tA) return tB - tA;
+          const cB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          const cA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          return cB - cA;
+        });
+
+      ['agentSel', 'entAgent'].forEach(id => {
+        const el = document.getElementById(id); if (!el) return;
+        el.innerHTML = `<option value="">${id === 'agentSel' ? 'All Agents' : 'Select Agent'}</option>`;
+        agents.forEach(a => el.innerHTML += `<option value="${a.id}">${a.name}</option>`);
+      });
+      const capSumAg = document.getElementById('capSummaryAgent');
+      if (capSumAg) {
+        const prevCapAg = capSumAg.value || '';
+        capSumAg.innerHTML = '<option value="">All Agents</option>' +
+          agents.map(a => `<option value="${a.id}" ${a.id === prevCapAg ? 'selected' : ''}>${a.name} (${a.code || a.outletCode || 'Agent'})</option>`).join('');
+      }
+
+      populateFiscalYears();
+      populateChartYears();
+      applyFilters();
+      renderChart();
+      renderFiscalYearComparison();
+    }
+
+    function applyFilters() {
+      let d = [...allData];
+      const agent = document.getElementById('agentSel').value;
+      const selectedFY = document.getElementById('fiscalYearSel')?.value || 'all';
+      const type = document.getElementById('typeSel').value;
+      const from = document.getElementById('dateFrom').value;
+      const to = document.getElementById('dateTo').value;
+
+      if (agent) d = d.filter(r => r.agentId === agent);
+      if (selectedFY && selectedFY !== 'all') {
+        d = d.filter(r => getRecordFiscalYear(r) === selectedFY);
+      }
+      if (type) d = d.filter(r => r.type === type);
+      if (from) d = d.filter(r => r.date >= from);
+      if (to) d = d.filter(r => r.date <= to);
+
+      filteredData = d;
+      page = 1;
+
+      // ── KPI 1: Total Capital ─────────────────────────
+      let totalCapital = 0;
+      if (agent) {
+        const agRecs = d.filter(r => r.agentId === agent);
+        if (agRecs.length > 0) {
+          totalCapital = getRecordTotalCapital(agRecs[0]);
+        }
+      } else {
+        const latestAgentMap = {};
+        d.forEach(r => {
+          if (!latestAgentMap[r.agentId]) {
+            latestAgentMap[r.agentId] = r;
+          }
+        });
+        totalCapital = Object.values(latestAgentMap).reduce((sum, r) => sum + getRecordTotalCapital(r), 0);
+      }
+
+      // ── Determine Active Month for Cards 2, 3, 4, 5, 6, 8 ────
+      let activeLatestRec = null;
+      if (agent) {
+        const agRecs = d.filter(r => r.agentId === agent);
+        activeLatestRec = agRecs.length > 0 ? agRecs[0] : null;
+      } else {
+        activeLatestRec = d.length > 0 ? d[0] : null;
+      }
+      const monthStr = getRecordMonthLabel(activeLatestRec);
+
+      // ── Helper to sum metric across latest entries per agent ────
+      function sumMetricAcrossLatest(metricFn) {
+        if (agent) {
+          const agRecs = d.filter(r => r.agentId === agent);
+          return agRecs.length > 0 ? metricFn(agRecs[0]) : 0;
+        } else {
+          const latestPerAgent = {};
+          d.forEach(r => {
+            if (!latestPerAgent[r.agentId]) {
+              latestPerAgent[r.agentId] = r;
+            }
+          });
+          return Object.values(latestPerAgent).reduce((sum, r) => sum + metricFn(r), 0);
+        }
+      }
+
+      // ── Card 2: Monthly Commission (Profit in <Month>) ──
+      const monthlyCommission = sumMetricAcrossLatest(getRecordMonthlyCommission);
+      const commMonthLbl = document.getElementById('commMonthLbl');
+      if (commMonthLbl) commMonthLbl.textContent = monthStr;
+
+      // ── Card 3: Cost (Total Cost in <Month>) ─────────────
+      const monthlyCost = sumMetricAcrossLatest(getRecordMonthlyCost);
+      const costMonthLbl = document.getElementById('costMonthLbl');
+      if (costMonthLbl) costMonthLbl.textContent = monthStr;
+
+      // ── Card 4: Govt. AIT Charges (Govt. AIT in <Month>) ─
+      const monthlyAit = sumMetricAcrossLatest(getRecordGovtAit);
+      const aitMonthLbl = document.getElementById('aitMonthLbl');
+      if (aitMonthLbl) aitMonthLbl.textContent = monthStr;
+
+      // ── Card 5: Total Commission (Total Profit = of Worksheet) ──
+      const totalCommission = sumMetricAcrossLatest(getRecordTotalCommission);
+      const commTotalMonthLbl = document.getElementById('commTotalMonthLbl');
+      if (commTotalMonthLbl) commTotalMonthLbl.textContent = monthStr;
+
+      // ── Card 6: Total Cost (Total Cost = of worksheet) ──
+      const totalCostWorksheet = sumMetricAcrossLatest(getRecordTotalCost);
+      const totCostMonthLbl = document.getElementById('totCostMonthLbl');
+      if (totCostMonthLbl) totCostMonthLbl.textContent = monthStr;
+
+      // ── Card 7: Total Govt. AIT (Fiscal Year: Jan to Dec) ──
+      let fyAitRecords = allData;
+      if (selectedFY !== 'all') {
+        fyAitRecords = allData.filter(r => getRecordFiscalYear(r) === selectedFY);
+      }
+      if (agent) {
+        fyAitRecords = fyAitRecords.filter(r => r.agentId === agent);
+      }
+      const totalFyAit = fyAitRecords.reduce((sum, r) => sum + getRecordGovtAit(r), 0);
+      const fyAitLbl = document.getElementById('fyAitLbl');
+      if (fyAitLbl) {
+        fyAitLbl.textContent = selectedFY === 'all' ? '(All FY)' : `(${formatFiscalYearLabel(selectedFY)})`;
+      }
+
+      // ── Card 8: Profit (Summary Profit - shows minus figure on loss) ─
+      const profitVal = sumMetricAcrossLatest(getRecordProfit);
+      const profitMonthLbl = document.getElementById('profitMonthLbl');
+      const profitKpiIcon = document.getElementById('profitKpiIcon');
+      const profitKpiLabel = document.getElementById('profitKpiLabel');
+      if (profitMonthLbl) profitMonthLbl.textContent = monthStr;
+      if (profitVal < 0) {
+        if (profitKpiIcon) profitKpiIcon.className = 'kpi-icon red';
+        if (profitKpiLabel) profitKpiLabel.innerHTML = `Loss / Differ <span id="profitMonthLbl" style="font-size:11px;opacity:0.85;font-weight:600;color:var(--gold);">${monthStr}</span>`;
+      } else {
+        if (profitKpiIcon) profitKpiIcon.className = 'kpi-icon green';
+        if (profitKpiLabel) profitKpiLabel.innerHTML = `Profit <span id="profitMonthLbl" style="font-size:11px;opacity:0.85;font-weight:600;color:var(--gold);">${monthStr}</span>`;
+      }
+
+      // ── Animate KPI Counter Displays ────────────────────
+      const capEl = document.getElementById('totalCap');
+      const commEl = document.getElementById('monthlyCommKpi');
+      const costEl = document.getElementById('monthlyCostKpi');
+      const aitEl = document.getElementById('monthlyAitKpi');
+      const totCommEl = document.getElementById('totalCommKpi');
+      const totCostEl = document.getElementById('totalCostKpi');
+      const fyAitEl = document.getElementById('totalFyAitKpi');
+      const profitEl = document.getElementById('totalProfitKpi');
+
+      if (capEl) animateCount(capEl, Math.abs(totalCapital), 600, totalCapital < 0 ? '-৳' : '৳');
+      if (commEl) animateCount(commEl, Math.abs(monthlyCommission), 600, monthlyCommission < 0 ? '-৳' : '৳');
+      if (costEl) animateCount(costEl, Math.abs(monthlyCost), 600, monthlyCost < 0 ? '-৳' : '৳');
+      if (aitEl) animateCount(aitEl, Math.abs(monthlyAit), 600, monthlyAit < 0 ? '-৳' : '৳');
+      if (totCommEl) animateCount(totCommEl, Math.abs(totalCommission), 600, totalCommission < 0 ? '-৳' : '৳');
+      if (totCostEl) animateCount(totCostEl, Math.abs(totalCostWorksheet), 600, totalCostWorksheet < 0 ? '-৳' : '৳');
+      if (fyAitEl) animateCount(fyAitEl, Math.abs(totalFyAit), 600, totalFyAit < 0 ? '-৳' : '৳');
+      if (profitEl) animateCount(profitEl, Math.abs(profitVal), 600, profitVal < 0 ? '-৳' : '৳');
+
+      renderTable();
+      renderFiscalYearComparison();
+      renderChart();
+    }
+
+    // ── Fiscal Year Comparison Report Calculation ──────────
+    function getFyMetrics(fy, agentId = '') {
+      let recs = allData.filter(r => getRecordFiscalYear(r) === fy);
+      if (agentId) {
+        recs = recs.filter(r => r.agentId === agentId);
+      }
+
+      const monthlyCommission = recs.reduce((sum, r) => sum + getRecordMonthlyCommission(r), 0);
+      const monthlyCost = recs.reduce((sum, r) => sum + getRecordMonthlyCost(r), 0);
+      const monthlyAit = recs.reduce((sum, r) => sum + getRecordGovtAit(r), 0);
+      const totalCommission = recs.reduce((sum, r) => sum + getRecordTotalCommission(r), 0);
+      const profit = recs.reduce((sum, r) => sum + getRecordProfit(r), 0);
+      const totalCost = recs.reduce((sum, r) => sum + getRecordTotalCost(r), 0);
+      const totalGovtAit = recs.reduce((sum, r) => sum + getRecordGovtAit(r), 0);
+
+      return {
+        monthlyCommission,
+        monthlyCost,
+        monthlyAit,
+        totalCommission,
+        profit,
+        totalCost,
+        totalGovtAit,
+        count: recs.length
+      };
+    }
+
+    function renderFiscalYearComparison() {
+      const baseSel = document.getElementById('fyCompBase');
+      const targetSel = document.getElementById('fyCompTarget');
+      const tableBody = document.getElementById('fyCompTableBody');
+      const summaryStrip = document.getElementById('fyCompSummaryStrip');
+      const thBase = document.getElementById('thBaseFy');
+      const thTarget = document.getElementById('thTargetFy');
+      if (!tableBody) return;
+
+      const baseFy = baseSel?.value || getCurrentFiscalYear();
+      const targetFy = targetSel?.value || '';
+      const currentAgent = document.getElementById('agentSel')?.value || '';
+
+      if (thBase) thBase.textContent = `${formatFiscalYearLabel(baseFy)} (মূল)`;
+      if (thTarget) thTarget.textContent = `${formatFiscalYearLabel(targetFy)} (তুলনামূলক)`;
+
+      const base = getFyMetrics(baseFy, currentAgent);
+      const target = getFyMetrics(targetFy, currentAgent);
+
+      const items = [
+        { key: 'monthlyCommission', name: 'Monthly Commission', type: 'income', icon: 'ri-money-dollar-circle-line', color: '#10b981' },
+        { key: 'monthlyCost', name: 'Monthly Cost', type: 'expense', icon: 'ri-hand-coin-line', color: '#ef4444' },
+        { key: 'monthlyAit', name: 'Govt. AIT Charges', type: 'tax', icon: 'ri-government-line', color: '#a855f7' },
+        { key: 'totalCommission', name: 'Total Commission', type: 'income', icon: 'ri-coins-line', color: '#14b8a6' },
+        { key: 'profit', name: 'Profit', type: 'income', icon: 'ri-line-chart-line', color: '#eab308' },
+        { key: 'totalCost', name: 'Total Cost', type: 'expense', icon: 'ri-pie-chart-2-line', color: '#f43f5e' },
+        { key: 'totalGovtAit', name: 'Total Govt. AIT', type: 'tax', icon: 'ri-scales-3-line', color: '#8b5cf6' }
+      ];
+
+      // Detailed Table Rows
+      tableBody.innerHTML = items.map(item => {
+        const bVal = base[item.key] || 0;
+        const tVal = target[item.key] || 0;
+        const diff = bVal - tVal;
+
+        let pctStr = '0.0%';
+        if (tVal !== 0) {
+          const p = ((diff / Math.abs(tVal)) * 100);
+          pctStr = (p > 0 ? '+' : '') + p.toFixed(1) + '%';
+        } else if (bVal !== 0) {
+          pctStr = bVal > 0 ? '+100.0%' : '-100.0%';
+        }
+
+        let diffFormatted = '';
+        if (diff > 0) diffFormatted = `<span style="color:#10b981; font-weight:700;">+${fmt(diff)}</span>`;
+        else if (diff < 0) diffFormatted = `<span style="color:#ef4444; font-weight:700;">-${fmt(Math.abs(diff))}</span>`;
+        else diffFormatted = `<span style="color:var(--text-muted);">৳0.00</span>`;
+
+        let trendBadge = '';
+        if (item.type === 'income') {
+          if (diff > 0) trendBadge = `<span class="badge badge-success" style="font-size:11px;"><i class="ri-arrow-up-line"></i> বৃদ্ধি</span>`;
+          else if (diff < 0) trendBadge = `<span class="badge badge-danger" style="font-size:11px;"><i class="ri-arrow-down-line"></i> হ্রাস</span>`;
+          else trendBadge = `<span class="badge" style="font-size:11px; opacity:0.6;">— অপরিবর্তিত</span>`;
+        } else {
+          // expense or tax: lower is savings
+          if (diff < 0) trendBadge = `<span class="badge badge-success" style="font-size:11px;"><i class="ri-arrow-down-line"></i> খরচ সাশ্রয়</span>`;
+          else if (diff > 0) trendBadge = `<span class="badge badge-warning" style="font-size:11px;"><i class="ri-arrow-up-line"></i> খরচ বৃদ্ধি</span>`;
+          else trendBadge = `<span class="badge" style="font-size:11px; opacity:0.6;">— অপরিবর্তিত</span>`;
+        }
+
+        return `
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+            <td style="padding:10px 14px; font-weight:600; display:flex; align-items:center; gap:8px;">
+              <i class="${item.icon}" style="color:${item.color}; font-size:16px;"></i>
+              <span>${item.name}</span>
+            </td>
+            <td style="padding:10px 14px; text-align:right; font-weight:700; color:var(--text-primary);">${fmt(bVal)}</td>
+            <td style="padding:10px 14px; text-align:right; color:var(--text-muted);">${fmt(tVal)}</td>
+            <td style="padding:10px 14px; text-align:right;">${diffFormatted}</td>
+            <td style="padding:10px 14px; text-align:center; font-weight:600; color:${diff >= 0 ? '#10b981' : '#ef4444'};">${pctStr}</td>
+            <td style="padding:10px 14px; text-align:center;">${trendBadge}</td>
+          </tr>
+        `;
+      }).join('');
+
+      // Top Summary Strip
+      if (summaryStrip) {
+        const profitDiff = base.profit - target.profit;
+        const commDiff = base.totalCommission - target.totalCommission;
+        const costDiff = base.totalCost - target.totalCost;
+        const aitDiff = base.totalGovtAit - target.totalGovtAit;
+
+        summaryStrip.innerHTML = `
+          <div style="background:rgba(234,179,8,0.07); border:1px solid rgba(234,179,8,0.25); border-radius:8px; padding:10px 14px;">
+            <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Profit ব্যবধান</div>
+            <div style="font-size:16px; font-weight:800; color:${profitDiff >= 0 ? '#eab308' : '#ef4444'};">
+              ${profitDiff >= 0 ? '+' : '-'}${fmt(Math.abs(profitDiff))}
+            </div>
+            <div style="font-size:11px; opacity:0.8; margin-top:2px;">
+              ${profitDiff >= 0 ? '▲ গত অর্থবছরের চেয়ে বেশি লাভ' : '▼ গত অর্থবছরের চেয়ে কম লাভ'}
+            </div>
+          </div>
+          <div style="background:rgba(20,184,166,0.07); border:1px solid rgba(20,184,166,0.25); border-radius:8px; padding:10px 14px;">
+            <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Total Commission ব্যবধান</div>
+            <div style="font-size:16px; font-weight:800; color:${commDiff >= 0 ? '#14b8a6' : '#ef4444'};">
+              ${commDiff >= 0 ? '+' : '-'}${fmt(Math.abs(commDiff))}
+            </div>
+            <div style="font-size:11px; opacity:0.8; margin-top:2px;">
+              ${commDiff >= 0 ? '▲ কমিশন প্রবৃদ্ধি অর্জিত' : '▼ কমিশন হ্রাস পেয়েছে'}
+            </div>
+          </div>
+          <div style="background:rgba(239,68,68,0.07); border:1px solid rgba(239,68,68,0.25); border-radius:8px; padding:10px 14px;">
+            <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Total Cost ব্যবধান</div>
+            <div style="font-size:16px; font-weight:800; color:${costDiff <= 0 ? '#10b981' : '#f43f5e'};">
+              ${costDiff >= 0 ? '+' : '-'}${fmt(Math.abs(costDiff))}
+            </div>
+            <div style="font-size:11px; opacity:0.8; margin-top:2px;">
+              ${costDiff <= 0 ? '▼ খরচ সাশ্রয় হয়েছে' : '▲ গত বছরের চেয়ে মোট খরচ বেশি'}
+            </div>
+          </div>
+          <div style="background:rgba(139,92,246,0.07); border:1px solid rgba(139,92,246,0.25); border-radius:8px; padding:10px 14px;">
+            <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Govt. AIT ব্যবধান</div>
+            <div style="font-size:16px; font-weight:800; color:#a78bfa;">
+              ${aitDiff >= 0 ? '+' : '-'}${fmt(Math.abs(aitDiff))}
+            </div>
+            <div style="font-size:11px; opacity:0.8; margin-top:2px;">
+              ${aitDiff >= 0 ? '▲ সরকারি ট্যাক্স বেশি জমা' : '▼ ট্যাক্স কম জমা হয়েছে'}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // ── Dynamic Chart Rendering with Models, Metrics, & Date Filters ─
+    function renderChart() {
+      const metric = document.getElementById('chartMetricSel')?.value || 'totalCapital';
+      const monthFilter = document.getElementById('chartMonthSel')?.value || 'all';
+      const yearFilter = document.getElementById('chartYearSel')?.value || 'all';
+      const chartModel = document.getElementById('chartModelSel')?.value || 'bar';
+
+      const METRIC_CONFIG = {
+        totalCapital: { label: 'Total Capital', color: 'rgba(56,189,248,0.85)', border: '#38bdf8', icon: 'ri-funds-line', getter: getRecordTotalCapital, mode: 'latest' },
+        monthlyCommission: { label: 'Monthly Commission', color: 'rgba(16,185,129,0.85)', border: '#10b981', icon: 'ri-money-dollar-circle-line', getter: getRecordMonthlyCommission, mode: 'sum' },
+        monthlyCost: { label: 'Cost', color: 'rgba(239,68,68,0.85)', border: '#ef4444', icon: 'ri-hand-coin-line', getter: getRecordMonthlyCost, mode: 'sum' },
+        monthlyAit: { label: 'Govt. AIT Charges', color: 'rgba(168,85,247,0.85)', border: '#a855f7', icon: 'ri-government-line', getter: getRecordGovtAit, mode: 'sum' },
+        totalCommission: { label: 'Total Commission', color: 'rgba(20,184,166,0.85)', border: '#14b8a6', icon: 'ri-coins-line', getter: getRecordTotalCommission, mode: 'sum' },
+        profit: { label: 'Profit', color: 'rgba(234,179,8,0.85)', border: '#eab308', icon: 'ri-line-chart-line', getter: getRecordProfit, mode: 'sum' },
+        totalCost: { label: 'Total Cost', color: 'rgba(244,63,94,0.85)', border: '#f43f5e', icon: 'ri-pie-chart-2-line', getter: getRecordTotalCost, mode: 'sum' },
+        totalGovtAit: { label: 'Total Govt. AIT', color: 'rgba(139,92,246,0.85)', border: '#8b5cf6', icon: 'ri-scales-3-line', getter: getRecordGovtAit, mode: 'sum' }
+      };
+
+      const cfg = METRIC_CONFIG[metric] || METRIC_CONFIG.totalCapital;
+      const titleEl = document.getElementById('chartCardTitle');
+      if (titleEl) {
+        let periodStr = '';
+        if (monthFilter !== 'all' && yearFilter !== 'all') periodStr = ` (${monthFilter} ${yearFilter})`;
+        else if (monthFilter !== 'all') periodStr = ` (${monthFilter})`;
+        else if (yearFilter !== 'all') periodStr = ` (${yearFilter})`;
+        titleEl.innerHTML = `<i class="${cfg.icon}"></i> ${cfg.label} by Agent${periodStr}`;
+      }
+
+      const agentData = {};
+      agents.forEach(a => agentData[a.name] = 0);
+
+      agents.forEach(a => {
+        let agRecs = allData.filter(r => r.agentId === a.id);
+        if (yearFilter !== 'all') {
+          agRecs = agRecs.filter(r => {
+            if (r.year && String(r.year) === String(yearFilter)) return true;
+            if (r.date && new Date(r.date).getFullYear() === parseInt(yearFilter)) return true;
+            return false;
+          });
+        }
+        if (monthFilter !== 'all') {
+          agRecs = agRecs.filter(r => {
+            if (r.month && r.month.toLowerCase() === monthFilter.toLowerCase()) return true;
+            if (r.date) {
+              const m = monthNames[new Date(r.date).getMonth()];
+              if (m && m.toLowerCase() === monthFilter.toLowerCase()) return true;
+            }
+            return false;
+          });
+        }
+
+        if (agRecs.length > 0) {
+          if (cfg.mode === 'latest') {
+            agentData[a.name] = cfg.getter(agRecs[0]);
+          } else {
+            agentData[a.name] = agRecs.reduce((sum, r) => sum + cfg.getter(r), 0);
+          }
+        }
+      });
+
+      if (chart) chart.destroy();
+
+      const palette = [
+        'rgba(56, 189, 248, 0.85)',
+        'rgba(16, 185, 129, 0.85)',
+        'rgba(234, 179, 8, 0.85)',
+        'rgba(239, 68, 68, 0.85)',
+        'rgba(168, 85, 247, 0.85)',
+        'rgba(20, 184, 166, 0.85)',
+        'rgba(244, 63, 94, 0.85)',
+        'rgba(99, 102, 241, 0.85)'
+      ];
+      const borders = [
+        '#38bdf8', '#10b981', '#eab308', '#ef4444',
+        '#a855f7', '#14b8a6', '#f43f5e', '#6366f1'
+      ];
+
+      const isRadial = chartModel === 'doughnut';
+      const isArea   = chartModel === 'area';
+      const isLine   = chartModel === 'line' || isArea;
+
+      // Create gradient fills for bar/line/area charts
+      const ctx = document.getElementById('capChart').getContext('2d');
+      let bgColors, borderColors;
+      if (isRadial) {
+        bgColors = palette.slice(0, Object.keys(agentData).length);
+        borderColors = borders.slice(0, Object.keys(agentData).length);
+      } else if (isLine) {
+        const grad = ctx.createLinearGradient(0, 0, 0, 260);
+        grad.addColorStop(0, 'rgba(245, 166, 35, 0.30)');
+        grad.addColorStop(0.5, 'rgba(245, 166, 35, 0.10)');
+        grad.addColorStop(1, 'rgba(245, 166, 35, 0.00)');
+        bgColors = grad;
+        borderColors = '#f5a623';
+      } else {
+        // bar: individual gradients per bar
+        const labels = Object.keys(agentData);
+        bgColors = labels.map((_, i) => {
+          const grad = ctx.createLinearGradient(0, 280, 0, 0);
+          const c = palette[i % palette.length];
+          grad.addColorStop(0, c.replace('0.85', '0.25'));
+          grad.addColorStop(0.5, c.replace('0.85', '0.65'));
+          grad.addColorStop(1, c);
+          return grad;
+        });
+        borderColors = labels.map((_, i) => borders[i % borders.length]);
+      }
+
+      const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 1200,
+          easing: 'easeOutQuart',
+          delay: (ctx) => ctx.dataIndex * 100
+        },
+        transitions: {
+          active: {
+            animation: { duration: 300 }
+          }
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            display: isRadial,
+            position: 'right',
+            labels: {
+              boxWidth: 14,
+              boxHeight: 14,
+              borderRadius: 4,
+              useBorderRadius: true,
+              font: { size: 11, family: 'Inter, sans-serif', weight: 500 },
+              color: '#c8d0e0',
+              padding: 14
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            titleFont: { size: 13, family: 'Outfit, sans-serif', weight: 700 },
+            titleColor: '#f8fafc',
+            bodyFont: { size: 12, family: 'Inter, sans-serif' },
+            bodyColor: '#cbd5e1',
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderWidth: 1,
+            cornerRadius: 10,
+            padding: { top: 10, bottom: 10, left: 14, right: 14 },
+            displayColors: true,
+            boxWidth: 10,
+            boxHeight: 10,
+            boxPadding: 6,
+            usePointStyle: true,
+            callbacks: {
+              label: c => ` ${c.label || cfg.label}: ${fmt(c.raw)}`
+            }
+          }
+        }
+      };
+
+      if (!isRadial) {
+        chartOptions.scales = {
+          x: {
+            grid: { display: false },
+            ticks: {
+              font: { size: 11, family: 'Inter, sans-serif', weight: 500 },
+              color: '#94a3b8',
+              maxRotation: 35,
+              minRotation: 0
+            },
+            border: { display: false }
+          },
+          y: {
+            grid: {
+              color: 'rgba(255,255,255,0.04)',
+              drawBorder: false
+            },
+            ticks: {
+              font: { size: 11, family: 'Inter, sans-serif' },
+              color: '#64748b',
+              padding: 8,
+              callback: v => (v < 0 ? '-৳' : '৳') + (Math.abs(v) >= 1000 ? (Math.abs(v) / 1000).toFixed(0) + 'k' : Math.abs(v))
+            },
+            border: { display: false },
+            beginAtZero: true
+          }
+        };
+      }
+
+      // Radial chart special styling
+      if (chartModel === 'doughnut') {
+        chartOptions.cutout = '65%';
+        chartOptions.plugins.legend.position = 'bottom';
+        chartOptions.animation = {
+          animateRotate: true,
+          animateScale: true,
+          duration: 1400,
+          easing: 'easeOutElastic'
+        };
+      }
+
+      // Area chart: special styling
+      if (isArea) {
+        chartOptions.animation = {
+          duration: 1400,
+          easing: 'easeOutQuart'
+        };
+        chartOptions.elements = {
+          line: {
+            tension: 0.3,
+            borderWidth: 2,
+            fill: 'origin'
+          },
+          point: {
+            radius: 0,
+            hoverRadius: 6,
+            backgroundColor: '#f5a623',
+            borderColor: '#ffffff',
+            borderWidth: 2
+          }
+        };
+      }
+
+      const datasetConfig = {
+        label: cfg.label,
+        data: Object.values(agentData),
+        backgroundColor: bgColors,
+        borderColor: isLine ? '#f5a623' : borderColors,
+        borderWidth: isLine ? 2 : (isRadial ? 2 : 0),
+        fill: isLine ? 'origin' : undefined,
+        borderRadius: chartModel === 'bar' ? { topLeft: 8, topRight: 8 } : undefined,
+        tension: isLine ? 0.15 : undefined,
+        pointRadius: isLine ? 0 : undefined,
+        pointHoverRadius: isLine ? 6 : undefined,
+        pointHoverBackgroundColor: '#f5a623',
+        pointHoverBorderColor: '#ffffff',
+        pointHoverBorderWidth: 2,
+        hoverOffset: isRadial ? 18 : undefined,
+        hoverBackgroundColor: chartModel === 'bar' ? (Array.isArray(bgColors) ? bgColors : cfg.color) : undefined,
+        barPercentage: 0.7,
+        categoryPercentage: 0.75
+      };
+
+      // Area/Line chart uses 'line' type in Chart.js
+      const chartJsType = isArea ? 'line' : chartModel;
+
+      chart = new Chart(ctx, {
+        type: chartJsType,
+        data: {
+          labels: Object.keys(agentData),
+          datasets: [datasetConfig]
+        },
+        options: chartOptions
+      });
+    }
+
+
+    function renderTable() {
+      document.getElementById('recCount').textContent = `(${filteredData.length})`;
+      const actH = document.getElementById('actH');
+      if (actH) actH.style.display = '';
+      const rows = filteredData.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+      const tbody = document.getElementById('tableBody');
+      if (!rows.length) { tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted" style="padding:30px">No records</td></tr>`; }
+      else {
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        tbody.innerHTML = rows.map(r => {
+          // Date with time and day
+          let dateHtml = '—';
+          if (r.date) {
+            const dObj = new Date(r.date);
+            const dateStr = fmtDate(r.date);
+            const dayName = dayNames[dObj.getDay()] || '';
+            const timeStr = r.createdAt ? new Date(r.createdAt).toLocaleTimeString('en-BD', { hour: '2-digit', minute: '2-digit', hour12: true }) : '';
+            dateHtml = `<div style="font-weight:600; color:var(--text-primary);">${dateStr}</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:1px;">${timeStr ? timeStr + ' • ' : ''}${dayName}</div>`;
+          }
+          // Month
+          const monthLabel = r.month ? `${r.month}${r.year ? ' ' + r.year : ''}` : (r.date ? monthNames[new Date(r.date).getMonth()] + ' ' + new Date(r.date).getFullYear() : '—');
+          // Monthly Commission
+          const mComm = getRecordMonthlyCommission(r);
+          // Monthly Cost
+          const mCost = getRecordMonthlyCost(r);
+          // Total Capital
+          const tCap = getRecordTotalCapital(r);
+          // User Name
+          const uName = r.userName || '—';
+
+          return `
+          <tr>
+            <td class="bold">${r.agentName}</td>
+            <td>${dateHtml}</td>
+            <td><span style="font-weight:600; color:var(--gold);">${monthLabel}</span></td>
+            <td class="text-success bold">${fmt(mComm)}</td>
+            <td class="text-danger bold">${fmt(mCost)}</td>
+            <td class="bold" style="color:var(--blue-bright);">${fmt(tCap)}</td>
+            <td style="font-weight:500; color:var(--text-primary);">${uName}</td>
+            <td>
+              <div class="flex gap-4 items-center">
+                ${r.sheetData ? `<button class="btn btn-ghost btn-sm btn-icon" title="View Full Sheet" onclick="viewSheet('${r.id}')"><i class="ri-file-text-line"></i></button>` : ''}
+                ${canEdit ? `<button class="btn btn-danger btn-sm btn-icon" onclick="del('${r.id}')" title="Delete"><i class="ri-delete-bin-line"></i></button>` : ''}
+              </div>
+            </td>
+          </tr>`;
+        }).join('');
+      }
+      const total = Math.ceil(filteredData.length / PER_PAGE);
+      const pag = document.getElementById('pagination');
+      if (total <= 1) { pag.innerHTML = ''; return; }
+      pag.innerHTML = Array.from({ length: total }, (_, i) => `<div class="page-btn${i + 1 === page ? ' active' : ''}" onclick="goPage(${i + 1})">${i + 1}</div>`).join('');
+    }
+
+    function goPage(p) { page = p; renderTable(); }
+
+    function del(id) {
+      Confirm.show('Delete this capital entry?', () => { DB.deleteCapital(id); Toast.success('Deleted!'); load(); });
+    }
+
+    document.getElementById('exportBtn')?.addEventListener('click', () => {
+      exportCSV(filteredData, 'capital.csv', [{ key: 'agentName', label: 'Agent' }, { key: 'date', label: 'Date' }, { key: 'type', label: 'Type' }, { key: 'amount', label: 'Amount' }, { key: 'note', label: 'Note' }]);
+    });
+
+    ['agentSel', 'fiscalYearSel', 'typeSel', 'dateFrom', 'dateTo'].forEach(id => document.getElementById(id)?.addEventListener('change', applyFilters));
+    ['chartMetricSel', 'chartMonthSel', 'chartYearSel', 'chartModelSel'].forEach(id => document.getElementById(id)?.addEventListener('change', renderChart));
+    ['fyCompBase', 'fyCompTarget'].forEach(id => document.getElementById(id)?.addEventListener('change', renderFiscalYearComparison));
+
+    document.getElementById('clearFilters')?.addEventListener('click', () => {
+      ['agentSel', 'typeSel', 'dateFrom', 'dateTo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      const fyEl = document.getElementById('fiscalYearSel');
+      if (fyEl) fyEl.value = 'all';
+      applyFilters();
+    });
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // AGENT CAPITAL WORKSHEET LOGIC & CALCULATIONS
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function updateLabels() {
+      const monthSel = document.getElementById('month-select');
+      const yearInp = document.getElementById('year-input');
+      if (!monthSel || !yearInp) return;
+
+      const selMonthFull = monthSel.value;
+      const currentYear = parseInt(yearInp.value) || new Date().getFullYear();
+
+      let monthIndex = monthNames.indexOf(selMonthFull);
+      if (monthIndex < 0) monthIndex = 0;
+      const currentMonthStr = shortMonths[monthIndex] + '/' + currentYear;
+
+      // Previous Month
+      let prevIndex = monthIndex - 1;
+      let prevYear = currentYear;
+      if (prevIndex < 0) {
+        prevIndex = 11;
+        prevYear = currentYear - 1;
+      }
+      const prevMonthStr = shortMonths[prevIndex] + '/' + prevYear;
+
+      // Next Month for Opening Balance: Opening Balance (<পরবর্তীমাস>/<বছর>)
+      let nextIndex = (monthIndex + 1) % 12;
+      let nextYear = (monthIndex === 11) ? (currentYear + 1) : currentYear;
+
+      const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.innerText = txt; };
+      setText('balance-month', shortMonths[nextIndex]);
+      setText('balance-year', nextYear);
+      setText('lbl-profit-last', prevMonthStr);
+      setText('lbl-profit-curr', currentMonthStr);
+      setText('lbl-cost-last', prevMonthStr);
+      setText('lbl-cost-curr', currentMonthStr);
+      setText('lbl-ait-curr', currentMonthStr);
+      setText('note-date', currentMonthStr);
+    }
+
+    function initDateLogic() {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const yearInput = document.getElementById('year-input');
+      if (yearInput) {
+        if (!yearInput.value) yearInput.value = currentYear;
+        yearInput.addEventListener('input', () => { updateLabels(); calculate(); scheduleAgentDraftSave(); });
+      }
+      const monthSelect = document.getElementById('month-select');
+      if (monthSelect) {
+        if (!monthSelect.value) monthSelect.value = monthNames[now.getMonth()];
+        monthSelect.addEventListener('change', () => { updateLabels(); calculate(); scheduleAgentDraftSave(); });
+      }
+      updateLabels();
+    }
+
+    function convertNumberToWords(amount) {
+      let num = Math.floor(amount);
+      if (num === 0) return "Zero Taka Only";
+      if (num < 0) num = Math.abs(num);
+
+      var a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+      var b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+      function inWords(n) {
+        if ((n = n.toString()).length > 9) return 'overflow';
+        n = ('000000000' + n).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+        if (!n) return '';
+        var str = '';
+        str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+        str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+        str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+        str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+        str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
+        return str;
+      }
+
+      return (amount < 0 ? "Minus " : "") + inWords(num) + "Taka Only";
+    }
+
+    function parseNumber(str) {
+      if (!str) return 0;
+      return parseFloat(String(str).replace(/,/g, '')) || 0;
+    }
+
+    function formatNumber(num) {
+      return Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function unformatInput(el) {
+      if (el.readOnly) return;
+      let val = parseNumber(el.value);
+      el.value = val === 0 ? '' : val;
+    }
+
+    function formatInput(el) {
+      if (el.readOnly) return;
+      let val = parseFloat(el.value) || 0;
+      if (val !== 0) el.value = formatNumber(val);
+      else el.value = "";
+      calculate();
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // DYNAMIC PARTNERS (TABLE 1: CASH) LOGIC
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function escapeHtml(str) {
+      return String(str || '').replace(/"/g, '&quot;');
+    }
+
+    function getAgentDefaultPartners(agentId) {
+      // 1. Check if this agent already has any previous saved record in DB with partners
+      const pastRecords = allData.filter(r => r.agentId === agentId && r.sheetData && Array.isArray(r.sheetData.partners) && r.sheetData.partners.length > 0);
+      if (pastRecords.length > 0) {
+        return pastRecords[0].sheetData.partners.map(p => ({ name: p.name, amount: p.amount }));
+      }
+
+      // 2. Default for Techno Enterprise
+      const ag = agents.find(a => a.id === agentId);
+      const agName = (ag?.name || '').toLowerCase();
+      if (!agentId || (agName.includes('techno') && !agName.includes('new techno'))) {
+        return [
+          { name: 'Md Waliul Islam', amount: '800,000.00' },
+          { name: 'Md Sohel Rana', amount: '400,000.00' },
+          { name: 'Masud Ali', amount: '400,000.00' },
+          { name: 'Md Abdul Ahad', amount: '400,000.00' },
+          { name: 'Md Selim Sahed', amount: '400,000.00' }
+        ];
+      }
+
+      // 3. For new/other agents without prior data, provide starter editable partner rows
+      return [
+        { name: '', amount: '' },
+        { name: '', amount: '' }
+      ];
+    }
+
+    function renumberPartnerRows() {
+      const rows = document.querySelectorAll('#partners-table tr.partner-row');
+      rows.forEach((row, idx) => {
+        const slCell = row.querySelector('.partner-sl');
+        if (slCell) slCell.textContent = idx + 1;
+      });
+    }
+
+    function bindPartnerRowEvents() {
+      const tbody = document.getElementById('partners-table');
+      if (!tbody) return;
+
+      tbody.querySelectorAll('tr.partner-row').forEach(row => {
+        const nameInp = row.querySelector('.partner-name');
+        const amtInp = row.querySelector('.partner-amt');
+        const delBtn = row.querySelector('.del-partner-btn');
+
+        if (amtInp && !amtInp.dataset.bound) {
+          amtInp.dataset.bound = 'true';
+          amtInp.addEventListener('focus', () => unformatInput(amtInp));
+          amtInp.addEventListener('blur', () => formatInput(amtInp));
+          amtInp.addEventListener('input', () => { calculate(); scheduleAgentDraftSave(); });
+        }
+
+        if (nameInp && !nameInp.dataset.bound) {
+          nameInp.dataset.bound = 'true';
+          nameInp.addEventListener('input', scheduleAgentDraftSave);
+        }
+
+        if (delBtn && !delBtn.dataset.bound) {
+          delBtn.dataset.bound = 'true';
+          delBtn.addEventListener('click', () => {
+            const allRows = tbody.querySelectorAll('tr.partner-row');
+            if (allRows.length <= 1) {
+              if (nameInp) nameInp.value = '';
+              if (amtInp) amtInp.value = '';
+            } else {
+              row.remove();
+            }
+            renumberPartnerRows();
+            calculate();
+            scheduleAgentDraftSave();
+          });
+        }
+      });
+    }
+
+    function addPartnerRow(name = '', amount = '') {
+      const tbody = document.getElementById('partners-table');
+      if (!tbody) return;
+      const count = tbody.querySelectorAll('tr.partner-row').length;
+      const tr = document.createElement('tr');
+      tr.className = 'partner-row';
+      tr.innerHTML = `
+        <td class="center partner-sl">${count + 1}</td>
+        <td>
+          <input type="text" class="partner-name" value="${escapeHtml(name)}" placeholder="Partner Name" style="text-align:left; padding-left:6px;">
+        </td>
+        <td class="amt">
+          <input type="text" class="partner-amt" value="${amount}" placeholder="0.00">
+        </td>
+        <td class="center">
+          <button type="button" class="del-partner-btn" title="Remove" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:15px; padding:2px; line-height:1;">
+            <i class="ri-close-circle-line"></i>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+      bindPartnerRowEvents();
+      renumberPartnerRows();
+      calculate();
+      scheduleAgentDraftSave();
+      tr.querySelector('.partner-name')?.focus();
+    }
+
+    function renderPartnerRows(list) {
+      const tbody = document.getElementById('partners-table');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      const partners = (Array.isArray(list) && list.length > 0) ? list : [{ name: '', amount: '' }];
+
+      partners.forEach((p, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'partner-row';
+        tr.innerHTML = `
+          <td class="center partner-sl">${idx + 1}</td>
+          <td>
+            <input type="text" class="partner-name" value="${escapeHtml(p.name || '')}" placeholder="Partner Name" style="text-align:left; padding-left:6px;">
+          </td>
+          <td class="amt">
+            <input type="text" class="partner-amt" value="${p.amount || ''}" placeholder="0.00">
+          </td>
+          <td class="center">
+            <button type="button" class="del-partner-btn" title="Remove" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:15px; padding:2px; line-height:1;">
+              <i class="ri-close-circle-line"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      bindPartnerRowEvents();
+      renumberPartnerRows();
+    }
+
+    function getPartnerData() {
+      const rows = document.querySelectorAll('#partners-table tr.partner-row');
+      const partners = [];
+      let sum = 0;
+      rows.forEach((row, idx) => {
+        const nameEl = row.querySelector('.partner-name');
+        const amtEl = row.querySelector('.partner-amt');
+        const name = nameEl ? nameEl.value.trim() : '';
+        const amtStr = amtEl ? amtEl.value.trim() : '';
+        const amtNum = parseNumber(amtStr);
+        sum += amtNum;
+        partners.push({ sl: idx + 1, name: name, amount: amtStr, numAmount: amtNum });
+      });
+      return { partners, sum };
+    }
+
+    function calculate() {
+      // Table 1: Partners (Cash) -> Total Invest =
+      const { partners, sum: partnerSum } = getPartnerData();
+      const totalPartEl = document.getElementById('total-partners');
+      if (totalPartEl) totalPartEl.innerText = formatNumber(partnerSum);
+
+      // Table 2: Calculations
+      let opCash = parseNumber(document.getElementById('opening-cash')?.value);
+      let otherCash = parseNumber(document.getElementById('other-cash')?.value);
+      let totalCash = opCash + otherCash; // Total =
+      const totalCashEl = document.getElementById('total-cash');
+      if (totalCashEl) totalCashEl.innerText = formatNumber(totalCash);
+
+      let pLast = parseNumber(document.getElementById('profit-last')?.value);
+      let pNov = parseNumber(document.getElementById('profit-nov')?.value);
+      let totalProfit = pLast + pNov; // Total Profit =
+      const totalProfitEl = document.getElementById('total-profit');
+      if (totalProfitEl) totalProfitEl.innerText = formatNumber(totalProfit);
+
+      let grandCash = totalCash + totalProfit; // Total Cash =
+      const grandCapEl = document.getElementById('grand-capital');
+      if (grandCapEl) grandCapEl.innerText = formatNumber(grandCash);
+
+      // Table 4: Cost
+      let cLast = parseNumber(document.getElementById('cost-last')?.value);
+      let cNov = parseNumber(document.getElementById('cost-nov')?.value);
+      let cGovt = parseNumber(document.getElementById('cost-govt')?.value);
+      let cComm = parseNumber(document.getElementById('cost-comm')?.value);
+      let totalCost = cLast + cNov + cGovt + cComm;
+      const totalCostEl = document.getElementById('total-cost');
+      if (totalCostEl) totalCostEl.innerText = formatNumber(totalCost);
+
+      // Table 5: Settlement
+      let netBalance = grandCash - totalCost;
+      let handCash = parseNumber(document.getElementById('hand-cash')?.value);
+      let settlementCash = netBalance - handCash;
+      const settleCashEl = document.getElementById('settlement-cash');
+      if (settleCashEl) settleCashEl.innerText = formatNumber(settlementCash);
+
+      let settlementTotal = settlementCash + handCash; // = Total Capital (Table 5)
+      const settleTotEl = document.getElementById('settlement-total');
+      if (settleTotEl) settleTotEl.innerText = formatNumber(settlementTotal);
+
+      // Table 3: Opening Balance = Table 5 Total Capital (settlementTotal)
+      const topBalEl = document.getElementById('top-balance');
+      if (topBalEl) topBalEl.innerText = formatNumber(settlementTotal);
+
+      // Auto Update In-Word based on this Total Capital
+      const inwordEl = document.getElementById('in-word-text');
+      if (inwordEl) inwordEl.innerText = convertNumberToWords(settlementTotal);
+
+      // Table 3: Profit = Settlement Cash - partnerSum (সেই এজেন্টের পার্টনারদের সমপরিমাণ ক্যাপিটাল)
+      let profitAmount = settlementCash - partnerSum;
+      let labelCell = document.getElementById('profit-label');
+      let valCell = document.getElementById('summary-profit-val');
+      if (valCell) valCell.innerText = formatNumber(profitAmount);
+      if (labelCell && valCell) {
+        if (profitAmount < 0) {
+          labelCell.innerText = "Agent Cash Differ";
+          labelCell.style.color = "#ef4444";
+          valCell.style.color = "#ef4444";
+        } else {
+          labelCell.innerText = "Profit";
+          labelCell.style.color = "var(--text-primary)";
+          valCell.style.color = "var(--text-primary)";
+        }
+      }
+
+      scheduleAgentDraftSave();
+    }
+
+    function buildCapitalState() {
+      const state = {
+        inputs: {},
+        month: document.getElementById('month-select')?.value,
+        year: document.getElementById('year-input')?.value
+      };
+      const ids = [
+        'opening-cash', 'other-cash', 'profit-last', 'profit-nov',
+        'cost-last', 'cost-nov', 'cost-govt', 'cost-comm', 'hand-cash'
+      ];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) state.inputs[id] = el.value.trim();
+      });
+
+      const { partners } = getPartnerData();
+      state.partners = partners.map(p => ({ sl: p.sl, name: p.name, amount: p.amount }));
+
+      state.calculated = {
+        totalInvest: document.getElementById('total-partners')?.innerText || '0.00',
+        totalPartners: document.getElementById('total-partners')?.innerText || '0.00',
+        totalCashCalc: document.getElementById('total-cash')?.innerText || '0.00',
+        totalCash: document.getElementById('total-cash')?.innerText || '0.00',
+        totalProfit: document.getElementById('total-profit')?.innerText || '0.00',
+        totalGrandCash: document.getElementById('grand-capital')?.innerText || '0.00',
+        totalCapital: document.getElementById('grand-capital')?.innerText || '0.00',
+        totalCost: document.getElementById('total-cost')?.innerText || '0.00',
+        netBalance: document.getElementById('top-balance')?.innerText || '0.00',
+        settlementCash: document.getElementById('settlement-cash')?.innerText || '0.00',
+        settlementTotal: document.getElementById('settlement-total')?.innerText || '0.00',
+        inword: document.getElementById('in-word-text')?.innerText || 'Zero Taka Only',
+        summaryProfit: document.getElementById('summary-profit-val')?.innerText || '0.00',
+        profitLabel: document.getElementById('profit-label')?.innerText || 'Profit',
+        nextMonth: document.getElementById('balance-month')?.innerText || '',
+        nextYear: document.getElementById('balance-year')?.innerText || ''
+      };
+      return state;
+    }
+
+    function resetCapitalForm(clearAgentDraft = false) {
+      const agId = document.getElementById('entAgent')?.value;
+      if (clearAgentDraft && agId) {
+        const store = getAllDrafts();
+        if (store.drafts && store.drafts[agId]) {
+          delete store.drafts[agId];
+          localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(store));
+        }
+      }
+
+      renderPartnerRows(getAgentDefaultPartners(agId));
+
+      const ids = [
+        'opening-cash', 'other-cash', 'profit-last', 'profit-nov',
+        'cost-last', 'cost-nov', 'cost-govt', 'cost-comm', 'hand-cash'
+      ];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      initDateLogic();
+      calculate();
+    }
+
+    function bindCapitalInputs() {
+      const ids = [
+        'opening-cash', 'other-cash', 'profit-last', 'profit-nov',
+        'cost-last', 'cost-nov', 'cost-govt', 'cost-comm', 'hand-cash'
+      ];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('focus', () => unformatInput(el));
+          el.addEventListener('blur', () => formatInput(el));
+          el.addEventListener('input', calculate);
+        }
+      });
+
+      document.getElementById('entFiscalYear')?.addEventListener('change', function () {
+        const m = this.value.match(/\d{4}/);
+        if (m) {
+          const yr = parseInt(m[0]);
+          const yInp = document.getElementById('year-input');
+          if (yInp) {
+            yInp.value = yr;
+            updateLabels();
+            calculate();
+          }
+        }
+        scheduleAgentDraftSave();
+      });
+
+      document.getElementById('entDate')?.addEventListener('change', function () {
+        if (this.value) {
+          const d = new Date(this.value);
+          if (!isNaN(d)) {
+            const yr = d.getFullYear();
+            const yInp = document.getElementById('year-input');
+            if (yInp) yInp.value = yr;
+            const targetFy = `${yr} (Jan-Dec)`;
+            const fySel = document.getElementById('entFiscalYear');
+            if (fySel && Array.from(fySel.options).some(o => o.value === targetFy)) {
+              fySel.value = targetFy;
+            }
+            const mSel = document.getElementById('month-select');
+            if (mSel) mSel.value = monthNames[d.getMonth()];
+            updateLabels();
+            calculate();
+          }
+        }
+        scheduleAgentDraftSave();
+      });
+
+      document.getElementById('year-input')?.addEventListener('input', function () {
+        const val = this.value;
+        if (val && val.length === 4) {
+          const targetFy = `${val} (Jan-Dec)`;
+          const fySel = document.getElementById('entFiscalYear');
+          if (fySel && Array.from(fySel.options).some(o => o.value === targetFy)) {
+            fySel.value = targetFy;
+          }
+        }
+        scheduleAgentDraftSave();
+      });
+
+      document.getElementById('addPartnerBtn')?.addEventListener('click', () => addPartnerRow('', ''));
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // MULTI-AGENT DRAFT PERSISTENCE
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const DRAFT_STORAGE_KEY = 'teNte_agent_capital_drafts_v2';
+    let currentDraftAgentId = '';
+    let draftDebounceTimer = null;
+
+    function getAllDrafts() {
+      try {
+        return JSON.parse(localStorage.getItem(DRAFT_STORAGE_KEY) || '{"lastAgentId":"","drafts":{}}');
+      } catch (e) {
+        return { lastAgentId: '', drafts: {} };
+      }
+    }
+
+    function saveCurrentAgentDraft(agentId) {
+      if (!agentId) return;
+      const store = getAllDrafts();
+      if (!store.drafts) store.drafts = {};
+
+      const ids = [
+        'opening-cash', 'other-cash', 'profit-last', 'profit-nov',
+        'cost-last', 'cost-nov', 'cost-govt', 'cost-comm', 'hand-cash'
+      ];
+      const inputVals = {};
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) inputVals[id] = el.value;
+      });
+
+      const { partners } = getPartnerData();
+
+      store.lastAgentId = agentId;
+      store.drafts[agentId] = {
+        agentId: agentId,
+        date: document.getElementById('entDate')?.value || '',
+        month: document.getElementById('month-select')?.value || '',
+        year: document.getElementById('year-input')?.value || '',
+        fiscalYear: document.getElementById('entFiscalYear')?.value || getCurrentFiscalYear(),
+        partners: partners.map(p => ({ name: p.name, amount: p.amount })),
+        inputs: inputVals,
+        updatedAt: new Date().toISOString()
+      };
+
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(store));
+    }
+
+    function scheduleAgentDraftSave() {
+      if (draftDebounceTimer) clearTimeout(draftDebounceTimer);
+      draftDebounceTimer = setTimeout(() => {
+        const agId = document.getElementById('entAgent')?.value;
+        if (agId) saveCurrentAgentDraft(agId);
+      }, 150);
+    }
+
+    function loadAgentDraft(agentId) {
+      if (!agentId) return;
+      const store = getAllDrafts();
+      const draft = store.drafts ? store.drafts[agentId] : null;
+
+      if (draft) {
+        if (draft.date && document.getElementById('entDate')) {
+          document.getElementById('entDate').value = draft.date;
+        }
+        if (draft.month && document.getElementById('month-select')) {
+          document.getElementById('month-select').value = draft.month;
+        }
+        if (draft.year && document.getElementById('year-input')) {
+          document.getElementById('year-input').value = draft.year;
+        }
+        if (draft.fiscalYear && document.getElementById('entFiscalYear')) {
+          document.getElementById('entFiscalYear').value = draft.fiscalYear;
+        } else {
+          populateAddFormFiscalYears(draft.year || null);
+        }
+
+        // Render partners for this agent
+        if (Array.isArray(draft.partners) && draft.partners.length > 0) {
+          renderPartnerRows(draft.partners);
+        } else {
+          renderPartnerRows(getAgentDefaultPartners(agentId));
+        }
+
+        const ids = [
+          'opening-cash', 'other-cash', 'profit-last', 'profit-nov',
+          'cost-last', 'cost-nov', 'cost-govt', 'cost-comm', 'hand-cash'
+        ];
+        ids.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.value = (draft.inputs && draft.inputs[id] !== undefined) ? draft.inputs[id] : '';
+          }
+        });
+      } else {
+        // Clear fields for new agent without draft
+        renderPartnerRows(getAgentDefaultPartners(agentId));
+
+        const ids = [
+          'opening-cash', 'other-cash', 'profit-last', 'profit-nov',
+          'cost-last', 'cost-nov', 'cost-govt', 'cost-comm', 'hand-cash'
+        ];
+        ids.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        const now = new Date();
+        if (document.getElementById('entDate') && !document.getElementById('entDate').value) {
+          document.getElementById('entDate').value = now.toISOString().slice(0, 10);
+        }
+        if (document.getElementById('month-select')) {
+          document.getElementById('month-select').value = monthNames[now.getMonth()];
+        }
+        if (document.getElementById('year-input')) {
+          document.getElementById('year-input').value = now.getFullYear();
+        }
+        populateAddFormFiscalYears();
+      }
+
+      updateLabels();
+      calculate();
+    }
+
+    // View full sheet modal
+    window.viewSheet = function (id) {
+      const rec = allData.find(r => r.id === id);
+      if (!rec) return;
+
+      const titleEl = document.getElementById('viewSheetTitle');
+      if (titleEl) titleEl.innerHTML = `<i class="ri-file-text-line"></i> Capital Worksheet: ${rec.agentName} (${rec.month || ''} ${rec.year || ''})`;
+
+      const sd = rec.sheetData || {};
+      const inp = sd.inputs || {};
+      const calc = sd.calculated || {};
+
+      const partnersList = Array.isArray(sd.partners) && sd.partners.length > 0 ? sd.partners : (
+        sd.inputs && sd.inputs.p1 ? [
+          { sl: 1, name: 'Md Waliul Islam', amount: sd.inputs['p1'] || '800,000.00' },
+          { sl: 2, name: 'Md Sohel Rana', amount: sd.inputs['p2'] || '400,000.00' },
+          { sl: 3, name: 'Masud Ali', amount: sd.inputs['p3'] || '400,000.00' },
+          { sl: 4, name: 'Md Abdul Ahad', amount: sd.inputs['p4'] || '400,000.00' },
+          { sl: 5, name: 'Md Selim Sahed', amount: sd.inputs['p5'] || '400,000.00' }
+        ] : [
+          { sl: 1, name: 'Md Waliul Islam', amount: '800,000.00' },
+          { sl: 2, name: 'Md Sohel Rana', amount: '400,000.00' },
+          { sl: 3, name: 'Masud Ali', amount: '400,000.00' },
+          { sl: 4, name: 'Md Abdul Ahad', amount: '400,000.00' },
+          { sl: 5, name: 'Md Selim Sahed', amount: '400,000.00' }
+        ]
+      );
+
+      const mIdx = monthNames.indexOf(sd.month || rec.month);
+      let nIdx = mIdx >= 0 ? (mIdx + 1) % 12 : 0;
+      let nYear = (mIdx === 11) ? ((parseInt(sd.year || rec.year) || new Date().getFullYear()) + 1) : (sd.year || rec.year || '');
+      const nextMonthLabel = calc.nextMonth && calc.nextYear ? `${calc.nextMonth}/${calc.nextYear}` : `${shortMonths[nIdx]}/${nYear}`;
+
+      const body = document.getElementById('viewSheetBody');
+      body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:12px 18px; margin-bottom:16px;">
+          <div>
+            <div style="font-size:18px; font-weight:700; color:var(--text-primary);">${rec.agentName}</div>
+            <div style="font-size:13px; color:var(--text-muted);">Period: ${rec.month || sd.month || ''} ${rec.year || sd.year || ''} ${rec.note ? `• Note: ${rec.note}` : ''}</div>
+          </div>
+          <div style="display:flex; gap:20px; text-align:right;">
+            <div>
+              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Total Cash</div>
+              <div style="font-size:18px; font-weight:700; color:#ef4444;">${calc.totalGrandCash || calc.totalCapital || rec.totalCapital || '0.00'}</div>
+            </div>
+            <div>
+              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Total Cost</div>
+              <div style="font-size:18px; font-weight:700; color:#38bdf8;">${calc.totalCost || rec.totalCost || '0.00'}</div>
+            </div>
+            <div>
+              <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Total Capital</div>
+              <div style="font-size:20px; font-weight:800; color:var(--gold);">${calc.settlementTotal || rec.netBalance || fmt(rec.amount)}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ac-sheet-wrap">
+          <div class="ac-grid">
+            <!-- Left Column -->
+            <div>
+              <table class="ac-table">
+                <thead>
+                  <tr><th colspan="3" class="red-header">Cash</th></tr>
+                  <tr style="background:rgba(255,255,255,0.04);"><th style="width:12%; text-align:center;">No.</th><th style="text-align:left; padding-left:8px;">Name</th><th style="width:38%; text-align:right;">TK</th></tr>
+                </thead>
+                <tbody>
+                  ${partnersList.map(p => `
+                    <tr><td class="center">${p.sl}</td><td>${escapeHtml(p.name || '—')}</td><td class="amt">${p.amount || '0.00'}</td></tr>
+                  `).join('')}
+                  <tr class="total-row"><td colspan="2" style="text-align:right;">Total Invest = </td><td class="amt red-text">${calc.totalInvest || calc.totalPartners || '0.00'}</td></tr>
+                </tbody>
+              </table>
+
+              <table class="ac-table">
+                <thead>
+                  <tr style="background:rgba(255,255,255,0.04);"><th style="width:12%; text-align:center;">No.</th><th style="text-align:left; padding-left:8px;">Description</th><th style="width:38%; text-align:right;">TK</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td class="center">1</td><td><b>Opening Cash</b></td><td class="amt">${inp['opening-cash'] || '0.00'}</td></tr>
+                  <tr><td class="center">2</td><td>Others Income</td><td class="amt">${inp['other-cash'] || '0.00'}</td></tr>
+                  <tr class="total-row"><td colspan="2" style="text-align:right;">Total = </td><td class="amt red-text">${calc.totalCash || '0.00'}</td></tr>
+                  <tr><td class="center">3</td><td>Total Profit Last</td><td class="amt">${inp['profit-last'] || '0.00'}</td></tr>
+                  <tr><td class="center">4</td><td>Profit in Current</td><td class="amt">${inp['profit-nov'] || '0.00'}</td></tr>
+                  <tr class="total-row"><td colspan="2" style="text-align:right;">Total Profit = </td><td class="amt red-text">${calc.totalProfit || '0.00'}</td></tr>
+                  <tr class="total-row" style="background:rgba(239,68,68,0.12);"><td colspan="2" style="text-align:right;"><b>Total Cash = </b></td><td class="amt red-text" style="font-size:14px;">${calc.totalGrandCash || calc.totalCapital || '0.00'}</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+              <table class="ac-table">
+                <thead>
+                  <tr>
+                    <th class="teal-header" style="text-align:left; padding-left:8px;">Opening Balance (${nextMonthLabel})</th>
+                    <th class="teal-header" style="width:38%; text-align:right;">${calc.settlementTotal || calc.netBalance || '0.00'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td style="text-align:center; font-weight:bold;">${calc.profitLabel || 'Profit'}</td><td class="amt">${calc.summaryProfit || '0.00'}</td></tr>
+                </tbody>
+              </table>
+
+              <table class="ac-table">
+                <thead>
+                  <tr><th colspan="3" class="red-header">Cost</th></tr>
+                  <tr style="background:rgba(255,255,255,0.04);"><th style="width:12%; text-align:center;">No.</th><th style="text-align:left; padding-left:8px;">Description</th><th style="width:38%; text-align:right;">TK</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td class="center">1</td><td>Total Cost Last</td><td class="amt blue-text">${inp['cost-last'] || '0.00'}</td></tr>
+                  <tr><td class="center">2</td><td>Total Cost in Current</td><td class="amt">${inp['cost-nov'] || '0.00'}</td></tr>
+                  <tr><td class="center">3</td><td>Govt. AIT Charges</td><td class="amt">${inp['cost-govt'] || '0.00'}</td></tr>
+                  <tr><td class="center">4</td><td>Commission Loss</td><td class="amt">${inp['cost-comm'] || '0.00'}</td></tr>
+                  <tr class="total-row"><td colspan="2" style="text-align:right;">Total Cost = </td><td class="amt red-text">${calc.totalCost || '0.00'}</td></tr>
+                </tbody>
+              </table>
+
+              <table class="ac-table">
+                <tbody>
+                  <tr><td class="center" style="width:12%;">1</td><td>Settlement Cash</td><td class="amt red-text" style="width:38%;">${calc.settlementCash || '0.00'}</td></tr>
+                  <tr><td class="center">2</td><td>Hand Cash for Monthly Exp</td><td class="amt">${inp['hand-cash'] || '0.00'}</td></tr>
+                  <tr class="total-row"><td colspan="2" style="text-align:right;">Total Capital = </td><td class="amt red-text">${calc.settlementTotal || '0.00'}</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="ac-footer-note">
+            <span style="color:#ef4444;">In-Word:</span> <span style="font-weight:normal; margin-left:6px; color:var(--gold);">${calc.inword || 'Zero Taka Only'}</span>
+          </div>
+          <div class="ac-footer-note secondary-note">
+            <span style="color:#ef4444; font-weight:bold;">Note:</span> We all partners have read and signed the calculations in the above worksheet for the Month of <span style="font-weight:bold; color:var(--text-primary);">${sd.month || rec.month || ''}/${sd.year || rec.year || ''}</span>
+          </div>
+        </div>
+      `;
+
+      Modal.open('viewSheetModal');
+    };
+
+    // Agent dropdown change listener for Multi-Agent Drafts
+    document.getElementById('entAgent')?.addEventListener('change', function () {
+      const newAgentId = this.value;
+      if (currentDraftAgentId && currentDraftAgentId !== newAgentId) {
+        saveCurrentAgentDraft(currentDraftAgentId);
+      }
+      currentDraftAgentId = newAgentId;
+      if (newAgentId) {
+        loadAgentDraft(newAgentId);
+      } else {
+        resetCapitalForm(false);
+      }
+    });
+
+    if (canEdit) {
+      document.getElementById('addBtn').style.display = '';
+      document.getElementById('addBtn').addEventListener('click', () => {
+        const store = getAllDrafts();
+        const entAgent = document.getElementById('entAgent');
+
+        // Restore last selected agent if available
+        if (!entAgent.value && store.lastAgentId) {
+          const opt = Array.from(entAgent.options).find(o => o.value === store.lastAgentId);
+          if (opt) entAgent.value = store.lastAgentId;
+        }
+
+        if (entAgent.value) {
+          currentDraftAgentId = entAgent.value;
+          loadAgentDraft(entAgent.value);
+        } else {
+          currentDraftAgentId = '';
+          renderPartnerRows(getAgentDefaultPartners(''));
+          if (!document.getElementById('entDate').value) {
+            document.getElementById('entDate').value = new Date().toISOString().slice(0, 10);
+          }
+          updateLabels();
+          calculate();
+        }
+
+        Modal.open('addModal');
+      });
+
+      document.getElementById('resetAcBtn')?.addEventListener('click', () => {
+        resetCapitalForm(true);
+        Toast.info('Worksheet reset for current agent.');
+      });
+
+      document.getElementById('saveBtn').addEventListener('click', () => {
+        const agentId = document.getElementById('entAgent').value;
+        const date = document.getElementById('entDate').value;
+        if (!agentId) { Toast.error('Select an agent.'); return; }
+        if (!date) { Toast.error('Select a date.'); return; }
+
+        calculate();
+        saveCurrentAgentDraft(agentId); // Keep draft preserved upon save
+
+        const state = buildCapitalState();
+        const netBal = parseNumber(state.calculated.settlementTotal || state.calculated.netBalance);
+        const month = document.getElementById('month-select')?.value;
+        const year = document.getElementById('year-input')?.value;
+        const fiscalYear = document.getElementById('entFiscalYear')?.value || getCurrentFiscalYear();
+
+        const monthlyCommNum = parseNumber(state.inputs['profit-nov']);
+        const monthlyCostNum = parseNumber(state.inputs['cost-nov']);
+        const govtAitNum = parseNumber(state.inputs['cost-govt']);
+        const totalCommNum = parseNumber(state.calculated.totalProfit);
+        const totalCostNum = parseNumber(state.calculated.totalCost);
+        const totalGovtAitNum = govtAitNum;
+        const profitNum = parseNumber(state.calculated.summaryProfit);
+
+        DB.addCapital({
+          agentId,
+          date,
+          type: 'deposit',
+          amount: netBal.toFixed(2),
+          totalCapital: state.calculated.settlementTotal,
+          monthlyCommission: monthlyCommNum,
+          monthlyCost: monthlyCostNum,
+          monthlyAit: govtAitNum,
+          govtAit: govtAitNum,
+          totalCommission: totalCommNum,
+          totalCost: totalCostNum,
+          totalCostWorksheet: totalCostNum,
+          totalGovtAit: totalGovtAitNum,
+          profit: profitNum,
+          netBalance: state.calculated.settlementTotal,
+          month,
+          year,
+          fiscalYear,
+          userName: user.name || '',
+          note: `${fiscalYear} Worksheet`,
+          sheetData: state
+        });
+
+        Modal.close('addModal');
+        Toast.success('Agent Capital worksheet entry added successfully!');
+        load();
+      });
+    }
+
+    // Initialize Add Form Date Logic
+    function initDateLogic() {
+      const now = new Date();
+      const currentMonth = monthNames[now.getMonth()];
+      const currentYear = now.getFullYear();
+
+      const mSel = document.getElementById('month-select');
+      const yInp = document.getElementById('year-input');
+      const dInp = document.getElementById('entDate');
+
+      if (mSel) mSel.value = currentMonth;
+      if (yInp) yInp.value = currentYear;
+      if (dInp && !dInp.value) dInp.value = now.toISOString().slice(0, 10);
+
+      populateAddFormFiscalYears();
+      updateLabels();
+    }
+
+    initDateLogic();
+    bindCapitalInputs();
+    calculate();
+    load();
+
+    // Auto-restore draft on initial page load if agent was previously active
+    setTimeout(() => {
+      const store = getAllDrafts();
+      const entAgent = document.getElementById('entAgent');
+      if (entAgent && store.lastAgentId) {
+        const opt = Array.from(entAgent.options).find(o => o.value === store.lastAgentId);
+        if (opt) {
+          entAgent.value = store.lastAgentId;
+          currentDraftAgentId = store.lastAgentId;
+          loadAgentDraft(store.lastAgentId);
+        }
+      }
+    }, 100);
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // CAPITAL SUMMARY STATEMENT (MODAL, PRINT & PDF)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    let capSummaryDateFrom = '', capSummaryDateTo = '';
+
+    function initCapSummaryDateRange() {
+      const now = new Date();
+      const past = new Date();
+      past.setFullYear(now.getFullYear() - 1);
+      capSummaryDateFrom = past.toISOString().slice(0, 10);
+      capSummaryDateTo = now.toISOString().slice(0, 10);
+      const df = document.getElementById('capSummaryDateFrom');
+      const dt = document.getElementById('capSummaryDateTo');
+      if (df) df.value = capSummaryDateFrom;
+      if (dt) dt.value = capSummaryDateTo;
+    }
+
+    window.setCapSummaryDatePreset = function (preset) {
+      const now = new Date();
+      capSummaryDateTo = now.toISOString().slice(0, 10);
+      if (preset === '30d') {
+        const d = new Date(); d.setDate(d.getDate() - 30);
+        capSummaryDateFrom = d.toISOString().slice(0, 10);
+      } else if (preset === '6m') {
+        const d = new Date(); d.setMonth(d.getMonth() - 6);
+        capSummaryDateFrom = d.toISOString().slice(0, 10);
+      } else if (preset === '1y') {
+        const d = new Date(); d.setFullYear(d.getFullYear() - 1);
+        capSummaryDateFrom = d.toISOString().slice(0, 10);
+      } else if (preset === 'fy') {
+        const curYr = now.getFullYear();
+        capSummaryDateFrom = `${curYr}-01-01`;
+        capSummaryDateTo = `${curYr}-12-31`;
+      } else if (preset === 'all') {
+        capSummaryDateFrom = '2020-01-01';
+      }
+      const df = document.getElementById('capSummaryDateFrom');
+      const dt = document.getElementById('capSummaryDateTo');
+      if (df) df.value = capSummaryDateFrom;
+      if (dt) dt.value = capSummaryDateTo;
+      renderCapitalSummary();
+    };
+
+    window.onCapSummaryDateChange = function () {
+      const df = document.getElementById('capSummaryDateFrom')?.value;
+      const dt = document.getElementById('capSummaryDateTo')?.value;
+      if (df) capSummaryDateFrom = df;
+      if (dt) capSummaryDateTo = dt;
+      renderCapitalSummary();
+    };
+
+    window.onCapSummaryFilterChange = function () {
+      const ag = document.getElementById('capSummaryAgent');
+      if (ag) ag.title = ag.options[ag.selectedIndex]?.text || '';
+      const ct = document.getElementById('capSummaryCategory');
+      if (ct) ct.title = ct.options[ct.selectedIndex]?.text || '';
+      renderCapitalSummary();
+    };
+
+    window.openCapitalSummaryModal = function () {
+      if (!capSummaryDateFrom || !capSummaryDateTo) {
+        initCapSummaryDateRange();
+      }
+      const agentSel = document.getElementById('capSummaryAgent');
+      if (agentSel) {
+        agentSel.innerHTML = '<option value="">All Agents</option>' +
+          agents.map(a => `<option value="${a.id}">${a.name} (${a.code || a.outletCode || 'Agent'})</option>`).join('');
+      }
+      renderCapitalSummary();
+      Modal.open('capSummaryModal');
+    };
+
+    function getRecordMonthSortKey(r) {
+      let y = null, mIdx = -1;
+      if (r.month) {
+        mIdx = monthNames.findIndex(m => m.toLowerCase() === r.month.toLowerCase());
+        if (mIdx < 0) mIdx = shortMonths.findIndex(m => m.toLowerCase() === r.month.toLowerCase());
+      }
+      if (r.year) y = parseInt(r.year);
+      if ((y === null || isNaN(y) || mIdx < 0) && r.date) {
+        const d = new Date(r.date);
+        if (!isNaN(d)) {
+          y = d.getFullYear();
+          mIdx = d.getMonth();
+        }
+      }
+      if (y === null || isNaN(y) || mIdx < 0) {
+        return { key: '9999-99', label: r.note || 'Other Period', sortVal: 0 };
+      }
+      const key = `${y}-${String(mIdx + 1).padStart(2, '0')}`;
+      const label = `${monthNames[mIdx]} ${y}`;
+      const sortVal = y * 12 + mIdx;
+      return { key, label, sortVal };
+    }
+
+    function getRecordCategoryValue(r, cat) {
+      if (!r || !cat) return 0;
+      if (cat === 'monthlyCommission') return getRecordMonthlyCommission(r);
+      if (cat === 'monthlyCost') return getRecordMonthlyCost(r);
+      if (cat === 'monthlyAit') return getRecordGovtAit(r);
+      if (cat === 'totalCommission') return getRecordTotalCommission(r);
+      if (cat === 'totalCost') return getRecordTotalCost(r);
+      if (cat === 'totalGovtAit') return getRecordGovtAit(r);
+      if (cat === 'profit') return getRecordProfit(r);
+      return 0;
+    }
+
+    function renderCapitalSummary() {
+      const agentId = document.getElementById('capSummaryAgent')?.value || '';
+      const category = document.getElementById('capSummaryCategory')?.value || '';
+      const from = capSummaryDateFrom;
+      const to = capSummaryDateTo;
+
+      let list = allData.filter(r => {
+        if (agentId && r.agentId !== agentId) return false;
+        const d = r.date || (r.createdAt ? r.createdAt.slice(0, 10) : '');
+        if (from && d && d < from) return false;
+        if (to && d && d > to) return false;
+        return true;
+      });
+
+      const selAgent = agents.find(a => a.id === agentId);
+      const agentLabel = selAgent ? `${selAgent.name}${selAgent.outletCode ? ' (' + selAgent.outletCode + ')' : ''}` : 'All Agents (সকল এজেন্ট)';
+
+      const catLabels = {
+        '': 'All Category',
+        'monthlyCommission': 'Monthly Commission',
+        'monthlyCost': 'Monthly Cost',
+        'monthlyAit': 'Govt. AIT Charges',
+        'totalCommission': 'Total Commission',
+        'totalCost': 'Total Cost',
+        'totalGovtAit': 'Total Govt. AIT',
+        'profit': 'Profit'
+      };
+      const catLabel = catLabels[category] || 'All Category';
+      const isSingleCategory = Boolean(category && catLabels[category] && category !== '');
+      const statementHeading = isSingleCategory ? catLabels[category] : 'Capital';
+
+      const printHeaderAgentTitle = selAgent
+        ? selAgent.name
+        : (agents.length ? agents.map(a => a.name).join(' • ') : 'All Agents');
+
+      const generatedAt = new Date().toLocaleString('en-BD', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+      document.getElementById('capSummaryModalTitle').textContent = `${statementHeading} Statement: ${agentLabel}`;
+
+      const body = document.getElementById('capSummaryModalBody');
+
+      // ── SINGLE CATEGORY STATEMENT ────────────────────────────────
+      // When a single category is selected: Columns are Month, Agent, Date, User Name, Category Name, Total below
+      if (isSingleCategory) {
+        // Sort individual records by date / timestamp descending
+        const recordsList = [...list].sort((a, b) => {
+          const tB = getRecordTimestamp(b);
+          const tA = getRecordTimestamp(a);
+          return tB - tA;
+        });
+
+        const singleCatGrandTotal = recordsList.reduce((sum, r) => sum + getRecordCategoryValue(r, category), 0);
+        document.getElementById('capSummaryFooterMeta').textContent = `Period: ${fmtDate(from)} to ${fmtDate(to)} • Total ${statementHeading}: ${fmt(singleCatGrandTotal)} • Generated: ${generatedAt}`;
+
+        body.innerHTML = `
+          <!-- Print Header -->
+          <div class="summary-print-header">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <h2 style="margin:0; font-size:20px; font-weight:800; font-family:'Outfit',sans-serif; color:#0f172a; text-transform:uppercase;">${printHeaderAgentTitle}</h2>
+                <p style="margin:3px 0 0 0; font-size:12px; color:#475569;">Agent Capital &amp; Financial Management • Statement &amp; Audit Report</p>
+                <p style="margin:2px 0 0 0; font-size:11px; color:#64748b;">${selAgent ? `Agent: <strong>${selAgent.name}</strong> (${selAgent.outletCode || selAgent.code || 'Agent'})` : `Scope: <strong>All Agents (${agents.length})</strong>`} | Category: <strong>${statementHeading}</strong></p>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:13px; font-weight:800; color:#0f172a; text-transform:uppercase;">${statementHeading.toUpperCase()} STATEMENT</div>
+                <div style="font-size:11px; color:#64748b;">Period: ${fmtDate(from)} ~ ${fmtDate(to)}</div>
+                <div style="font-size:11px; color:#64748b;">Generated: ${generatedAt}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Screen KPI Box -->
+          <div class="summary-kpi-row screen-only" style="margin-bottom:16px;">
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--gold);">${fmt(singleCatGrandTotal)}</div>
+              <div class="summary-kpi-lbl">Total ${statementHeading}</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--blue-bright);">${recordsList.length}</div>
+              <div class="summary-kpi-lbl">Total Records</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--success); font-size:13px;">${selAgent ? selAgent.name : 'All Agents'}</div>
+              <div class="summary-kpi-lbl">Selected Agent</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--text-muted); font-size:12px;">${fmtDate(from)} ~ ${fmtDate(to)}</div>
+              <div class="summary-kpi-lbl">Statement Range</div>
+            </div>
+          </div>
+
+          <!-- Single Category Statement Table -->
+          <div class="summary-report-card">
+            <div class="summary-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <i class="ri-file-list-3-line" style="color:var(--gold);"></i>
+                <span style="font-weight:700;">${statementHeading} Statement</span>
+              </div>
+              <span style="font-size:11px; color:var(--text-muted);">${recordsList.length} Entries Found</span>
+            </div>
+            <div class="table-wrapper" style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                <thead>
+                  <tr style="background:rgba(255,255,255,0.03);">
+                    <th style="padding:10px; text-align:left;">Month</th>
+                    <th style="padding:10px; text-align:left;">Agent</th>
+                    <th style="padding:10px; text-align:left;">Date</th>
+                    <th style="padding:10px; text-align:left;">User Name</th>
+                    <th style="padding:10px; text-align:right;" class="col-highlight">${statementHeading}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${recordsList.length > 0 ? recordsList.map(r => {
+                    const mLabel = r.month ? `${r.month} ${r.year || ''}` : (r.date ? fmtDate(r.date) : '—');
+                    const agName = r.agentName || (agents.find(a => a.id === r.agentId)?.name || 'Unknown');
+                    const dtStr = r.date ? fmtDate(r.date) : (r.createdAt ? fmtDate(r.createdAt.slice(0, 10)) : '—');
+                    const uName = r.userName || '—';
+                    const val = getRecordCategoryValue(r, category);
+                    return `
+                      <tr>
+                        <td style="padding:8px 10px; font-weight:600; color:var(--text-primary);">${mLabel}</td>
+                        <td style="padding:8px 10px;">${agName}</td>
+                        <td style="padding:8px 10px; color:var(--text-muted);">${dtStr}</td>
+                        <td style="padding:8px 10px;">${uName}</td>
+                        <td style="padding:8px 10px; text-align:right; font-weight:700;" class="col-highlight">${fmt(val)}</td>
+                      </tr>
+                    `;
+                  }).join('') : `
+                    <tr>
+                      <td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">
+                        <i class="ri-inbox-line" style="font-size:24px; display:block; margin-bottom:6px;"></i>
+                        No records found for ${statementHeading} in the selected range.
+                      </td>
+                    </tr>
+                  `}
+                </tbody>
+                <tfoot>
+                  <tr style="background:rgba(245,166,35,0.08); font-weight:700; border-top:2px solid var(--border);">
+                    <td colspan="4" style="padding:10px; font-weight:800; color:var(--gold); text-align:right;">Total =</td>
+                    <td style="padding:10px; text-align:right; color:var(--gold); font-weight:800;" class="col-highlight">${fmt(singleCatGrandTotal)}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          <!-- Print Signatures (Print & PDF Only) -->
+          <div class="print-sign-row print-only" style="display:none;">
+            <div class="print-sign-box">
+              Prepared By<br>
+              <strong>Accountant</strong>
+            </div>
+            <div class="print-sign-box">
+              Verified By<br>
+              <strong>Internal Auditor</strong>
+            </div>
+            <div class="print-sign-box">
+              Approved By<br>
+              <strong>Managing Director</strong>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // ── ALL CATEGORY STATEMENT (MONTHLY AGGREGATED) ───────────────
+      // Group list by month
+      const monthMap = {};
+      list.forEach(r => {
+        const { key, label, sortVal } = getRecordMonthSortKey(r);
+        if (!monthMap[key]) {
+          monthMap[key] = {
+            key,
+            label,
+            sortVal,
+            agents: new Set(),
+            userNames: new Set(),
+            monthlyCommission: 0,
+            monthlyCost: 0,
+            monthlyAit: 0,
+            totalCommission: 0,
+            totalCost: 0,
+            totalGovtAit: 0,
+            profit: 0,
+            count: 0
+          };
+        }
+        if (r.agentName) monthMap[key].agents.add(r.agentName);
+        if (r.userName) monthMap[key].userNames.add(r.userName);
+        monthMap[key].monthlyCommission += getRecordMonthlyCommission(r);
+        monthMap[key].monthlyCost += getRecordMonthlyCost(r);
+        monthMap[key].monthlyAit += getRecordGovtAit(r);
+        monthMap[key].totalCommission += getRecordTotalCommission(r);
+        monthMap[key].totalCost += getRecordTotalCost(r);
+        monthMap[key].totalGovtAit += getRecordGovtAit(r);
+        monthMap[key].profit += getRecordProfit(r);
+        monthMap[key].count++;
+      });
+
+      const monthRows = Object.values(monthMap).sort((a, b) => b.sortVal - a.sortVal);
+
+      // Grand totals
+      const grandMonthlyComm = monthRows.reduce((s, m) => s + m.monthlyCommission, 0);
+      const grandMonthlyCost = monthRows.reduce((s, m) => s + m.monthlyCost, 0);
+      const grandMonthlyAit = monthRows.reduce((s, m) => s + m.monthlyAit, 0);
+      const grandTotalComm = monthRows.reduce((s, m) => s + m.totalCommission, 0);
+      const grandTotalCost = monthRows.reduce((s, m) => s + m.totalCost, 0);
+      const grandTotalGovtAit = monthRows.reduce((s, m) => s + m.totalGovtAit, 0);
+      const grandProfit = monthRows.reduce((s, m) => s + m.profit, 0);
+
+      document.getElementById('capSummaryFooterMeta').textContent = `Period: ${fmtDate(from)} to ${fmtDate(to)} • Total Profit: ${fmt(grandProfit)} • Generated: ${generatedAt}`;
+
+      const isHighlight = col => category === col ? 'col-highlight' : '';
+
+      body.innerHTML = `
+        <!-- Print Header -->
+        <div class="summary-print-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <h2 style="margin:0; font-size:20px; font-weight:800; font-family:'Outfit',sans-serif; color:#0f172a; text-transform:uppercase;">${printHeaderAgentTitle}</h2>
+              <p style="margin:3px 0 0 0; font-size:12px; color:#475569;">Agent Capital &amp; Financial Management • Statement &amp; Audit Report</p>
+              <p style="margin:2px 0 0 0; font-size:11px; color:#64748b;">${selAgent ? `Agent: <strong>${selAgent.name}</strong> (${selAgent.outletCode || selAgent.code || 'Agent'})` : `Scope: <strong>All Agents (${agents.length})</strong>`} | Category: <strong>${catLabel}</strong></p>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:13px; font-weight:800; color:#0f172a; text-transform:uppercase;">${statementHeading.toUpperCase()} STATEMENT</div>
+              <div style="font-size:11px; color:#64748b;">Period: ${fmtDate(from)} ~ ${fmtDate(to)}</div>
+              <div style="font-size:11px; color:#64748b;">Generated: ${generatedAt}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Screen KPI Box -->
+        <div class="summary-kpi-row screen-only" style="margin-bottom:16px;">
+          <div class="summary-kpi-box">
+            <div class="summary-kpi-val" style="color:var(--success);">${fmt(grandTotalComm)}</div>
+            <div class="summary-kpi-lbl">Total Commission</div>
+          </div>
+          <div class="summary-kpi-box">
+            <div class="summary-kpi-val" style="color:var(--danger);">${fmt(grandTotalCost)}</div>
+            <div class="summary-kpi-lbl">Total Cost</div>
+          </div>
+          <div class="summary-kpi-box">
+            <div class="summary-kpi-val" style="color:#a855f7;">${fmt(grandTotalGovtAit)}</div>
+            <div class="summary-kpi-lbl">Total Govt. AIT</div>
+          </div>
+          <div class="summary-kpi-box">
+            <div class="summary-kpi-val" style="color:${grandProfit >= 0 ? 'var(--gold)' : 'var(--danger)'};">${fmt(grandProfit)}</div>
+            <div class="summary-kpi-lbl">Total Profit</div>
+          </div>
+          <div class="summary-kpi-box">
+            <div class="summary-kpi-val" style="color:var(--blue-bright);">${monthRows.length}</div>
+            <div class="summary-kpi-lbl">Month Records</div>
+          </div>
+        </div>
+
+        <!-- Capital STATEMENT Table Card -->
+        <div class="summary-report-card">
+          <div class="summary-card-header">
+            <i class="ri-file-list-3-line" style="color:var(--gold);"></i>
+            <span style="font-weight:700;">${statementHeading} Statement</span>
+            <span style="margin-left:auto; font-size:11px; color:var(--text-muted); font-weight:normal;">${monthRows.length} Month Periods</span>
+          </div>
+          <div class="table-wrapper" style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:12px;">
+              <thead>
+                <tr style="background:rgba(255,255,255,0.03);">
+                  <th style="padding:10px; text-align:left;">Month</th>
+                  <th class="${isHighlight('monthlyCommission')}" style="padding:10px; text-align:right;">Monthly Commission</th>
+                  <th class="${isHighlight('monthlyCost')}" style="padding:10px; text-align:right;">Monthly Cost</th>
+                  <th class="${isHighlight('monthlyAit')}" style="padding:10px; text-align:right;">Govt. AIT Charges</th>
+                  <th style="padding:10px; text-align:left;">User Name</th>
+                  <th class="${isHighlight('profit')}" style="padding:10px; text-align:right;">Profit</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${monthRows.length > 0 ? monthRows.map(m => `
+                  <tr>
+                    <td style="padding:8px 10px;">
+                      <div style="font-weight:700; color:var(--text-primary);">${m.label}</div>
+                      ${!agentId && m.agents.size ? `<div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${Array.from(m.agents).join(', ')}</div>` : ''}
+                    </td>
+                    <td class="${isHighlight('monthlyCommission')}" style="padding:8px 10px; text-align:right; font-weight:600; color:var(--success);">${fmt(m.monthlyCommission)}</td>
+                    <td class="${isHighlight('monthlyCost')}" style="padding:8px 10px; text-align:right; font-weight:600; color:var(--danger);">${fmt(m.monthlyCost)}</td>
+                    <td class="${isHighlight('monthlyAit')}" style="padding:8px 10px; text-align:right; font-weight:600; color:#a855f7;">${fmt(m.monthlyAit)}</td>
+                    <td style="padding:8px 10px; font-weight:500; color:var(--text-primary);">${m.userNames.size > 0 ? Array.from(m.userNames).join(', ') : '—'}</td>
+                    <td class="${isHighlight('profit')}" style="padding:8px 10px; text-align:right; font-weight:700; color:${m.profit >= 0 ? 'var(--gold)' : 'var(--danger)'};">${fmt(m.profit)}</td>
+                  </tr>
+                `).join('') : `
+                  <tr>
+                    <td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">
+                      <i class="ri-inbox-line" style="font-size:24px; display:block; margin-bottom:6px;"></i>
+                      No capital records found in selected range.
+                    </td>
+                  </tr>
+                `}
+              </tbody>
+              <tfoot>
+                <tr style="background:rgba(245,166,35,0.08); font-weight:700; border-top:2px solid var(--border);">
+                  <td style="padding:10px; font-weight:800; color:var(--gold);">Total =</td>
+                  <td class="${isHighlight('monthlyCommission')}" style="padding:10px; text-align:right; color:var(--success); font-weight:800;">${fmt(grandMonthlyComm)}</td>
+                  <td class="${isHighlight('monthlyCost')}" style="padding:10px; text-align:right; color:var(--danger); font-weight:800;">${fmt(grandMonthlyCost)}</td>
+                  <td class="${isHighlight('monthlyAit')}" style="padding:10px; text-align:right; color:#a855f7; font-weight:800;">${fmt(grandMonthlyAit)}</td>
+                  <td style="padding:10px;"></td>
+                  <td style="padding:10px;"></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Print Signatures (Print & PDF Only) -->
+        <div class="print-sign-row print-only" style="display:none;">
+          <div class="print-sign-box">
+            Prepared By<br>
+            <strong>Accountant</strong>
+          </div>
+          <div class="print-sign-box">
+            Verified By<br>
+            <strong>Internal Auditor</strong>
+          </div>
+          <div class="print-sign-box">
+            Approved By<br>
+            <strong>Managing Director</strong>
+          </div>
+        </div>
+      `;
+    }
+
+    window.printCapitalSummary = function () {
+      window.print();
+    };
+
+    window.downloadCapitalSummaryPDF = function () {
+      const element = document.getElementById('capSummaryModalBody');
+      if (!element) return;
+      const agentSel = document.getElementById('capSummaryAgent');
+      const agentText = agentSel && agentSel.value ? (agents.find(a => a.id === agentSel.value)?.name || 'Agent').replace(/\s+/g, '_') : 'All_Agents';
+      const filename = `Capital_Statement_${agentText}_${capSummaryDateFrom || 'All'}_to_${capSummaryDateTo || 'Now'}.pdf`;
+
+      if (window.html2pdf) {
+        const opt = {
+          margin: [8, 8, 8, 8],
+          filename: filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            backgroundColor: '#ffffff',
+            onclone: (clonedDoc) => {
+              const printHeader = clonedDoc.querySelector('.summary-print-header');
+              if (printHeader) {
+                printHeader.style.display = 'block';
+                printHeader.style.visibility = 'visible';
+                printHeader.querySelectorAll('*').forEach(el => {
+                  if (el.tagName === 'H2') el.style.color = '#0f172a';
+                  else if (el.style) el.style.color = '#334155';
+                });
+              }
+              const clonedBody = clonedDoc.getElementById('capSummaryModalBody');
+              if (clonedBody) {
+                clonedBody.style.color = '#0f172a';
+                clonedBody.querySelectorAll('h1, h2, h3, h4, th, strong').forEach(el => {
+                  el.style.color = '#0f172a';
+                });
+                clonedBody.querySelectorAll('table, th, td').forEach(el => {
+                  el.style.borderColor = '#cbd5e1';
+                  if (el.tagName === 'TH') {
+                    el.style.background = '#f1f5f9';
+                    el.style.color = '#0f172a';
+                  } else if (el.tagName === 'TD') {
+                    el.style.color = '#1e293b';
+                  }
+                });
+              }
+            }
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(element).save().then(() => {
+          Toast.success('PDF সফলভাবে ডাউনলোড হয়েছে!');
+        }).catch(err => {
+          console.warn('html2pdf failed, falling back to print', err);
+          window.print();
+        });
+      } else {
+        window.print();
+      }
+    };
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // FISCAL YEAR COMPARISON SUMMARY REPORT (MODAL, PRINT & PDF)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    window.openFyCompSummaryModal = function () {
+      const agentSel = document.getElementById('fySummaryAgent');
+      if (agentSel) {
+        const curAgent = document.getElementById('agentSel')?.value || '';
+        agentSel.innerHTML = '<option value="">All Agents (সকল এজেন্ট)</option>' +
+          agents.map(a => `<option value="${a.id}" ${a.id === curAgent ? 'selected' : ''}>${a.name} (${a.code || a.outletCode || 'Agent'})</option>`).join('');
+      }
+
+      const fys = getAllFiscalYearsList();
+      const baseSel = document.getElementById('fySummaryBase');
+      const targetSel = document.getElementById('fySummaryTarget');
+
+      const pageBase = document.getElementById('fyCompBase')?.value || getCurrentFiscalYear();
+      const pageTarget = document.getElementById('fyCompTarget')?.value || `${(parseInt(pageBase.match(/\d{4}/)?.[0] || '2026') + 1)} (Jan-Dec)`;
+
+      if (baseSel) {
+        baseSel.innerHTML = fys.map(fy => `<option value="${fy}" ${fy === pageBase ? 'selected' : ''}>${fy}</option>`).join('');
+      }
+      if (targetSel) {
+        targetSel.innerHTML = fys.map(fy => `<option value="${fy}" ${fy === pageTarget ? 'selected' : ''}>${fy}</option>`).join('');
+      }
+
+      renderFyCompSummary();
+      Modal.open('fyCompSummaryModal');
+    };
+
+    window.onFySummaryFilterChange = function () {
+      renderFyCompSummary();
+    };
+
+    function renderFyCompSummary() {
+      const agentId = document.getElementById('fySummaryAgent')?.value || '';
+      const category = document.getElementById('fySummaryCategory')?.value || 'all';
+      const baseFy = document.getElementById('fySummaryBase')?.value || getCurrentFiscalYear();
+      const targetFy = document.getElementById('fySummaryTarget')?.value || '';
+
+      const selAgent = agents.find(a => a.id === agentId);
+      const agentLabel = selAgent ? `${selAgent.name} (${selAgent.outletCode || selAgent.code || 'Agent'})` : 'All Agents (সকল এজেন্ট)';
+
+      const catLabels = {
+        'all': 'All Categories (সকল ক্যাটাগরি)',
+        'monthlyCommission': 'Monthly Commission',
+        'monthlyCost': 'Monthly Cost',
+        'monthlyAit': 'Govt. AIT Charges',
+        'totalCommission': 'Total Commission',
+        'totalCost': 'Total Cost',
+        'totalGovtAit': 'Total Govt. AIT',
+        'profit': 'Profit'
+      };
+      const catLabel = catLabels[category] || 'All Categories';
+
+      const base = getFyMetrics(baseFy, agentId);
+      const target = getFyMetrics(targetFy, agentId);
+
+      const generatedAt = new Date().toLocaleString('en-BD', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+      document.getElementById('fyCompSummaryModalTitle').textContent = `Fiscal Year Comparison Summary: ${baseFy} vs ${targetFy}`;
+      document.getElementById('fyCompSummaryFooterMeta').textContent = `Comparison: ${baseFy} vs ${targetFy} • Scope: ${agentLabel} • Generated: ${generatedAt}`;
+
+      const body = document.getElementById('fyCompSummaryBody');
+      if (!body) return;
+
+      const items = [
+        { key: 'monthlyCommission', name: 'Monthly Commission', type: 'income', icon: 'ri-money-dollar-circle-line', color: '#10b981' },
+        { key: 'monthlyCost', name: 'Monthly Cost', type: 'expense', icon: 'ri-hand-coin-line', color: '#ef4444' },
+        { key: 'monthlyAit', name: 'Govt. AIT Charges', type: 'tax', icon: 'ri-government-line', color: '#a855f7' },
+        { key: 'totalCommission', name: 'Total Commission', type: 'income', icon: 'ri-coins-line', color: '#14b8a6' },
+        { key: 'profit', name: 'Profit', type: 'income', icon: 'ri-line-chart-line', color: '#eab308' },
+        { key: 'totalCost', name: 'Total Cost', type: 'expense', icon: 'ri-pie-chart-2-line', color: '#f43f5e' },
+        { key: 'totalGovtAit', name: 'Total Govt. AIT', type: 'tax', icon: 'ri-scales-3-line', color: '#8b5cf6' }
+      ];
+
+      // When a single category is selected
+      const isSingleCategory = category !== 'all' && catLabels[category];
+
+      let contentHtml = `
+        <!-- Print Header -->
+        <div class="summary-print-header">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <h2 style="margin:0; font-size:20px; font-weight:800; font-family:'Outfit',sans-serif; color:#0f172a; text-transform:uppercase;">
+                ${selAgent ? selAgent.name : 'MS TECHNO ENTERPRISE'}
+              </h2>
+              <p style="margin:3px 0 0 0; font-size:12px; color:#475569;">Fiscal Year Financial Comparison Report • Audit &amp; Performance Analysis</p>
+              <p style="margin:2px 0 0 0; font-size:11px; color:#64748b;">
+                ${selAgent ? `Agent: <strong>${selAgent.name}</strong> (${selAgent.outletCode || selAgent.code || 'Agent'})` : `Scope: <strong>All Accessible Agents (${agents.length})</strong>`} | 
+                Category: <strong>${catLabel}</strong> | Comparison: <strong>${baseFy} vs ${targetFy}</strong>
+              </p>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:13px; font-weight:800; color:#0f172a; text-transform:uppercase;">FY COMPARISON SUMMARY</div>
+              <div style="font-size:11px; color:#64748b;">Base: <strong>${baseFy}</strong> | Compare: <strong>${targetFy}</strong></div>
+              <div style="font-size:11px; color:#64748b;">Generated: ${generatedAt}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      if (isSingleCategory) {
+        const itemObj = items.find(it => it.key === category) || { key: category, name: catLabel, type: 'income' };
+        const bVal = base[category] || 0;
+        const tVal = target[category] || 0;
+        const diff = bVal - tVal;
+
+        let pctStr = '0.0%';
+        if (tVal !== 0) {
+          const p = ((diff / Math.abs(tVal)) * 100);
+          pctStr = (p > 0 ? '+' : '') + p.toFixed(1) + '%';
+        } else if (bVal !== 0) {
+          pctStr = bVal > 0 ? '+100.0%' : '-100.0%';
+        }
+
+        // Single category KPI Cards
+        contentHtml += `
+          <div class="summary-kpi-row screen-only" style="margin-bottom:16px;">
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:#c4b5fd;">${fmt(bVal)}</div>
+              <div class="summary-kpi-lbl">${baseFy} Total</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--text-muted);">${fmt(tVal)}</div>
+              <div class="summary-kpi-lbl">${targetFy} Total</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:${diff >= 0 ? 'var(--success)' : 'var(--danger)'};">
+                ${diff >= 0 ? '+' : ''}${fmt(diff)}
+              </div>
+              <div class="summary-kpi-lbl">Difference (ব্যবধান)</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:${diff >= 0 ? 'var(--success)' : 'var(--danger)'};">${pctStr}</div>
+              <div class="summary-kpi-lbl">Change (% পরিবর্তন)</div>
+            </div>
+          </div>
+        `;
+
+        // Month-by-Month comparison for selected single category
+        contentHtml += `
+          <div class="summary-report-card mb-16">
+            <div class="summary-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <i class="ri-calendar-check-line" style="color:var(--gold);"></i>
+                <span style="font-weight:700;">${catLabel} — Month by Month Comparison (${baseFy} vs ${targetFy})</span>
+              </div>
+              <span style="font-size:11px; color:var(--text-muted);">12 Calendar Months</span>
+            </div>
+            <div class="table-wrapper" style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                <thead>
+                  <tr style="background:rgba(255,255,255,0.03);">
+                    <th style="padding:10px; text-align:left;">Month</th>
+                    <th style="padding:10px; text-align:right;">${baseFy} (মূল)</th>
+                    <th style="padding:10px; text-align:right;">${targetFy} (তুলনামূলক)</th>
+                    <th style="padding:10px; text-align:right;">পার্থক্য (Difference)</th>
+                    <th style="padding:10px; text-align:center;">পরিবর্তন (%)</th>
+                    <th style="padding:10px; text-align:center;">ট্রেন্ড / অবস্থা</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${monthNames.map(mName => {
+                    const mB = allData.filter(r => getRecordFiscalYear(r) === baseFy && (!agentId || r.agentId === agentId) && (r.month?.toLowerCase() === mName.toLowerCase() || (r.date && monthNames[new Date(r.date).getMonth()].toLowerCase() === mName.toLowerCase()))).reduce((sum, r) => sum + getRecordCategoryValue(r, category), 0);
+                    const mT = allData.filter(r => getRecordFiscalYear(r) === targetFy && (!agentId || r.agentId === agentId) && (r.month?.toLowerCase() === mName.toLowerCase() || (r.date && monthNames[new Date(r.date).getMonth()].toLowerCase() === mName.toLowerCase()))).reduce((sum, r) => sum + getRecordCategoryValue(r, category), 0);
+                    const mDiff = mB - mT;
+                    let mPct = '0.0%';
+                    if (mT !== 0) {
+                      const p = (mDiff / Math.abs(mT)) * 100;
+                      mPct = (p > 0 ? '+' : '') + p.toFixed(1) + '%';
+                    } else if (mB !== 0) {
+                      mPct = mB > 0 ? '+100.0%' : '-100.0%';
+                    }
+
+                    let diffStr = '';
+                    if (mDiff > 0) diffStr = `<span style="color:#10b981; font-weight:700;">+${fmt(mDiff)}</span>`;
+                    else if (mDiff < 0) diffStr = `<span style="color:#ef4444; font-weight:700;">-${fmt(Math.abs(mDiff))}</span>`;
+                    else diffStr = `<span style="color:var(--text-muted);">৳0.00</span>`;
+
+                    let statusBadge = '';
+                    if (itemObj.type === 'income') {
+                      if (mDiff > 0) statusBadge = `<span class="badge badge-success" style="font-size:11px;">▲ বৃদ্ধি</span>`;
+                      else if (mDiff < 0) statusBadge = `<span class="badge badge-danger" style="font-size:11px;">▼ হ্রাস</span>`;
+                      else statusBadge = `<span class="badge" style="font-size:11px; opacity:0.6;">— অপরিবর্তিত</span>`;
+                    } else {
+                      if (mDiff < 0) statusBadge = `<span class="badge badge-success" style="font-size:11px;">▼ খরচ সাশ্রয়</span>`;
+                      else if (mDiff > 0) statusBadge = `<span class="badge badge-warning" style="font-size:11px;">▲ খরচ বৃদ্ধি</span>`;
+                      else statusBadge = `<span class="badge" style="font-size:11px; opacity:0.6;">— অপরিবর্তিত</span>`;
+                    }
+
+                    return `
+                      <tr>
+                        <td style="padding:8px 10px; font-weight:600; color:var(--text-primary);">${mName}</td>
+                        <td style="padding:8px 10px; text-align:right; font-weight:600;">${fmt(mB)}</td>
+                        <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">${fmt(mT)}</td>
+                        <td style="padding:8px 10px; text-align:right;">${diffStr}</td>
+                        <td style="padding:8px 10px; text-align:center; font-weight:600; color:${mDiff >= 0 ? '#10b981' : '#ef4444'};">${mPct}</td>
+                        <td style="padding:8px 10px; text-align:center;">${statusBadge}</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+                <tfoot>
+                  <tr style="background:rgba(245,166,35,0.08); font-weight:700; border-top:2px solid var(--border);">
+                    <td style="padding:10px; font-weight:800; color:var(--gold);">Total =</td>
+                    <td style="padding:10px; text-align:right; font-weight:800; color:#c4b5fd;">${fmt(bVal)}</td>
+                    <td style="padding:10px; text-align:right; font-weight:800; color:var(--text-muted);">${fmt(tVal)}</td>
+                    <td style="padding:10px; text-align:right; font-weight:800;">
+                      ${diff > 0 ? `<span style="color:#10b981;">+${fmt(diff)}</span>` : (diff < 0 ? `<span style="color:#ef4444;">-${fmt(Math.abs(diff))}</span>` : `৳0.00`)}
+                    </td>
+                    <td style="padding:10px; text-align:center; font-weight:800; color:${diff >= 0 ? '#10b981' : '#ef4444'};">${pctStr}</td>
+                    <td style="padding:10px; text-align:center; font-weight:700;">
+                      ${diff > 0 ? (itemObj.type === 'income' ? 'বৃদ্ধি' : 'খরচ বৃদ্ধি') : (diff < 0 ? (itemObj.type === 'income' ? 'হ্রাস' : 'খরচ সাশ্রয়') : 'অপরিবর্তিত')}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        `;
+
+        // If All Agents is selected, add Agent-by-Agent breakdown table
+        if (!agentId && agents.length > 0) {
+          contentHtml += `
+            <div class="summary-report-card">
+              <div class="summary-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <i class="ri-store-2-line" style="color:var(--gold);"></i>
+                  <span style="font-weight:700;">Agent Breakdown: ${catLabel} (${baseFy} vs ${targetFy})</span>
+                </div>
+                <span style="font-size:11px; color:var(--text-muted);">${agents.length} Agents</span>
+              </div>
+              <div class="table-wrapper" style="overflow-x:auto;">
+                <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                  <thead>
+                    <tr style="background:rgba(255,255,255,0.03);">
+                      <th style="padding:10px; text-align:left;">Agent Name</th>
+                      <th style="padding:10px; text-align:right;">${baseFy}</th>
+                      <th style="padding:10px; text-align:right;">${targetFy}</th>
+                      <th style="padding:10px; text-align:right;">পার্থক্য</th>
+                      <th style="padding:10px; text-align:center;">পরিবর্তন (%)</th>
+                      <th style="padding:10px; text-align:center;">অবস্থা</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${agents.map(ag => {
+                      const agB = allData.filter(r => getRecordFiscalYear(r) === baseFy && r.agentId === ag.id).reduce((s, r) => s + getRecordCategoryValue(r, category), 0);
+                      const agT = allData.filter(r => getRecordFiscalYear(r) === targetFy && r.agentId === ag.id).reduce((s, r) => s + getRecordCategoryValue(r, category), 0);
+                      const agDiff = agB - agT;
+                      let agPct = '0.0%';
+                      if (agT !== 0) {
+                        const p = (agDiff / Math.abs(agT)) * 100;
+                        agPct = (p > 0 ? '+' : '') + p.toFixed(1) + '%';
+                      } else if (agB !== 0) {
+                        agPct = agB > 0 ? '+100.0%' : '-100.0%';
+                      }
+                      return `
+                        <tr>
+                          <td style="padding:8px 10px; font-weight:600; color:var(--text-primary);">${ag.name} (${ag.outletCode || ag.code || 'Agent'})</td>
+                          <td style="padding:8px 10px; text-align:right; font-weight:600;">${fmt(agB)}</td>
+                          <td style="padding:8px 10px; text-align:right; color:var(--text-muted);">${fmt(agT)}</td>
+                          <td style="padding:8px 10px; text-align:right; font-weight:600; color:${agDiff >= 0 ? '#10b981' : '#ef4444'};">${agDiff >= 0 ? '+' : ''}${fmt(agDiff)}</td>
+                          <td style="padding:8px 10px; text-align:center; font-weight:600;">${agPct}</td>
+                          <td style="padding:8px 10px; text-align:center;">${agDiff >= 0 ? '<span class="badge badge-success">বৃদ্ধি</span>' : '<span class="badge badge-danger">হ্রাস</span>'}</td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                  <tfoot>
+                    <tr style="background:rgba(245,166,35,0.08); font-weight:700; border-top:2px solid var(--border);">
+                      <td style="padding:10px; font-weight:800; color:var(--gold);">Total =</td>
+                      <td style="padding:10px; text-align:right; font-weight:800; color:#c4b5fd;">${fmt(bVal)}</td>
+                      <td style="padding:10px; text-align:right; font-weight:800; color:var(--text-muted);">${fmt(tVal)}</td>
+                      <td style="padding:10px; text-align:right; font-weight:800; color:${diff >= 0 ? '#10b981' : '#ef4444'};">${diff >= 0 ? '+' : ''}${fmt(diff)}</td>
+                      <td style="padding:10px; text-align:center; font-weight:800;">${pctStr}</td>
+                      <td style="padding:10px; text-align:center;">—</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          `;
+        }
+      } else {
+        // ALL CATEGORIES SUMMARY COMPARISON TABLE
+        const profitDiff = base.profit - target.profit;
+        const commDiff = base.totalCommission - target.totalCommission;
+        const costDiff = base.totalCost - target.totalCost;
+        const aitDiff = base.totalGovtAit - target.totalGovtAit;
+
+        contentHtml += `
+          <!-- KPI Summary Strip -->
+          <div class="summary-kpi-row screen-only" style="margin-bottom:16px;">
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:${profitDiff >= 0 ? 'var(--gold)' : 'var(--danger)'};">
+                ${profitDiff >= 0 ? '+' : ''}${fmt(profitDiff)}
+              </div>
+              <div class="summary-kpi-lbl">Profit ব্যবধান</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--success);">
+                ${commDiff >= 0 ? '+' : ''}${fmt(commDiff)}
+              </div>
+              <div class="summary-kpi-lbl">Total Commission ব্যবধান</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:${costDiff <= 0 ? 'var(--success)' : 'var(--danger)'};">
+                ${costDiff >= 0 ? '+' : ''}${fmt(costDiff)}
+              </div>
+              <div class="summary-kpi-lbl">Total Cost ব্যবধান</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:#a855f7;">
+                ${aitDiff >= 0 ? '+' : ''}${fmt(aitDiff)}
+              </div>
+              <div class="summary-kpi-lbl">Total Govt. AIT ব্যবধান</div>
+            </div>
+          </div>
+
+          <!-- All Category Comparison Table -->
+          <div class="summary-report-card">
+            <div class="summary-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <i class="ri-scales-line" style="color:var(--gold);"></i>
+                <span style="font-weight:700;">Fiscal Year Comparison: ${baseFy} vs ${targetFy}</span>
+              </div>
+              <span style="font-size:11px; color:var(--text-muted);">${items.length} Financial Metrics</span>
+            </div>
+            <div class="table-wrapper" style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                <thead>
+                  <tr style="background:rgba(255,255,255,0.03);">
+                    <th style="padding:10px 14px; text-align:left;">Category / Metric</th>
+                    <th style="padding:10px 14px; text-align:right;">${baseFy} (মূল)</th>
+                    <th style="padding:10px 14px; text-align:right;">${targetFy} (তুলনামূলক)</th>
+                    <th style="padding:10px 14px; text-align:right;">পার্থক্য (ব্যবধান)</th>
+                    <th style="padding:10px 14px; text-align:center;">পরিবর্তন (%)</th>
+                    <th style="padding:10px 14px; text-align:center;">সার্বিক ট্রেন্ড / অবস্থা</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${items.map(item => {
+                    const bVal = base[item.key] || 0;
+                    const tVal = target[item.key] || 0;
+                    const diff = bVal - tVal;
+
+                    let pctStr = '0.0%';
+                    if (tVal !== 0) {
+                      const p = ((diff / Math.abs(tVal)) * 100);
+                      pctStr = (p > 0 ? '+' : '') + p.toFixed(1) + '%';
+                    } else if (bVal !== 0) {
+                      pctStr = bVal > 0 ? '+100.0%' : '-100.0%';
+                    }
+
+                    let diffFormatted = '';
+                    if (diff > 0) diffFormatted = `<span style="color:#10b981; font-weight:700;">+${fmt(diff)}</span>`;
+                    else if (diff < 0) diffFormatted = `<span style="color:#ef4444; font-weight:700;">-${fmt(Math.abs(diff))}</span>`;
+                    else diffFormatted = `<span style="color:var(--text-muted);">৳0.00</span>`;
+
+                    let trendBadge = '';
+                    if (item.type === 'income') {
+                      if (diff > 0) trendBadge = `<span class="badge badge-success" style="font-size:11px;">▲ বৃদ্ধি</span>`;
+                      else if (diff < 0) trendBadge = `<span class="badge badge-danger" style="font-size:11px;">▼ হ্রাস</span>`;
+                      else trendBadge = `<span class="badge" style="font-size:11px; opacity:0.6;">— অপরিবর্তিত</span>`;
+                    } else {
+                      if (diff < 0) trendBadge = `<span class="badge badge-success" style="font-size:11px;">▼ খরচ সাশ্রয়</span>`;
+                      else if (diff > 0) trendBadge = `<span class="badge badge-warning" style="font-size:11px;">▲ খরচ বৃদ্ধি</span>`;
+                      else trendBadge = `<span class="badge" style="font-size:11px; opacity:0.6;">— অপরিবর্তিত</span>`;
+                    }
+
+                    return `
+                      <tr>
+                        <td style="padding:10px 14px; font-weight:600; display:flex; align-items:center; gap:8px;">
+                          <i class="${item.icon}" style="color:${item.color}; font-size:16px;"></i>
+                          <span>${item.name}</span>
+                        </td>
+                        <td style="padding:10px 14px; text-align:right; font-weight:700; color:var(--text-primary);">${fmt(bVal)}</td>
+                        <td style="padding:10px 14px; text-align:right; color:var(--text-muted);">${fmt(tVal)}</td>
+                        <td style="padding:10px 14px; text-align:right;">${diffFormatted}</td>
+                        <td style="padding:10px 14px; text-align:center; font-weight:600; color:${diff >= 0 ? '#10b981' : '#ef4444'};">${pctStr}</td>
+                        <td style="padding:10px 14px; text-align:center;">${trendBadge}</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      // Print Signatures Section
+      contentHtml += `
+        <div class="print-sign-row print-only" style="display:none;">
+          <div class="print-sign-box">
+            Prepared By<br>
+            <strong>Accountant</strong>
+          </div>
+          <div class="print-sign-box">
+            Verified By<br>
+            <strong>Internal Auditor</strong>
+          </div>
+          <div class="print-sign-box">
+            Approved By<br>
+            <strong>Managing Director</strong>
+          </div>
+        </div>
+      `;
+
+      body.innerHTML = contentHtml;
+    }
+
+    window.printFyCompSummary = function () {
+      window.print();
+    };
+
+    window.downloadFyCompSummaryPDF = function () {
+      const element = document.getElementById('fyCompSummaryBody');
+      if (!element) return;
+      const agentSel = document.getElementById('fySummaryAgent');
+      const agentText = agentSel && agentSel.value ? (agents.find(a => a.id === agentSel.value)?.name || 'Agent').replace(/\s+/g, '_') : 'All_Agents';
+      const baseFy = (document.getElementById('fySummaryBase')?.value || 'Base').replace(/[^a-zA-Z0-9]/g, '_');
+      const targetFy = (document.getElementById('fySummaryTarget')?.value || 'Compare').replace(/[^a-zA-Z0-9]/g, '_');
+      const filename = `FY_Comparison_${agentText}_${baseFy}_vs_${targetFy}.pdf`;
+
+      if (window.html2pdf) {
+        const opt = {
+          margin: [8, 8, 8, 8],
+          filename: filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            backgroundColor: '#ffffff',
+            onclone: (clonedDoc) => {
+              const printHeader = clonedDoc.querySelector('.summary-print-header');
+              if (printHeader) {
+                printHeader.style.display = 'block';
+                printHeader.style.visibility = 'visible';
+                printHeader.querySelectorAll('*').forEach(el => {
+                  if (el.tagName === 'H2') el.style.color = '#0f172a';
+                  else if (el.style) el.style.color = '#334155';
+                });
+              }
+              const clonedBody = clonedDoc.getElementById('fyCompSummaryBody');
+              if (clonedBody) {
+                clonedBody.style.color = '#0f172a';
+                clonedBody.querySelectorAll('h1, h2, h3, h4, th, strong').forEach(el => {
+                  el.style.color = '#0f172a';
+                });
+                clonedBody.querySelectorAll('table, th, td').forEach(el => {
+                  el.style.borderColor = '#cbd5e1';
+                  if (el.tagName === 'TH') {
+                    el.style.background = '#f1f5f9';
+                    el.style.color = '#0f172a';
+                  } else if (el.tagName === 'TD') {
+                    el.style.color = '#1e293b';
+                  }
+                });
+              }
+            }
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(element).save().then(() => {
+          Toast.success('PDF সফলভাবে ডাউনলোড হয়েছে!');
+        }).catch(err => {
+          console.warn('html2pdf failed, falling back to print', err);
+          window.print();
+        });
+      } else {
+        window.print();
+      }
+    };
+  </script>
+</body>
+
+</html>

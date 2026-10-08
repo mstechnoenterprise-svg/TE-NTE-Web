@@ -1,0 +1,1969 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Details — TE & NTE Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    .profile-hero {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--r-xl);
+      padding: 32px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--blue-bright), var(--gold));
+      background-size: 200%;
+      animation: shimmer 3s linear infinite;
+    }
+
+    @keyframes shimmer {
+      from {
+        background-position: -200% center
+      }
+
+      to {
+        background-position: 200% center
+      }
+    }
+
+    .profile-avatar-lg {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      flex-shrink: 0;
+      box-shadow: 0 0 30px var(--gold-glow);
+    }
+
+    .profile-info {
+      flex: 1;
+    }
+
+    .profile-info h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .profile-meta {
+      display: flex;
+      gap: 20px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .profile-meta span {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .profile-meta span i {
+      color: var(--gold);
+    }
+
+    .profile-stats {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+
+    .profile-stat {
+      text-align: center;
+      padding: 12px 20px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      min-width: 90px;
+    }
+
+    .profile-stat .val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .profile-stat .lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .loan-modal-tabs {
+      display: flex;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .loan-tab-btn {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-glass);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s ease;
+    }
+
+    .loan-tab-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--border-gold);
+    }
+
+    .loan-tab-btn.active {
+      background: var(--gold-subtle);
+      color: var(--gold);
+      border-color: var(--border-gold);
+      box-shadow: 0 0 15px var(--gold-glow);
+    }
+
+    .loan-source-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed var(--border-gold);
+      border-radius: var(--r-sm);
+      padding: 14px;
+      margin-top: 6px;
+      margin-bottom: 16px;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .loan-summary-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @media(max-width:700px) {
+      .profile-hero {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .profile-stats {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .profile-meta {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-animated"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <div class="main-content" id="mainContent">
+      <header class="top-header" id="topHeader">
+        <button class="header-toggle" id="sidebarToggle"><i class="ri-menu-line"></i></button>
+        <div class="header-title">
+          <h1 id="headerTitle">Agent Details</h1>
+          <p id="headerSubtitle">Full profile and financial summary</p>
+        </div>
+        <div class="header-actions">
+          <select id="agentPicker" class="form-control"
+            style="max-width:220px;height:36px;font-size:13px;font-weight:600;background:var(--bg-glass);border-color:var(--border-gold);color:var(--text-primary);cursor:pointer"
+            title="Select Agent"></select>
+          <a href="agents-list.html" class="header-btn" title="Back to list"><i class="ri-arrow-left-line"></i></a>
+          <div class="header-btn header-btn-settings" id="settingsBtn" title="Settings"><i
+              class="ri-settings-3-line"></i><span class="header-btn-label">Settings</span></div>
+        </div>
+      </header>
+
+      <div class="page-wrapper">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb animate-in" id="pageBreadcrumb"></nav>
+
+
+        <!-- Profile Hero -->
+        <div class="profile-hero animate-in" id="profileHero">
+          <div class="empty-state" style="width:100%"><i class="ri-loader-4-line"></i>
+            <p>Loading...</p>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs mb-24 animate-in anim-delay-1" id="detailTabs">
+          <button class="tab-btn active" data-tab="balance">Balance</button>
+          <button class="tab-btn" data-tab="cashbook">Cash Book</button>
+          <button class="tab-btn" data-tab="capital">Capital</button>
+          <button class="tab-btn" data-tab="commission">Commission</button>
+          <button class="tab-btn" data-tab="loans">Loans</button>
+          <button class="tab-btn" data-tab="employees" id="tabBtnEmployees"><i class="ri-group-line"></i>
+            Employees</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="tabContent" class="animate-in anim-delay-2">
+          <div class="empty-state"><i class="ri-loader-4-line"></i>
+            <p>Loading...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Agent Modal -->
+  <div class="modal-overlay" id="editAgentModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title"><i class="ri-edit-line"></i> Edit Agent Profile</div>
+        <div class="modal-close" onclick="Modal.close('editAgentModal')"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body">
+        <form id="editAgentForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Agent Name *</label>
+              <input type="text" id="editAgName" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bank Name</label>
+              <input type="text" id="editAgBank" class="form-control" placeholder="e.g. Dutch-Bangla Bank">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Agent Code</label>
+              <input type="text" id="editAgCode" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Agent Opening Date</label>
+              <input type="date" id="editAgOpeningDate" class="form-control">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input type="tel" id="editAgPhone" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" id="editAgEmail" class="form-control" placeholder="agent@example.com">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Area / Region</label>
+              <input type="text" id="editAgArea" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Address</label>
+              <input type="text" id="editAgAddress" class="form-control">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select id="editAgStatus" class="form-control">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Agent Logo / Picture</label>
+            <div class="logo-upload-wrap">
+              <div class="logo-preview" id="editAgLogoPreview">
+                <i class="ri-image-add-line"></i>
+              </div>
+              <div style="flex:1">
+                <div class="flex gap-8" style="align-items:center">
+                  <label class="btn btn-outline btn-sm" for="editAgLogoInput" style="cursor:pointer;margin:0">
+                    <i class="ri-upload-2-line"></i> Change Logo
+                  </label>
+                  <button type="button" class="btn btn-ghost btn-sm" id="removeEditAgLogoBtn"
+                    style="display:none;color:var(--danger)">
+                    <i class="ri-delete-bin-line"></i> Remove
+                  </button>
+                </div>
+                <input type="file" id="editAgLogoInput" accept="image/*" style="display:none">
+                <p style="font-size:11px;color:var(--text-muted);margin-top:4px">Upload agent/organization logo (PNG,
+                  JPG, WebP)</p>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="Modal.close('editAgentModal')"><i class="ri-close-line"></i>
+          Cancel</button>
+        <button class="btn btn-primary" id="saveEditAgentBtn"><i class="ri-save-line"></i> Update Agent</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loan & Payment Modal with Two Tabs -->
+  <div class="modal-overlay" id="loanModal">
+    <div class="modal" style="max-width:580px">
+      <div class="modal-header">
+        <div class="modal-title"><i class="ri-hand-coin-line"></i> Manage Loan & Payment</div>
+        <div class="modal-close" onclick="Modal.close('loanModal')"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body" style="padding-top:16px">
+        <!-- Modal Tabs -->
+        <div class="loan-modal-tabs">
+          <button type="button" class="loan-tab-btn active" id="btnTabLoanEntry" onclick="switchLoanModalTab('entry')">
+            <i class="ri-file-add-line"></i> 1. Add Loans Entry
+          </button>
+          <button type="button" class="loan-tab-btn" id="btnTabLoanPayment" onclick="switchLoanModalTab('payment')">
+            <i class="ri-money-dollar-circle-line"></i> 2. Add Loans Payment
+          </button>
+        </div>
+
+        <!-- Tab 1: Add Loans Entry -->
+        <form id="loanEntryForm" onsubmit="event.preventDefault(); saveLoanEntry();">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Date *</label>
+              <input type="date" id="leDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Select Agent *</label>
+              <select id="leAgent" class="form-control" required></select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Receive Loan *</label>
+            <select id="leSourceType" class="form-control" required onchange="onLoanSourceTypeChange()">
+              <option value="">-- Select Source --</option>
+              <option value="person">Person</option>
+              <option value="ngo">NGO</option>
+              <option value="bank">Bank</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <!-- Dynamic Source Fields Box -->
+          <div id="leSourceFields" class="loan-source-box" style="display:none"></div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Amount *</label>
+              <input type="number" id="leAmount" class="form-control" placeholder="0.00" step="0.01" required min="1"
+                oninput="calcLoanEntryDue()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Interest</label>
+              <input type="number" id="leInterest" class="form-control" placeholder="0.00" step="0.01" value="0" min="0"
+                oninput="calcLoanEntryDue()">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Status *</label>
+              <select id="leStatus" class="form-control">
+                <option value="outstanding">Outstanding</option>
+                <option value="partial">Partially Paid</option>
+                <option value="paid">Paid</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Remaining Due (Amount + Interest)</label>
+              <div id="leDuePreview"
+                style="padding:10px 14px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm);font-weight:700;color:var(--danger);font-family:'Outfit',sans-serif">
+                ৳0.00</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Note</label>
+            <textarea id="leNote" class="form-control" rows="2" placeholder="Loan notes or description..."></textarea>
+          </div>
+
+          <div class="modal-footer" style="padding:16px 0 0 0;margin-top:16px">
+            <button type="button" class="btn btn-ghost" onclick="Modal.close('loanModal')"><i class="ri-close-line"></i>
+              Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btnSubmitLoanEntry"><i class="ri-save-line"></i> Save Loan
+              Entry</button>
+          </div>
+        </form>
+
+        <!-- Tab 2: Add Loans Payment -->
+        <form id="loanPaymentForm" style="display:none" onsubmit="event.preventDefault(); saveLoanPayment();">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Date *</label>
+              <input type="date" id="lpDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Select Agent *</label>
+              <select id="lpAgent" class="form-control" required onchange="onPaymentAgentChange()"></select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Select Loan *</label>
+            <select id="lpLoanSelect" class="form-control" required onchange="onPaymentLoanSelectChange()">
+              <option value="">-- Select Loan --</option>
+            </select>
+          </div>
+
+          <!-- Selected Loan Summary Info Card -->
+          <div id="lpLoanSummaryCard" class="loan-summary-box" style="display:none">
+            <div class="flex" style="justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:12px;color:var(--text-muted)">Lender / Source:</span>
+              <strong style="color:var(--text-primary);font-size:13px" id="lpSumSource">—</strong>
+            </div>
+            <div class="flex" style="justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:12px;color:var(--text-muted)">Total Loan:</span>
+              <strong style="color:var(--gold);font-family:'Outfit',sans-serif" id="lpSumTotal">৳0.00</strong>
+            </div>
+            <div class="flex" style="justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:12px;color:var(--text-muted)">Previously Paid:</span>
+              <strong style="color:var(--success);font-family:'Outfit',sans-serif" id="lpSumPaid">৳0.00</strong>
+            </div>
+            <div class="flex" style="justify-content:space-between;padding-top:6px;border-top:1px dashed var(--border)">
+              <span style="font-size:12px;color:var(--text-muted);font-weight:600">Current Due:</span>
+              <strong style="color:var(--danger);font-size:14px;font-family:'Outfit',sans-serif"
+                id="lpSumDue">৳0.00</strong>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Payment Amount *</label>
+              <input type="number" id="lpAmount" class="form-control" placeholder="0.00" step="0.01" required min="1"
+                oninput="calcLoanPaymentPreview()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Payment Method</label>
+              <select id="lpMethod" class="form-control">
+                <option value="Cash">Cash</option>
+                <option value="Bank">Bank / Cheque</option>
+                <option value="Mobile Banking">bKash/Nagad/Rocket</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Status After Payment</label>
+              <select id="lpStatus" class="form-control">
+                <option value="auto">Auto (Partial / Paid)</option>
+                <option value="partial">Partially Paid</option>
+                <option value="paid">Paid</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Remaining After This Payment</label>
+              <div id="lpRemainingPreview"
+                style="padding:10px 14px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm);font-weight:700;color:var(--info);font-family:'Outfit',sans-serif">
+                ৳0.00</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Note / Voucher No</label>
+            <input type="text" id="lpNote" class="form-control" placeholder="Voucher, receipt or transaction ID...">
+          </div>
+
+          <div class="modal-footer" style="padding:16px 0 0 0;margin-top:16px">
+            <button type="button" class="btn btn-ghost" onclick="Modal.close('loanModal')"><i class="ri-close-line"></i>
+              Cancel</button>
+            <button type="submit" class="btn btn-success" id="btnSubmitLoanPayment"><i class="ri-check-line"></i> Save
+              Payment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loan Statement Modal -->
+  <div class="modal-overlay" id="loanStatementModal">
+    <div class="modal" style="max-width:880px;width:95%">
+      <div class="modal-header">
+        <div class="modal-title"><i class="ri-file-list-3-line"></i> Loan Statement</div>
+        <div class="modal-close" onclick="Modal.close('loanStatementModal')"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body" style="padding-top:16px">
+        <!-- Filter Controls Bar -->
+        <div class="card mb-16" style="padding:14px;background:rgba(255,255,255,0.02)">
+          <div class="form-row-3" style="align-items:flex-end">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="font-size:12px;font-weight:700">Receive Loan</label>
+              <select id="stmtSourceFilter" class="form-control" onchange="onStatementSourceChange()">
+                <option value="all">All Sources</option>
+                <option value="person">Person</option>
+                <option value="ngo">NGO</option>
+                <option value="bank">Bank</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="font-size:12px;font-weight:700">Select Agent</label>
+              <select id="stmtAgentFilter" class="form-control" onchange="onStatementAgentChange()">
+                <option value="all">All Agents</option>
+              </select>
+            </div>
+            <div class="flex gap-8" style="align-items:flex-end">
+              <button class="btn btn-primary" onclick="printLoanStatement()" style="width:100%"><i
+                  class="ri-printer-line"></i> Print Statement</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Printable Statement Area -->
+        <div id="stmtPrintArea"
+          style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);padding:22px">
+          <!-- Statement Letterhead / Header -->
+          <div
+            style="text-align:center;border-bottom:2px solid var(--border-gold);padding-bottom:14px;margin-bottom:16px">
+            <div id="stmtHeaderTitle"
+              style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;letter-spacing:1px;color:var(--text-primary)">
+              M/S TANVIR ENTERPRISE & NEW TANVIR ENTERPRISE</div>
+            <div style="font-size:14px;font-weight:700;color:var(--gold);margin-top:4px;letter-spacing:0.5px">LOAN
+              ACCOUNT STATEMENT</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:3px" id="stmtGeneratedTime">Generated: </div>
+          </div>
+
+          <!-- Statement Meta Info -->
+          <div
+            style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 16px">
+            <div>
+              <div style="font-size:11px;color:var(--text-muted)">Agent Name:</div>
+              <strong style="color:var(--text-primary);font-size:13px" id="stmtAgentName">—</strong>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--text-muted)">Bank / Organization:</div>
+              <strong style="color:var(--gold);font-size:13px" id="stmtAgentBank">—</strong>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--text-muted)">Selected Filter:</div>
+              <strong style="color:var(--blue-bright);font-size:13px" id="stmtSelectedSource">All Sources</strong>
+            </div>
+          </div>
+
+          <!-- Statement Table -->
+          <div class="table-wrapper" style="border:none;border-radius:0">
+            <table id="stmtTable">
+              <thead>
+                <tr>
+                  <th style="width:115px">Date</th>
+                  <th>Details</th>
+                  <th style="text-align:right;width:130px">Loan</th>
+                  <th style="text-align:right;width:130px">Payment</th>
+                  <th style="text-align:right;width:140px">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="stmtTableBody"></tbody>
+              <tfoot id="stmtTableFoot" style="font-weight:800;border-top:2px solid var(--border-gold)"></tfoot>
+            </table>
+          </div>
+
+          <!-- Signatures for Print -->
+          <div
+            style="margin-top:44px;display:flex;justify-content:space-between;padding-top:20px;border-top:1px dashed var(--border);text-align:center">
+            <div style="width:160px">
+              <div style="border-top:1px solid var(--border);padding-top:4px;font-size:11px;color:var(--text-muted)">
+                Prepared By</div>
+            </div>
+            <div style="width:160px">
+              <div style="border-top:1px solid var(--border);padding-top:4px;font-size:11px;color:var(--text-muted)">
+                Verified By</div>
+            </div>
+            <div style="width:190px">
+              <div style="border-top:1px solid var(--border);padding-top:4px;font-size:11px;color:var(--text-muted)">
+                Authorized Seal & Signature</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="Modal.close('loanStatementModal')"><i class="ri-close-line"></i>
+          Close</button>
+        <button class="btn btn-primary" onclick="printLoanStatement()"><i class="ri-printer-line"></i> Print
+          Statement</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const user = App.init('agent-details', 'Agent Details', 'Full profile and financial summary');
+    if (!user) throw new Error('Not authenticated');
+
+    const params = new URLSearchParams(location.search);
+    let agentId = params.get('id');
+    const accessibleAgents = Auth.getAccessibleAgents(DB.getAgents());
+
+    if (!accessibleAgents.length) {
+      document.getElementById('profileHero').innerHTML = `
+        <div class="empty-state" style="width:100%;padding:40px">
+          <i class="ri-team-line" style="font-size:44px;color:var(--text-muted)"></i>
+          <h3 style="margin-top:12px">No Agents Found</h3>
+          <p style="color:var(--text-muted);margin-bottom:16px">Please add an agent in the Agents List first.</p>
+          <a href="agents-list.html" class="btn btn-primary"><i class="ri-user-add-line"></i> Go to Agents List</a>
+        </div>`;
+      document.getElementById('tabContent').innerHTML = '';
+      throw new Error('No agents available');
+    }
+
+    if (!agentId || !DB.getAgentById(agentId)) {
+      const savedId = localStorage.getItem('mste_last_agent_id');
+      if (savedId && DB.getAgentById(savedId) && accessibleAgents.some(a => a.id === savedId)) {
+        agentId = savedId;
+      } else {
+        agentId = accessibleAgents[0].id;
+      }
+    }
+
+    localStorage.setItem('mste_last_agent_id', agentId);
+    let agent = DB.getAgentById(agentId);
+
+    UIEnhancements.setBreadcrumb('pageBreadcrumb', [
+      { label: 'Agents List', href: 'agents-list.html' },
+      { label: agent.name }
+    ]);
+
+    // Agent picker in header
+    const picker = document.getElementById('agentPicker');
+    if (picker) {
+      picker.innerHTML = accessibleAgents.map(a => `
+        <option value="${a.id}" ${a.id === agentId ? 'selected' : ''}>
+          ${a.name}${a.bank ? ' (' + a.bank + ')' : ''}
+        </option>
+      `).join('');
+      picker.addEventListener('change', function () {
+        location.href = 'agent-details.html?id=' + this.value;
+      });
+    }
+
+    const isAdmin = user.role === 'admin' || user.role === 'sub-admin';
+    const canEdit = isAdmin || Auth.canEdit('agent-details');
+    let activeTab = 'balance';
+    let editAgLogoData = agent.logo || '';
+
+    // ── Render Hero ───────────────────────────────────────────
+    function renderHero() {
+      if (!agent) return;
+      const stats = DB.getAgentStats(agentId);
+      const emps = DB.getHREmployees(agentId);
+      const empCount = emps.length;
+      const initials = agent.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+      const empTabBtn = document.getElementById('tabBtnEmployees');
+      if (empTabBtn) empTabBtn.innerHTML = `<i class="ri-group-line"></i> Employees (${empCount})`;
+
+      const avatarHTML = agent.logo
+        ? `<div class="profile-avatar-lg has-logo"><img src="${agent.logo}" alt="${agent.name}"></div>`
+        : `<div class="profile-avatar-lg av-1">${initials}</div>`;
+
+      document.getElementById('profileHero').innerHTML = `
+        ${avatarHTML}
+        <div class="profile-info">
+          <h2>${agent.name}</h2>
+          <div class="agent-bank-name" style="font-size:14px;margin-top:4px;color:var(--gold-light);font-weight:700">
+            <i class="ri-bank-line"></i> <span>${agent.bank || 'No Bank Assigned'}</span>
+          </div>
+          <div class="profile-meta">
+            ${agent.code ? `<span><i class="ri-hashtag"></i> ${agent.code}</span>` : ''}
+            ${agent.phone ? `<span><i class="ri-phone-line"></i> ${agent.phone}</span>` : ''}
+            ${agent.area ? `<span><i class="ri-map-pin-line"></i> ${agent.area}</span>` : ''}
+            ${agent.email ? `<span><i class="ri-mail-line"></i> ${agent.email}</span>` : ''}
+            <a href="employees.html?agent=${agent.id}" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px;color:#c084fc;font-weight:600;padding:2px 8px;background:rgba(168,85,247,0.12);border-radius:12px;border:1px solid rgba(168,85,247,0.25)" title="Manage employees">
+              <i class="ri-group-line"></i> <strong>${empCount}</strong> Employees
+            </a>
+          </div>
+          <div style="margin-top:10px">
+            <span class="badge ${agent.status === 'active' ? 'badge-success' : 'badge-warning'}">${agent.status}</span>
+            <span style="font-size:11px;color:var(--text-muted);margin-left:10px">Since ${fmtDate(agent.openingDate || agent.createdAt)}</span>
+          </div>
+        </div>
+        <div class="profile-stats">
+          <div class="profile-stat"><div class="val">${fmt(stats.totalBalance)}</div><div class="lbl">Balance</div></div>
+          <div class="profile-stat"><div class="val" style="color:var(--success)">${fmt(stats.netCash)}</div><div class="lbl">Net Cash</div></div>
+          <div class="profile-stat"><div class="val" style="color:var(--blue-bright)">${fmt(stats.totalCapital)}</div><div class="lbl">Capital</div></div>
+          <div class="profile-stat"><div class="val" style="color:var(--warning)">${fmt(stats.totalCommission)}</div><div class="lbl">Commission</div></div>
+          <div class="profile-stat" style="border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.06);cursor:pointer" onclick="document.querySelector('#detailTabs [data-tab=loans]')?.click()" title="View loans">
+            <div class="val" style="color:var(--danger)">৳${fmt(stats.totalLoans)}</div>
+            <div class="lbl">Loans (${fmt(stats.totalLoanDue)} Due)</div>
+          </div>
+          <div class="profile-stat" style="border-color:rgba(168,85,247,0.3);background:rgba(168,85,247,0.06);cursor:pointer" onclick="document.querySelector('#detailTabs [data-tab=employees]')?.click()" title="View employees">
+            <div class="val" style="color:#c084fc"><i class="ri-group-line"></i> ${empCount}</div>
+            <div class="lbl">Employees</div>
+          </div>
+        </div>
+        ${canEdit ? `<div style="position:absolute;top:20px;right:20px">
+          <button class="btn btn-outline btn-sm" onclick="openEditAgentModal()"><i class="ri-edit-line"></i> Edit Agent</button>
+        </div>` : ''}`;
+    }
+
+    // Edit agent modal functions
+    function openEditAgentModal() {
+      if (!agent) return;
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = (val !== undefined && val !== null) ? val : '';
+      };
+      setVal('editAgName', agent.name);
+      setVal('editAgBank', agent.bank || '');
+      setVal('editAgCode', agent.code || '');
+      setVal('editAgOpeningDate', agent.openingDate ? agent.openingDate.slice(0, 10) : (agent.createdAt ? agent.createdAt.slice(0, 10) : ''));
+      setVal('editAgPhone', agent.phone || '');
+      setVal('editAgEmail', agent.email || '');
+      setVal('editAgArea', agent.area || '');
+      setVal('editAgAddress', agent.address || '');
+      setVal('editAgStatus', agent.status || 'active');
+
+      editAgLogoData = agent.logo || '';
+      const preview = document.getElementById('editAgLogoPreview');
+      const removeBtn = document.getElementById('removeEditAgLogoBtn');
+      if (editAgLogoData) {
+        if (preview) preview.innerHTML = `<img src="${editAgLogoData}" alt="Logo">`;
+        if (removeBtn) removeBtn.style.display = 'inline-flex';
+      } else {
+        if (preview) preview.innerHTML = `<i class="ri-image-add-line"></i>`;
+        if (removeBtn) removeBtn.style.display = 'none';
+      }
+
+      Modal.open('editAgentModal');
+    }
+    window.openEditAgentModal = openEditAgentModal;
+
+    document.getElementById('editAgLogoInput')?.addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        editAgLogoData = evt.target.result;
+        document.getElementById('editAgLogoPreview').innerHTML = `<img src="${editAgLogoData}" alt="Logo">`;
+        document.getElementById('removeEditAgLogoBtn').style.display = 'inline-flex';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('removeEditAgLogoBtn')?.addEventListener('click', function () {
+      editAgLogoData = '';
+      const inp = document.getElementById('editAgLogoInput');
+      if (inp) inp.value = '';
+      document.getElementById('editAgLogoPreview').innerHTML = `<i class="ri-image-add-line"></i>`;
+      this.style.display = 'none';
+    });
+
+    document.getElementById('saveEditAgentBtn')?.addEventListener('click', () => {
+      const name = document.getElementById('editAgName')?.value?.trim();
+      if (!name) { Toast.error('Agent name is required.'); return; }
+
+      DB.updateAgent(agentId, {
+        name,
+        bank: document.getElementById('editAgBank')?.value?.trim() || '',
+        code: document.getElementById('editAgCode')?.value?.trim() || '',
+        openingDate: document.getElementById('editAgOpeningDate')?.value || '',
+        phone: document.getElementById('editAgPhone')?.value?.trim() || '',
+        area: document.getElementById('editAgArea')?.value?.trim() || '',
+        email: document.getElementById('editAgEmail')?.value?.trim() || '',
+        address: document.getElementById('editAgAddress')?.value?.trim() || '',
+        status: document.getElementById('editAgStatus')?.value || 'active',
+        logo: editAgLogoData,
+      });
+
+      agent = DB.getAgentById(agentId);
+      Modal.close('editAgentModal');
+      Toast.success('Agent updated successfully!');
+      renderHero();
+      // Update picker options
+      if (picker) {
+        picker.innerHTML = accessibleAgents.map(a => `
+          <option value="${a.id}" ${a.id === agentId ? 'selected' : ''}>
+            ${a.name}${a.bank ? ' (' + a.bank + ')' : ''}
+          </option>
+        `).join('');
+      }
+    });
+
+    // ── Tab rendering ─────────────────────────────────────────
+    function renderTab(tab) {
+      const content = document.getElementById('tabContent');
+
+      if (tab === 'employees') {
+        const emps = DB.getHREmployees(agentId);
+        content.innerHTML = `
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="ri-group-line"></i> Assigned Employees (${emps.length})</div>
+              <div class="flex gap-8">
+                <a href="employees.html?agent=${agentId}" class="btn btn-primary btn-sm"><i class="ri-external-link-line"></i> Open in Employees</a>
+              </div>
+            </div>
+            <div class="table-wrapper" style="border:none;border-radius:0">
+              <table>
+                <thead><tr>
+                  <th>Employee</th>
+                  <th>Employee ID</th>
+                  <th>Designation</th>
+                  <th>Phone</th>
+                  <th>Monthly Salary</th>
+                  <th>Status</th>
+                  <th>Joined Date</th>
+                  <th>Actions</th>
+                </tr></thead>
+                <tbody>
+                  ${emps.length ? emps.map((e, idx) => {
+          const initials = e.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+          const colors = ['av-1', 'av-2', 'av-3', 'av-4', 'av-5', 'av-6'];
+          const clr = colors[idx % colors.length];
+          return `
+                    <tr>
+                      <td>
+                        <div class="flex gap-10" style="align-items:center">
+                          <div class="agent-avatar ${clr}" style="width:34px;height:34px;font-size:12px;margin:0">${initials}</div>
+                          <div>
+                            <div style="font-weight:600;color:var(--text-primary)">${e.name}</div>
+                            <div style="font-size:11px;color:var(--text-muted)">${e.email || '—'}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="bold">${e.employeeId || '—'}</td>
+                      <td><span class="badge badge-purple">${e.designation || '—'}</span></td>
+                      <td>${e.phone || '—'}</td>
+                      <td class="primary" style="font-weight:700">৳${fmt(e.monthlySalary || e.salary || 0)}</td>
+                      <td><span class="badge ${e.status === 'active' ? 'badge-success' : 'badge-warning'}">${e.status}</span></td>
+                      <td>${e.joinDate ? fmtDate(e.joinDate) : '—'}</td>
+                      <td>
+                        <a href="employees.html?agent=${agentId}" class="btn btn-ghost btn-sm" title="Manage Employee"><i class="ri-user-settings-line"></i> Details</a>
+                      </td>
+                    </tr>`;
+        }).join('') : `<tr><td colspan="8" class="text-center text-muted" style="padding:36px"><i class="ri-group-line" style="font-size:32px;display:block;margin-bottom:8px;opacity:0.5"></i>No employees assigned to this agent yet.<br><a href="employees.html?agent=${agentId}" class="btn btn-outline btn-sm" style="margin-top:12px"><i class="ri-user-add-line"></i> Add Employee</a></td></tr>`}
+                </tbody>
+              </table>
+            </div>
+          </div>`;
+        return;
+      }
+
+      if (tab === 'loans') {
+        const loans = DB.getLoans(agentId).sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
+        const totalLoan = loans.reduce((s, r) => s + (parseFloat(r.totalPayable !== undefined && r.totalPayable !== null ? r.totalPayable : ((parseFloat(r.amount) || 0) + (parseFloat(r.interest) || 0))) || 0), 0);
+        const totalPaid = loans.reduce((s, r) => s + (parseFloat(r.paymentAmount || r.paidAmount) || 0), 0);
+        const totalDue = Math.max(0, totalLoan - totalPaid);
+
+        content.innerHTML = `
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="ri-hand-coin-line"></i> Loans Records (${loans.length})</div>
+              <div class="flex gap-8" style="align-items:center;flex-wrap:wrap">
+                <span class="badge badge-gold" style="font-size:12px;font-weight:700">Total: ৳${fmt(totalLoan)}</span>
+                <span class="badge badge-success" style="font-size:12px;font-weight:700">Paid: ৳${fmt(totalPaid)}</span>
+                <span class="badge badge-danger" style="font-size:12px;font-weight:700">Due: ৳${fmt(totalDue)}</span>
+                <button class="btn btn-outline btn-sm" onclick="openLoanStatementModal()"><i class="ri-file-list-3-line"></i> Statement</button>
+                ${canEdit ? `<button class="btn btn-primary btn-sm" onclick="openLoanModal('entry')"><i class="ri-add-line"></i> Add Loan / Payment</button>` : ''}
+              </div>
+            </div>
+            <div class="table-wrapper" style="border:none;border-radius:0">
+              <table>
+                <thead><tr>
+                  <th>Date</th>
+                  <th>Receive From / Lender</th>
+                  <th style="text-align:right">Loan Amount</th>
+                  <th style="text-align:right">Interest</th>
+                  <th style="text-align:right">Total Loan</th>
+                  <th style="text-align:right">Paid Amount</th>
+                  <th style="text-align:right">Remaining Due</th>
+                  <th>Status</th>
+                  <th>Note</th>
+                  <th>Actions</th>
+                </tr></thead>
+                <tbody>
+                  ${loans.length ? loans.map(row => {
+          const principal = parseFloat(row.amount) || 0;
+          const interest = parseFloat(row.interest) || 0;
+          const amt = (row.totalPayable !== undefined && row.totalPayable !== null) ? parseFloat(row.totalPayable) : (principal + interest);
+          const paid = parseFloat(row.paymentAmount || row.paidAmount) || 0;
+          const due = Math.max(0, amt - paid);
+          const isPaid = (due <= 0) || row.status === 'paid';
+          const badgeClass = isPaid ? 'badge-success' : paid > 0 ? 'badge-warning' : 'badge-danger';
+          const statusText = isPaid ? 'Paid' : paid > 0 ? 'Partial' : 'Outstanding';
+
+          let typeBadge = '';
+          if (row.sourceType === 'person') typeBadge = `<span class="badge badge-gold" style="font-size:10px"><i class="ri-user-line"></i> Person</span>`;
+          else if (row.sourceType === 'ngo') typeBadge = `<span class="badge badge-purple" style="font-size:10px"><i class="ri-community-line"></i> NGO</span>`;
+          else if (row.sourceType === 'bank') typeBadge = `<span class="badge badge-info" style="font-size:10px"><i class="ri-bank-line"></i> Bank</span>`;
+          else if (row.sourceType === 'other') typeBadge = `<span class="badge badge-outline" style="font-size:10px">Other</span>`;
+
+          const subParts = [];
+          if (row.sourceBranch) subParts.push('Branch: ' + row.sourceBranch);
+          if (row.sourcePhone) subParts.push('Mobile: ' + row.sourcePhone);
+          if (row.sourceAddress) subParts.push('Address: ' + row.sourceAddress);
+          if (row.sourceAcc) subParts.push('A/C: ' + row.sourceAcc);
+          const subInfo = subParts.join(' • ');
+
+          const paymentCount = (row.payments || []).length;
+
+          return `
+                    <tr>
+                      <td class="bold">${fmtDate(row.date)}</td>
+                      <td>
+                        <div style="display:flex;flex-direction:column;gap:3px">
+                          <div class="flex gap-6" style="align-items:center">
+                            ${typeBadge}
+                            <strong style="color:var(--text-primary)">${row.sourceName || row.note || 'General Loan'}</strong>
+                          </div>
+                          ${subInfo ? `<div style="font-size:11px;color:var(--text-muted)">${subInfo}</div>` : ''}
+                        </div>
+                      </td>
+                      <td style="text-align:right;font-weight:700;color:var(--text-primary)">৳${fmt(principal)}</td>
+                      <td style="text-align:right;font-weight:600;color:${interest > 0 ? 'var(--gold)' : 'var(--text-muted)'}">৳${fmt(interest)}</td>
+                      <td class="primary" style="text-align:right;font-weight:700">৳${fmt(amt)}</td>
+                      <td style="text-align:right;color:var(--success);font-weight:600">৳${fmt(paid)}</td>
+                      <td style="text-align:right;color:${due > 0 ? 'var(--danger)' : 'var(--text-muted)'};font-weight:700">৳${fmt(due)}</td>
+                      <td><span class="badge ${badgeClass}">${statusText}</span></td>
+                      <td style="font-size:12px;color:var(--text-muted);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${row.note || ''}">${row.note || '—'}</td>
+                      <td>
+                        <div class="flex gap-6">
+                          ${!isPaid && canEdit ? `
+                            <button class="btn btn-outline btn-sm" onclick="openLoanModal('payment', '${row.id}')" title="Make Payment" style="padding:3px 8px;font-size:11px">
+                              <i class="ri-money-dollar-circle-line"></i> Pay
+                            </button>` : ''}
+                          <button class="btn btn-ghost btn-sm btn-icon" onclick="viewLoanPayments('${row.id}')" title="Payment History (${paymentCount})">
+                            <i class="ri-history-line"></i>
+                          </button>
+                          ${canEdit ? `
+                            <button class="btn btn-ghost btn-sm btn-icon" onclick="deleteEntry('loans', '${row.id}')" title="Delete Loan">
+                              <i class="ri-delete-bin-line"></i>
+                            </button>` : ''}
+                        </div>
+                      </td>
+                    </tr>`;
+        }).join('') : `<tr><td colspan="10" class="text-center text-muted" style="padding:36px"><i class="ri-hand-coin-line" style="font-size:32px;display:block;margin-bottom:8px;opacity:0.5"></i>No loan records found.<br>${canEdit ? `<button class="btn btn-primary btn-sm" onclick="openLoanModal('entry')" style="margin-top:12px"><i class="ri-add-line"></i> Add Loan</button>` : ''}</td></tr>`}
+                </tbody>
+              </table>
+            </div>
+          </div>`;
+        return;
+      }
+
+      const configs = {
+        balance: { getter: () => DB.getBalances(agentId), cols: [{ k: 'date', l: 'Date' }, { k: 'balance', l: 'Balance', gold: true }, { k: 'note', l: 'Note' }], addFn: 'addBalanceEntry', type: 'balance' },
+        cashbook: { getter: () => DB.getCashbook(agentId), cols: [{ k: 'date', l: 'Date' }, { k: 'type', l: 'Type', badge: true }, { k: 'amount', l: 'Amount', gold: true }, { k: 'description', l: 'Description' }, { k: 'category', l: 'Category' }], addFn: 'addCashbookEntry', type: 'cashbook' },
+        capital: { getter: () => DB.getCapital(agentId), cols: [{ k: 'date', l: 'Date' }, { k: 'type', l: 'Type' }, { k: 'amount', l: 'Amount', gold: true }, { k: 'note', l: 'Note' }], addFn: 'addCapitalEntry', type: 'capital' },
+        commission: { getter: () => DB.getCommission(agentId), cols: [{ k: 'date', l: 'Date' }, { k: 'amount', l: 'Amount', gold: true }, { k: 'rate', l: 'Rate' }, { k: 'note', l: 'Note' }], addFn: 'addCommissionEntry', type: 'commission' },
+        loans: { getter: () => DB.getLoans(agentId), cols: [{ k: 'date', l: 'Date' }, { k: 'amount', l: 'Amount', gold: true }, { k: 'status', l: 'Status', badge: true }, { k: 'note', l: 'Note' }], addFn: 'addLoanEntry', type: 'loans' },
+      };
+
+      const cfg = configs[tab];
+      const data = cfg.getter().sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
+
+      const total = data.reduce((s, r) => s + (parseFloat(r.amount || r.balance) || 0), 0);
+
+      content.innerHTML = `
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="ri-list-check"></i> ${tab.charAt(0).toUpperCase() + tab.slice(1)} Records (${data.length})</div>
+            <div class="flex gap-8">
+              <span style="font-size:13px;color:var(--gold);font-weight:700">Total: ${fmt(total)}</span>
+              ${canEdit ? `<button class="btn btn-primary btn-sm" id="addEntryBtn"><i class="ri-add-line"></i> Add</button>` : ''}
+            </div>
+          </div>
+          <div class="table-wrapper" style="border:none;border-radius:0">
+            <table>
+              <thead><tr>
+                ${cfg.cols.map(c => `<th>${c.l}</th>`).join('')}
+                ${canEdit ? '<th>Actions</th>' : ''}
+              </tr></thead>
+              <tbody>
+                ${data.length ? data.map(row => `
+                  <tr>
+                    ${cfg.cols.map(c => {
+        if (c.badge) {
+          const v = row[c.k] || '';
+          const badgeClass = v === 'in' || v === 'deposit' || v === 'paid' ? 'badge-success' : v === 'out' || v === 'outstanding' ? 'badge-danger' : 'badge-info';
+          return `<td><span class="badge ${badgeClass}">${v}</span></td>`;
+        }
+        if (c.gold) return `<td class="primary">${c.k === 'balance' || c.k === 'amount' ? fmt(row[c.k]) : row[c.k] || '—'}</td>`;
+        if (c.k === 'date') return `<td class="bold">${fmtDate(row[c.k])}</td>`;
+        return `<td>${row[c.k] || '—'}</td>`;
+      }).join('')}
+                    ${canEdit ? `<td>
+                      <div class="flex gap-8">
+                        <button class="btn btn-ghost btn-sm btn-icon" onclick="deleteEntry('${tab}','${row.id}')"><i class="ri-delete-bin-line"></i></button>
+                      </div>
+                    </td>` : ''}
+                  </tr>`).join('')
+          : `<tr><td colspan="${cfg.cols.length + (canEdit ? 1 : 0)}" class="text-center text-muted" style="padding:30px">No records yet</td></tr>`
+        }
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+
+      if (canEdit) {
+        document.getElementById('addEntryBtn')?.addEventListener('click', () => {
+          if (tab === 'loans') {
+            openLoanModal('entry');
+          } else {
+            openAddEntry(tab);
+          }
+        });
+      }
+    }
+
+    // ── Add entry inline modal ────────────────────────────────
+    function openAddEntry(type) {
+      const existing = document.getElementById('quickAddModal');
+      if (existing) existing.remove();
+
+      const fields = {
+        balance: `<div class="form-row"><div class="form-group"><label class="form-label">Date</label><input type="date" id="qDate" class="form-control" value="${new Date().toISOString().slice(0, 10)}"></div><div class="form-group"><label class="form-label">Balance Amount</label><input type="number" id="qBalance" class="form-control" placeholder="0.00" step="0.01"></div></div><div class="form-group"><label class="form-label">Note</label><input type="text" id="qNote" class="form-control" placeholder="Note"></div>`,
+        cashbook: `<div class="form-row-3"><div class="form-group"><label class="form-label">Date</label><input type="date" id="qDate" class="form-control" value="${new Date().toISOString().slice(0, 10)}"></div><div class="form-group"><label class="form-label">Type</label><select id="qType" class="form-control"><option value="in">Cash In</option><option value="out">Cash Out</option></select></div><div class="form-group"><label class="form-label">Amount</label><input type="number" id="qAmount" class="form-control" placeholder="0.00" step="0.01"></div></div><div class="form-row"><div class="form-group"><label class="form-label">Description</label><input type="text" id="qDesc" class="form-control" placeholder="Description"></div><div class="form-group"><label class="form-label">Category</label><input type="text" id="qCat" class="form-control" placeholder="e.g. collection"></div></div>`,
+        capital: `<div class="form-row"><div class="form-group"><label class="form-label">Date</label><input type="date" id="qDate" class="form-control" value="${new Date().toISOString().slice(0, 10)}"></div><div class="form-group"><label class="form-label">Type</label><select id="qType2" class="form-control"><option value="deposit">Deposit</option><option value="withdrawal">Withdrawal</option></select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Amount</label><input type="number" id="qAmount" class="form-control" placeholder="0.00" step="0.01"></div><div class="form-group"><label class="form-label">Note</label><input type="text" id="qNote" class="form-control" placeholder="Note"></div></div>`,
+        commission: `<div class="form-row"><div class="form-group"><label class="form-label">Date</label><input type="date" id="qDate" class="form-control" value="${new Date().toISOString().slice(0, 10)}"></div><div class="form-group"><label class="form-label">Amount</label><input type="number" id="qAmount" class="form-control" placeholder="0.00" step="0.01"></div></div><div class="form-row"><div class="form-group"><label class="form-label">Rate</label><input type="text" id="qRate" class="form-control" placeholder="e.g. 2%"></div><div class="form-group"><label class="form-label">Note</label><input type="text" id="qNote" class="form-control" placeholder="Note"></div></div>`,
+        loans: `<div class="form-row"><div class="form-group"><label class="form-label">Date</label><input type="date" id="qDate" class="form-control" value="${new Date().toISOString().slice(0, 10)}"></div><div class="form-group"><label class="form-label">Amount</label><input type="number" id="qAmount" class="form-control" placeholder="0.00" step="0.01"></div></div><div class="form-row"><div class="form-group"><label class="form-label">Status</label><select id="qStatus" class="form-control"><option value="outstanding">Outstanding</option><option value="paid">Paid</option></select></div><div class="form-group"><label class="form-label">Note</label><input type="text" id="qNote" class="form-control" placeholder="Note"></div></div>`,
+      };
+
+      const m = document.createElement('div');
+      m.id = 'quickAddModal';
+      m.className = 'modal-overlay open';
+      m.innerHTML = `
+        <div class="modal" style="max-width:520px">
+          <div class="modal-header">
+            <div class="modal-title"><i class="ri-add-circle-line"></i> Add ${type.charAt(0).toUpperCase() + type.slice(1)} Entry</div>
+            <div class="modal-close" onclick="document.getElementById('quickAddModal').remove()"><i class="ri-close-line"></i></div>
+          </div>
+          <div class="modal-body">${fields[type]}</div>
+          <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="document.getElementById('quickAddModal').remove()">Cancel</button>
+            <button class="btn btn-primary" id="qSaveBtn"><i class="ri-save-line"></i> Save</button>
+          </div>
+        </div>`;
+      document.body.appendChild(m);
+
+      document.getElementById('qSaveBtn').addEventListener('click', () => {
+        const date = document.getElementById('qDate')?.value || new Date().toISOString().slice(0, 10);
+
+        const savers = {
+          balance: () => DB.addBalance({ agentId, date, balance: document.getElementById('qBalance')?.value || 0, note: document.getElementById('qNote')?.value }),
+          cashbook: () => DB.addCashbook({ agentId, date, type: document.getElementById('qType')?.value, amount: document.getElementById('qAmount')?.value || 0, description: document.getElementById('qDesc')?.value, category: document.getElementById('qCat')?.value }),
+          capital: () => DB.addCapital({ agentId, date, type: document.getElementById('qType2')?.value, amount: document.getElementById('qAmount')?.value || 0, note: document.getElementById('qNote')?.value }),
+          commission: () => DB.addCommission({ agentId, date, amount: document.getElementById('qAmount')?.value || 0, rate: document.getElementById('qRate')?.value, note: document.getElementById('qNote')?.value }),
+          loans: () => DB.addLoan({ agentId, date, amount: document.getElementById('qAmount')?.value || 0, status: document.getElementById('qStatus')?.value, note: document.getElementById('qNote')?.value }),
+        };
+
+        savers[type]?.();
+        m.remove();
+        Toast.success('Entry added!');
+        renderHero();
+        renderTab(activeTab);
+      });
+
+      m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+    }
+
+    function deleteEntry(type, id) {
+      const deleters = {
+        balance: () => DB.deleteBalance(id),
+        cashbook: () => DB.deleteCashbook(id),
+        capital: () => DB.deleteCapital(id),
+        commission: () => DB.deleteCommission(id),
+        loans: () => DB.deleteLoan(id),
+      };
+      Confirm.show('Delete this entry?', () => {
+        deleters[type]?.();
+        Toast.success('Entry deleted.');
+        renderHero();
+        renderTab(activeTab);
+      });
+    }
+
+    // ── Loan Modal Functions ──────────────────────────────────
+    function switchLoanModalTab(tab, preselectLoanId = null) {
+      const btnEntry = document.getElementById('btnTabLoanEntry');
+      const btnPayment = document.getElementById('btnTabLoanPayment');
+      const panelEntry = document.getElementById('loanEntryForm');
+      const panelPayment = document.getElementById('loanPaymentForm');
+
+      if (tab === 'entry') {
+        btnEntry?.classList.add('active');
+        btnPayment?.classList.remove('active');
+        if (panelEntry) panelEntry.style.display = 'block';
+        if (panelPayment) panelPayment.style.display = 'none';
+      } else {
+        btnPayment?.classList.add('active');
+        btnEntry?.classList.remove('active');
+        if (panelEntry) panelEntry.style.display = 'none';
+        if (panelPayment) panelPayment.style.display = 'block';
+        populateLoanPaymentSelect(preselectLoanId);
+      }
+    }
+    window.switchLoanModalTab = switchLoanModalTab;
+
+    function onLoanSourceTypeChange() {
+      const type = document.getElementById('leSourceType')?.value;
+      const box = document.getElementById('leSourceFields');
+      if (!box) return;
+
+      if (!type) {
+        box.style.display = 'none';
+        box.innerHTML = '';
+        return;
+      }
+      box.style.display = 'block';
+
+      if (type === 'person') {
+        box.innerHTML = `
+          <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:10px"><i class="ri-user-line"></i> Person Details:</div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label" style="font-size:12px">Person Name *</label>
+              <input type="text" id="lePersonName" class="form-control" placeholder="Enter person name" required>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label" style="font-size:12px">Mobile Number</label>
+              <input type="tel" id="lePersonPhone" class="form-control" placeholder="Mobile number">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" style="font-size:12px">Address</label>
+            <input type="text" id="lePersonAddress" class="form-control" placeholder="Address">
+          </div>
+        `;
+      } else if (type === 'ngo') {
+        box.innerHTML = `
+          <div style="font-size:12px;font-weight:700;color:#c084fc;margin-bottom:10px"><i class="ri-community-line"></i> NGO Details:</div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label" style="font-size:12px">NGO Name *</label>
+              <input type="text" id="leNgoName" class="form-control" placeholder="NGO name (e.g. ASA, BRAC)" required>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label" style="font-size:12px">Mobile / Contact</label>
+              <input type="tel" id="leNgoPhone" class="form-control" placeholder="Contact number">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" style="font-size:12px">Branch / Address</label>
+            <input type="text" id="leNgoAddress" class="form-control" placeholder="Branch or office address">
+          </div>
+        `;
+      } else if (type === 'bank') {
+        box.innerHTML = `
+          <div style="font-size:12px;font-weight:700;color:var(--blue-bright);margin-bottom:10px"><i class="ri-bank-line"></i> Bank Details:</div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label" style="font-size:12px">Bank Name *</label>
+              <input type="text" id="leBankName" class="form-control" placeholder="e.g. Sonali Bank, Dutch-Bangla" required>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label" style="font-size:12px">Branch Name</label>
+              <input type="text" id="leBankBranch" class="form-control" placeholder="Branch name">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label" style="font-size:12px">Account / Ref No</label>
+            <input type="text" id="leBankAcc" class="form-control" placeholder="Account or loan tracking no">
+          </div>
+        `;
+      } else if (type === 'other') {
+        box.innerHTML = `
+          <div style="font-size:12px;font-weight:700;color:var(--text-primary);margin-bottom:10px"><i class="ri-more-fill"></i> Other Source Details:</div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label" style="font-size:12px">Source Name *</label>
+              <input type="text" id="leOtherName" class="form-control" placeholder="Source or organization name" required>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label class="form-label" style="font-size:12px">Details / Address</label>
+              <input type="text" id="leOtherDetails" class="form-control" placeholder="Address or other details">
+            </div>
+          </div>
+        `;
+      }
+    }
+    window.onLoanSourceTypeChange = onLoanSourceTypeChange;
+
+    function calcLoanEntryDue() {
+      const amt = parseFloat(document.getElementById('leAmount')?.value) || 0;
+      const interest = parseFloat(document.getElementById('leInterest')?.value) || 0;
+      const totalDue = amt + interest;
+      const preview = document.getElementById('leDuePreview');
+      if (preview) {
+        preview.textContent = '৳' + fmt(totalDue);
+        preview.style.color = totalDue > 0 ? 'var(--danger)' : 'var(--text-muted)';
+      }
+    }
+    window.calcLoanEntryDue = calcLoanEntryDue;
+
+    function populateLoanPaymentSelect(preselectLoanId = null) {
+      const selAgent = document.getElementById('lpAgent')?.value || agentId;
+      const loans = DB.getLoans(selAgent);
+      const sel = document.getElementById('lpLoanSelect');
+      if (!sel) return;
+
+      if (!loans.length) {
+        sel.innerHTML = '<option value="">-- No loan records found for this agent --</option>';
+        onPaymentLoanSelectChange();
+        return;
+      }
+
+      sel.innerHTML = '<option value="">-- Select Loan --</option>' + loans.map(l => {
+        const principal = parseFloat(l.amount) || 0;
+        const interest = parseFloat(l.interest) || 0;
+        const total = (l.totalPayable !== undefined && l.totalPayable !== null) ? parseFloat(l.totalPayable) : (principal + interest);
+        const paid = parseFloat(l.paymentAmount || l.paidAmount) || 0;
+        const due = Math.max(0, total - paid);
+        const source = l.sourceName || l.note || 'General Loan';
+        const isSelected = (preselectLoanId && l.id === preselectLoanId) ? 'selected' : '';
+        return `<option value="${l.id}" ${isSelected}>${fmtDate(l.date)} - ${source} (Total: ৳${fmt(total)} | Due: ৳${fmt(due)})</option>`;
+      }).join('');
+
+      if (preselectLoanId) {
+        sel.value = preselectLoanId;
+      }
+      onPaymentLoanSelectChange();
+    }
+    window.populateLoanPaymentSelect = populateLoanPaymentSelect;
+
+    function onPaymentLoanSelectChange() {
+      const loanId = document.getElementById('lpLoanSelect')?.value;
+      const summaryCard = document.getElementById('lpLoanSummaryCard');
+      if (!loanId) {
+        if (summaryCard) summaryCard.style.display = 'none';
+        return;
+      }
+
+      const loan = DB.getLoans().find(l => l.id === loanId);
+      if (!loan) {
+        if (summaryCard) summaryCard.style.display = 'none';
+        return;
+      }
+
+      if (summaryCard) summaryCard.style.display = 'block';
+
+      const principal = parseFloat(loan.amount) || 0;
+      const interest = parseFloat(loan.interest) || 0;
+      const total = (loan.totalPayable !== undefined && loan.totalPayable !== null) ? parseFloat(loan.totalPayable) : (principal + interest);
+      const paid = parseFloat(loan.paymentAmount || loan.paidAmount) || 0;
+      const due = Math.max(0, total - paid);
+
+      let sourceLabel = loan.sourceName || loan.note || 'Lender';
+      if (loan.sourceType) {
+        const typeNames = { person: 'Person', ngo: 'NGO', bank: 'Bank', other: 'Other' };
+        sourceLabel = `[${typeNames[loan.sourceType] || loan.sourceType}] ${sourceLabel}`;
+      }
+      if (loan.sourceBranch) sourceLabel += ` (Branch: ${loan.sourceBranch})`;
+
+      const sumSource = document.getElementById('lpSumSource');
+      if (sumSource) sumSource.textContent = sourceLabel;
+
+      const sumTotal = document.getElementById('lpSumTotal');
+      if (sumTotal) sumTotal.textContent = '৳' + fmt(total) + (interest > 0 ? ` (Principal: ৳${fmt(principal)} + Interest: ৳${fmt(interest)})` : '');
+
+      const sumPaid = document.getElementById('lpSumPaid');
+      if (sumPaid) sumPaid.textContent = '৳' + fmt(paid);
+
+      const sumDue = document.getElementById('lpSumDue');
+      if (sumDue) sumDue.textContent = '৳' + fmt(due);
+
+      const lpAmount = document.getElementById('lpAmount');
+      if (lpAmount && (!lpAmount.value || parseFloat(lpAmount.value) === 0)) {
+        lpAmount.value = due > 0 ? due : '';
+      }
+      calcLoanPaymentPreview();
+    }
+    window.onPaymentLoanSelectChange = onPaymentLoanSelectChange;
+
+    function onPaymentAgentChange() {
+      populateLoanPaymentSelect();
+    }
+    window.onPaymentAgentChange = onPaymentAgentChange;
+
+    function calcLoanPaymentPreview() {
+      const sel = document.getElementById('lpLoanSelect');
+      const loanId = sel?.value;
+      if (!loanId) return;
+      const loan = DB.getLoans().find(l => l.id === loanId);
+      if (!loan) return;
+      const principal = parseFloat(loan.amount) || 0;
+      const interest = parseFloat(loan.interest) || 0;
+      const total = (loan.totalPayable !== undefined && loan.totalPayable !== null) ? parseFloat(loan.totalPayable) : (principal + interest);
+      const alreadyPaid = parseFloat(loan.paymentAmount || loan.paidAmount || 0);
+      const currentDue = Math.max(0, total - alreadyPaid);
+      const newPay = parseFloat(document.getElementById('lpAmount')?.value) || 0;
+      const remaining = Math.max(0, currentDue - newPay);
+
+      const remEl = document.getElementById('lpRemainingPreview');
+      if (remEl) {
+        remEl.textContent = '৳' + fmt(remaining);
+        remEl.style.color = remaining === 0 ? 'var(--success)' : 'var(--danger)';
+      }
+    }
+    window.calcLoanPaymentPreview = calcLoanPaymentPreview;
+
+    function saveLoanEntry() {
+      const agId = document.getElementById('leAgent')?.value || agentId;
+      const date = document.getElementById('leDate')?.value || new Date().toISOString().slice(0, 10);
+      const sourceType = document.getElementById('leSourceType')?.value;
+      if (!sourceType) {
+        Toast.error('Please select Receive Loan source.');
+        return;
+      }
+
+      let sourceName = '';
+      let sourcePhone = '';
+      let sourceAddress = '';
+      let sourceBranch = '';
+      let sourceAcc = '';
+
+      if (sourceType === 'person') {
+        sourceName = document.getElementById('lePersonName')?.value?.trim() || '';
+        sourcePhone = document.getElementById('lePersonPhone')?.value?.trim() || '';
+        sourceAddress = document.getElementById('lePersonAddress')?.value?.trim() || '';
+        if (!sourceName) { Toast.error('Person name is required'); return; }
+      } else if (sourceType === 'ngo') {
+        sourceName = document.getElementById('leNgoName')?.value?.trim() || '';
+        sourcePhone = document.getElementById('leNgoPhone')?.value?.trim() || '';
+        sourceAddress = document.getElementById('leNgoAddress')?.value?.trim() || '';
+        if (!sourceName) { Toast.error('NGO name is required'); return; }
+      } else if (sourceType === 'bank') {
+        sourceName = document.getElementById('leBankName')?.value?.trim() || '';
+        sourceBranch = document.getElementById('leBankBranch')?.value?.trim() || '';
+        sourceAcc = document.getElementById('leBankAcc')?.value?.trim() || '';
+        if (!sourceName) { Toast.error('Bank name is required'); return; }
+      } else if (sourceType === 'other') {
+        sourceName = document.getElementById('leOtherName')?.value?.trim() || '';
+        sourceAddress = document.getElementById('leOtherDetails')?.value?.trim() || '';
+        if (!sourceName) { Toast.error('Source name is required'); return; }
+      }
+
+      const amount = parseFloat(document.getElementById('leAmount')?.value) || 0;
+      if (amount <= 0) {
+        Toast.error('Please enter a valid loan amount.');
+        return;
+      }
+      const interest = parseFloat(document.getElementById('leInterest')?.value) || 0;
+      const totalPayable = amount + interest;
+      const status = document.getElementById('leStatus')?.value || 'outstanding';
+      const note = document.getElementById('leNote')?.value?.trim() || '';
+
+      DB.addLoan({
+        agentId: agId,
+        date,
+        sourceType,
+        sourceName,
+        sourcePhone,
+        sourceAddress,
+        sourceBranch,
+        sourceAcc,
+        amount,
+        interest,
+        totalPayable,
+        paymentAmount: 0,
+        paidAmount: 0,
+        status,
+        note,
+        payments: []
+      });
+
+      Modal.close('loanModal');
+      Toast.success('Loan entry added successfully!');
+      renderHero();
+      renderTab(activeTab);
+    }
+    window.saveLoanEntry = saveLoanEntry;
+
+    function saveLoanPayment() {
+      const loanId = document.getElementById('lpLoanSelect')?.value;
+      if (!loanId) {
+        Toast.error('Please select a loan to pay.');
+        return;
+      }
+
+      const allLoans = DB.getLoans();
+      const loan = allLoans.find(l => l.id === loanId);
+      if (!loan) {
+        Toast.error('Loan record not found.');
+        return;
+      }
+
+      const payDate = document.getElementById('lpDate')?.value || new Date().toISOString().slice(0, 10);
+      const payAmt = parseFloat(document.getElementById('lpAmount')?.value) || 0;
+      if (payAmt <= 0) {
+        Toast.error('Please enter a valid payment amount.');
+        return;
+      }
+
+      const payMethod = document.getElementById('lpMethod')?.value || 'Cash';
+      const payNote = document.getElementById('lpNote')?.value?.trim() || '';
+      const currentPaid = parseFloat(loan.paymentAmount || loan.paidAmount || 0);
+      const principal = parseFloat(loan.amount) || 0;
+      const interest = parseFloat(loan.interest) || 0;
+      const totalAmount = (loan.totalPayable !== undefined && loan.totalPayable !== null) ? parseFloat(loan.totalPayable) : (principal + interest);
+      const newPaid = currentPaid + payAmt;
+
+      let newStatus = document.getElementById('lpStatus')?.value;
+      if (newStatus === 'auto' || !newStatus) {
+        newStatus = (newPaid >= totalAmount) ? 'paid' : 'partial';
+      }
+
+      const payments = loan.payments || [];
+      payments.push({
+        id: DB.uid(),
+        date: payDate,
+        amount: payAmt,
+        method: payMethod,
+        note: payNote,
+        createdAt: DB.now()
+      });
+
+      DB.updateLoan(loan.id, {
+        paymentAmount: newPaid,
+        paidAmount: newPaid,
+        status: newStatus,
+        lastPaymentDate: payDate,
+        payments
+      });
+
+      Modal.close('loanModal');
+      Toast.success(`Payment of ৳${fmt(payAmt)} saved successfully!`);
+      renderHero();
+      renderTab(activeTab);
+    }
+    window.saveLoanPayment = saveLoanPayment;
+
+    function openLoanModal(initialTab = 'entry', loanId = null) {
+      const agents = Auth.getAccessibleAgents(DB.getAgents());
+      ['leAgent', 'lpAgent'].forEach(elId => {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        el.innerHTML = agents.map(a => `<option value="${a.id}" ${a.id === agentId ? 'selected' : ''}>${a.name}${a.bank ? ' (' + a.bank + ')' : ''}</option>`).join('');
+      });
+
+      const today = new Date().toISOString().slice(0, 10);
+      const leDate = document.getElementById('leDate');
+      if (leDate) leDate.value = today;
+      const lpDate = document.getElementById('lpDate');
+      if (lpDate) lpDate.value = today;
+
+      const entryForm = document.getElementById('loanEntryForm');
+      if (entryForm) entryForm.reset();
+      if (leDate) leDate.value = today;
+      const leAgent = document.getElementById('leAgent');
+      if (leAgent) leAgent.value = agentId;
+      const leInterest = document.getElementById('leInterest');
+      if (leInterest) leInterest.value = '0';
+      onLoanSourceTypeChange();
+      calcLoanEntryDue();
+
+      switchLoanModalTab(initialTab, loanId);
+      Modal.open('loanModal');
+    }
+    window.openLoanModal = openLoanModal;
+
+    function viewLoanPayments(loanId) {
+      const loan = DB.getLoans().find(l => l.id === loanId);
+      if (!loan) return;
+      const payments = loan.payments || [];
+      const existing = document.getElementById('loanHistoryModal');
+      if (existing) existing.remove();
+
+      const totalPaid = parseFloat(loan.paymentAmount || loan.paidAmount || 0);
+      const principal = parseFloat(loan.amount) || 0;
+      const interest = parseFloat(loan.interest) || 0;
+      const totalAmt = (loan.totalPayable !== undefined && loan.totalPayable !== null) ? parseFloat(loan.totalPayable) : (principal + interest);
+      const due = Math.max(0, totalAmt - totalPaid);
+
+      const m = document.createElement('div');
+      m.id = 'loanHistoryModal';
+      m.className = 'modal-overlay open';
+      m.innerHTML = `
+        <div class="modal" style="max-width:560px">
+          <div class="modal-header">
+            <div class="modal-title"><i class="ri-history-line"></i> Payment History: ${loan.sourceName || 'Loan'}</div>
+            <div class="modal-close" onclick="document.getElementById('loanHistoryModal').remove()"><i class="ri-close-line"></i></div>
+          </div>
+          <div class="modal-body">
+            <div style="background:var(--bg-glass);border:1px solid var(--border);border-radius:var(--r-sm);padding:12px;margin-bottom:16px;display:flex;justify-content:space-around;text-align:center">
+              <div><div style="font-size:11px;color:var(--text-muted)">Total Loan</div><div style="font-weight:700;color:var(--gold);font-family:'Outfit',sans-serif">৳${fmt(totalAmt)}</div></div>
+              <div><div style="font-size:11px;color:var(--text-muted)">Total Paid</div><div style="font-weight:700;color:var(--success);font-family:'Outfit',sans-serif">৳${fmt(totalPaid)}</div></div>
+              <div><div style="font-size:11px;color:var(--text-muted)">Remaining Due</div><div style="font-weight:700;color:var(--danger);font-family:'Outfit',sans-serif">৳${fmt(due)}</div></div>
+            </div>
+            <div class="table-wrapper" style="border:none">
+              <table>
+                <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Note</th></tr></thead>
+                <tbody>
+                  ${payments.length ? payments.map(p => `
+                    <tr>
+                      <td>${fmtDate(p.date)}</td>
+                      <td class="bold" style="color:var(--success)">৳${fmt(p.amount)}</td>
+                      <td><span class="badge badge-info" style="font-size:11px">${p.method || 'Cash'}</span></td>
+                      <td>${p.note || '—'}</td>
+                    </tr>`).join('') : `<tr><td colspan="4" class="text-center text-muted" style="padding:24px">No payments recorded yet</td></tr>`}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="document.getElementById('loanHistoryModal').remove()">Close</button>
+            ${due > 0 ? `<button class="btn btn-primary btn-sm" onclick="document.getElementById('loanHistoryModal').remove(); openLoanModal('payment', '${loan.id}')"><i class="ri-money-dollar-circle-line"></i> Add Payment</button>` : ''}
+          </div>
+        </div>
+      `;
+      document.body.appendChild(m);
+      m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+    }
+    window.viewLoanPayments = viewLoanPayments;
+
+    // ── Loan Statement Logic ──────────────────────────────────
+    function safeStr(val) {
+      if (!val) return '';
+      return String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function updateStatementAgentInfo() {
+      const selAgentId = document.getElementById('stmtAgentFilter')?.value || agentId;
+      const headerTitleEl = document.getElementById('stmtHeaderTitle');
+      const agentNameEl = document.getElementById('stmtAgentName');
+      const agentBankEl = document.getElementById('stmtAgentBank');
+      const timeEl = document.getElementById('stmtGeneratedTime');
+      const allAgents = (window.Auth && Auth.getAccessibleAgents) ? Auth.getAccessibleAgents(DB.getAgents()) : DB.getAgents();
+
+      if (selAgentId === 'all') {
+        const allNames = allAgents.map(a => a.name.toUpperCase()).join(' & ') || 'ALL AGENTS';
+        if (headerTitleEl) headerTitleEl.textContent = allNames;
+        if (agentNameEl) agentNameEl.textContent = allAgents.map(a => a.name).join(', ') || 'All Agents';
+        if (agentBankEl) agentBankEl.textContent = 'All Banks / Combined';
+      } else {
+        const targetAgent = DB.getAgentById(selAgentId) || (DB.getAgent ? DB.getAgent(selAgentId) : null);
+        const agName = targetAgent ? targetAgent.name : 'Unknown Agent';
+        if (headerTitleEl) headerTitleEl.textContent = agName.toUpperCase();
+        if (agentNameEl) agentNameEl.textContent = agName;
+        if (agentBankEl) agentBankEl.textContent = (targetAgent && targetAgent.bank) ? targetAgent.bank : 'N/A';
+      }
+
+      if (timeEl) timeEl.textContent = 'Generated: ' + new Date().toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+    }
+    window.updateStatementAgentInfo = updateStatementAgentInfo;
+
+    function populateStatementAgents(preselectId = null) {
+      const agentSel = document.getElementById('stmtAgentFilter');
+      if (!agentSel) return;
+      const allAgents = (window.Auth && Auth.getAccessibleAgents) ? Auth.getAccessibleAgents(DB.getAgents()) : DB.getAgents();
+      const curId = preselectId !== null ? preselectId : agentId;
+      let optionsHtml = `<option value="all" ${curId === 'all' ? 'selected' : ''}>All Agents</option>`;
+      optionsHtml += allAgents.map(a => {
+        const isSelected = a.id === curId ? 'selected' : '';
+        return `<option value="${a.id}" ${isSelected}>${safeStr(a.name)}${a.bank ? ' (' + safeStr(a.bank) + ')' : ''}</option>`;
+      }).join('');
+      agentSel.innerHTML = optionsHtml;
+    }
+    window.populateStatementAgents = populateStatementAgents;
+
+    function onStatementAgentChange() {
+      updateStatementAgentInfo();
+      renderLoanStatement();
+    }
+    window.onStatementAgentChange = onStatementAgentChange;
+
+    function onStatementSourceChange() {
+      renderLoanStatement();
+    }
+    window.onStatementSourceChange = onStatementSourceChange;
+
+    function openLoanStatementModal() {
+      const srcFilter = document.getElementById('stmtSourceFilter');
+      if (srcFilter) srcFilter.value = 'all';
+
+      populateStatementAgents(agentId);
+      updateStatementAgentInfo();
+      renderLoanStatement();
+      Modal.open('loanStatementModal');
+    }
+    window.openLoanStatementModal = openLoanStatementModal;
+
+    function renderLoanStatement() {
+      const selAgentId = document.getElementById('stmtAgentFilter')?.value || agentId;
+      const allAgents = (window.Auth && Auth.getAccessibleAgents) ? Auth.getAccessibleAgents(DB.getAgents()) : DB.getAgents();
+      const srcFilter = document.getElementById('stmtSourceFilter')?.value || 'all';
+
+      updateStatementAgentInfo();
+
+      const selSourceEl = document.getElementById('stmtSelectedSource');
+      if (selSourceEl) {
+        const typeLabels = {
+          all: 'All Sources',
+          person: 'Person',
+          ngo: 'NGO',
+          bank: 'Bank',
+          other: 'Other'
+        };
+        selSourceEl.textContent = typeLabels[srcFilter] || srcFilter;
+      }
+
+      let matchedLoans = [];
+      if (selAgentId === 'all') {
+        allAgents.forEach(a => {
+          const aLoans = DB.getLoans(a.id);
+          aLoans.forEach(l => {
+            matchedLoans.push({
+              ...l,
+              _agentName: a.name
+            });
+          });
+        });
+      } else {
+        const aLoans = DB.getLoans(selAgentId);
+        const targetAgent = DB.getAgentById(selAgentId) || (DB.getAgent ? DB.getAgent(selAgentId) : null);
+        aLoans.forEach(l => {
+          matchedLoans.push({
+            ...l,
+            _agentName: targetAgent ? targetAgent.name : ''
+          });
+        });
+      }
+
+      if (srcFilter !== 'all') {
+        matchedLoans = matchedLoans.filter(loan => loan.sourceType === srcFilter);
+      }
+
+      const ledger = [];
+      matchedLoans.forEach(loan => {
+        const principal = parseFloat(loan.amount) || 0;
+        const interest = parseFloat(loan.interest) || 0;
+        const totalLoan = (loan.totalPayable !== undefined && loan.totalPayable !== null) ? parseFloat(loan.totalPayable) : (principal + interest);
+
+        const typeLabels = { person: 'Person', ngo: 'NGO', bank: 'Bank', other: 'Other' };
+        const typeBadge = typeLabels[loan.sourceType] ? `[${typeLabels[loan.sourceType]}] ` : '';
+        const agentBadge = (selAgentId === 'all' && loan._agentName) ? `<span class="badge badge-purple" style="font-size:10px;margin-right:4px">${safeStr(loan._agentName)}</span>` : '';
+
+        ledger.push({
+          date: loan.date || (loan.createdAt ? loan.createdAt.slice(0, 10) : ''),
+          order: 1,
+          details: `<strong>${agentBadge}${typeBadge}${safeStr(loan.sourceName || 'Loan')}</strong>${loan.sourceBranch ? ' (Branch: ' + safeStr(loan.sourceBranch) + ')' : ''}${loan.sourceAcc ? ' [A/C: ' + safeStr(loan.sourceAcc) + ']' : ''}${interest > 0 ? '<div style="font-size:11px;color:var(--text-muted)">Principal: ৳' + fmt(principal) + ' + Interest: ৳' + fmt(interest) + '</div>' : ''}${loan.note ? '<div style="font-size:11px;color:var(--text-muted)">' + safeStr(loan.note) + '</div>' : ''}`,
+          loan: totalLoan,
+          payment: 0
+        });
+
+        (loan.payments || []).forEach(p => {
+          const payAmt = parseFloat(p.amount) || 0;
+          if (payAmt > 0) {
+            ledger.push({
+              date: p.date || (p.createdAt ? p.createdAt.slice(0, 10) : ''),
+              order: 2,
+              details: `<span style="color:var(--success)"><i class="ri-arrow-down-circle-line"></i> Repayment to: <strong>${agentBadge}${safeStr(loan.sourceName || 'Lender')}</strong></span>${p.method ? ' <span class="badge badge-info" style="font-size:10px">' + safeStr(p.method) + '</span>' : ''}${p.note ? '<div style="font-size:11px;color:var(--text-muted)">' + safeStr(p.note) + '</div>' : ''}`,
+              loan: 0,
+              payment: payAmt
+            });
+          }
+        });
+      });
+
+      ledger.sort((a, b) => {
+        const da = new Date(a.date || '1970-01-01').getTime();
+        const db = new Date(b.date || '1970-01-01').getTime();
+        if (da !== db) return da - db;
+        return (a.order || 1) - (b.order || 1);
+      });
+
+      let runningBalance = 0;
+      let totalLoanSum = 0;
+      let totalPaySum = 0;
+
+      const rowsHtml = ledger.map(item => {
+        runningBalance += item.loan;
+        runningBalance -= item.payment;
+        totalLoanSum += item.loan;
+        totalPaySum += item.payment;
+
+        return `
+          <tr>
+            <td style="font-weight:600;font-size:12px;white-space:nowrap">${fmtDate(item.date)}</td>
+            <td>${item.details}</td>
+            <td style="text-align:right;font-weight:700;color:${item.loan > 0 ? 'var(--text-primary)' : 'var(--text-muted)'}">${item.loan > 0 ? '৳' + fmt(item.loan) : '—'}</td>
+            <td style="text-align:right;font-weight:700;color:${item.payment > 0 ? 'var(--success)' : 'var(--text-muted)'}">${item.payment > 0 ? '৳' + fmt(item.payment) : '—'}</td>
+            <td style="text-align:right;font-weight:800;font-family:'Outfit',sans-serif;color:${runningBalance > 0 ? 'var(--danger)' : 'var(--success)'}">৳${fmt(runningBalance)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const tbody = document.getElementById('stmtTableBody');
+      const tfoot = document.getElementById('stmtTableFoot');
+
+      if (tbody) {
+        tbody.innerHTML = rowsHtml || `<tr><td colspan="5" class="text-center text-muted" style="padding:28px">No records found for selected filter</td></tr>`;
+      }
+
+      if (tfoot) {
+        tfoot.innerHTML = `
+          <tr style="background:rgba(255,255,255,0.03);font-size:13px">
+            <td colspan="2" style="font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:0.5px">Total</td>
+            <td style="text-align:right;font-weight:800;color:var(--text-primary);font-family:'Outfit',sans-serif">৳${fmt(totalLoanSum)}</td>
+            <td style="text-align:right;font-weight:800;color:var(--success);font-family:'Outfit',sans-serif">৳${fmt(totalPaySum)}</td>
+            <td style="text-align:right;font-weight:800;color:${(totalLoanSum - totalPaySum) > 0 ? 'var(--danger)' : 'var(--success)'};font-family:'Outfit',sans-serif">৳${fmt(totalLoanSum - totalPaySum)}</td>
+          </tr>
+        `;
+      }
+    }
+    window.renderLoanStatement = renderLoanStatement;
+
+    function printLoanStatement() {
+      const selAgentId = document.getElementById('stmtAgentFilter')?.value || agentId;
+      const allAgents = (window.Auth && Auth.getAccessibleAgents) ? Auth.getAccessibleAgents(DB.getAgents()) : DB.getAgents();
+      const agent = DB.getAgentById(selAgentId) || (DB.getAgent ? DB.getAgent(selAgentId) : null);
+      const srcFilter = document.getElementById('stmtSourceFilter')?.value || 'all';
+
+      const typeLabels = {
+        all: 'All Sources',
+        person: 'Person',
+        ngo: 'NGO',
+        bank: 'Bank',
+        other: 'Other'
+      };
+      const filterText = typeLabels[srcFilter] || srcFilter;
+
+      let printHeading = '';
+      let printAgentMeta = '';
+      let printBankMeta = '';
+
+      if (selAgentId === 'all') {
+        printHeading = allAgents.map(a => a.name.toUpperCase()).join(' & ') || 'ALL AGENTS';
+        printAgentMeta = allAgents.map(a => a.name).join(', ') || 'All Agents';
+        printBankMeta = 'All Banks / Combined';
+      } else {
+        printHeading = agent ? agent.name.toUpperCase() : 'AGENT LOAN STATEMENT';
+        printAgentMeta = agent ? agent.name : '—';
+        printBankMeta = (agent && agent.bank) ? agent.bank : 'N/A';
+      }
+
+      let matchedLoans = [];
+      if (selAgentId === 'all') {
+        allAgents.forEach(a => {
+          const aLoans = DB.getLoans(a.id);
+          aLoans.forEach(l => {
+            matchedLoans.push({
+              ...l,
+              _agentName: a.name
+            });
+          });
+        });
+      } else {
+        const aLoans = DB.getLoans(selAgentId);
+        aLoans.forEach(l => {
+          matchedLoans.push({
+            ...l,
+            _agentName: agent ? agent.name : ''
+          });
+        });
+      }
+
+      if (srcFilter !== 'all') {
+        matchedLoans = matchedLoans.filter(loan => loan.sourceType === srcFilter);
+      }
+
+      const ledger = [];
+      matchedLoans.forEach(loan => {
+        const principal = parseFloat(loan.amount) || 0;
+        const interest = parseFloat(loan.interest) || 0;
+        const totalLoan = (loan.totalPayable !== undefined && loan.totalPayable !== null) ? parseFloat(loan.totalPayable) : (principal + interest);
+
+        const typeLabels = { person: 'Person', ngo: 'NGO', bank: 'Bank', other: 'Other' };
+        const typeBadge = typeLabels[loan.sourceType] ? `[${typeLabels[loan.sourceType]}] ` : '';
+        const agPrefix = (selAgentId === 'all' && loan._agentName) ? `[Agent: ${loan._agentName}] ` : '';
+        let details = `${agPrefix}${typeBadge}${loan.sourceName || 'Loan'}`;
+        if (loan.sourceBranch) details += ` | Branch: ${loan.sourceBranch}`;
+        if (loan.sourceAcc) details += ` | A/C: ${loan.sourceAcc}`;
+        if (interest > 0) details += ` (Principal: ৳${fmt(principal)} + Interest: ৳${fmt(interest)})`;
+        if (loan.note) details += ` — ${loan.note}`;
+
+        ledger.push({
+          date: loan.date || (loan.createdAt ? loan.createdAt.slice(0, 10) : ''),
+          order: 1,
+          details,
+          loan: totalLoan,
+          payment: 0
+        });
+
+        (loan.payments || []).forEach(p => {
+          const payAmt = parseFloat(p.amount) || 0;
+          if (payAmt > 0) {
+            ledger.push({
+              date: p.date || (p.createdAt ? p.createdAt.slice(0, 10) : ''),
+              order: 2,
+              details: `${agPrefix}Repayment to: ${loan.sourceName || 'Lender'} (${p.method || 'Cash'})${p.note ? ' - ' + p.note : ''}`,
+              loan: 0,
+              payment: payAmt
+            });
+          }
+        });
+      });
+
+      ledger.sort((a, b) => {
+        const da = new Date(a.date || '1970-01-01').getTime();
+        const db = new Date(b.date || '1970-01-01').getTime();
+        if (da !== db) return da - db;
+        return (a.order || 1) - (b.order || 1);
+      });
+
+      let runningBalance = 0;
+      let totalLoanSum = 0;
+      let totalPaySum = 0;
+
+      const rows = ledger.map(item => {
+        runningBalance += item.loan;
+        runningBalance -= item.payment;
+        totalLoanSum += item.loan;
+        totalPaySum += item.payment;
+
+        return `
+          <tr>
+            <td style="white-space:nowrap">${fmtDate(item.date)}</td>
+            <td>${item.details}</td>
+            <td style="text-align:right">${item.loan > 0 ? '৳' + fmt(item.loan) : '—'}</td>
+            <td style="text-align:right">${item.payment > 0 ? '৳' + fmt(item.payment) : '—'}</td>
+            <td style="text-align:right;font-weight:bold">৳${fmt(runningBalance)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        alert('Please allow popups to print the statement.');
+        return;
+      }
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Loan Statement - ${selAgentId === 'all' ? 'All Agents' : (agent ? agent.name : 'Agent')}</title>
+          <style>
+            @page { size: A4 portrait; margin: 15mm; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #111; margin: 0; padding: 20px; font-size: 13px; line-height: 1.4; }
+            .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 12px; margin-bottom: 16px; }
+            .header h1 { margin: 0; font-size: 20px; font-weight: 800; color: #111; letter-spacing: 0.5px; }
+            .header h2 { margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #444; }
+            .meta-box { display: flex; justify-content: space-between; border: 1px solid #ccc; background: #f9f9f9; padding: 10px 14px; border-radius: 4px; margin-bottom: 16px; font-size: 12px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+            th, td { border: 1px solid #ddd; padding: 8px 10px; font-size: 12px; text-align: left; }
+            th { background-color: #f2f2f2; font-weight: bold; text-transform: uppercase; font-size: 11px; }
+            tfoot tr { background-color: #f7f7f7; font-weight: bold; border-top: 2px solid #333; }
+            .signatures { margin-top: 60px; display: flex; justify-content: space-between; page-break-inside: avoid; }
+            .sig-block { width: 180px; text-align: center; border-top: 1px solid #444; padding-top: 6px; font-size: 12px; font-weight: 600; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>${printHeading}</h1>
+            <h2>LOAN ACCOUNT STATEMENT</h2>
+            <div style="font-size:11px;color:#666;margin-top:4px">Generated on: ${new Date().toLocaleString('en-GB')}</div>
+          </div>
+
+          <div class="meta-box">
+            <div><strong>Agent Name:</strong> ${printAgentMeta}</div>
+            <div><strong>Bank:</strong> ${printBankMeta}</div>
+            <div><strong>Receive Loan Source:</strong> ${filterText}</div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th style="width:110px">Date</th>
+                <th>Details</th>
+                <th style="text-align:right;width:120px">Loan</th>
+                <th style="text-align:right;width:120px">Payment</th>
+                <th style="text-align:right;width:130px">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows || '<tr><td colspan="5" style="text-align:center;padding:20px">No records found</td></tr>'}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2" style="font-weight:bold;text-transform:uppercase">Total</td>
+                <td style="text-align:right;font-weight:bold">৳${fmt(totalLoanSum)}</td>
+                <td style="text-align:right;font-weight:bold">৳${fmt(totalPaySum)}</td>
+                <td style="text-align:right;font-weight:bold">৳${fmt(totalLoanSum - totalPaySum)}</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div class="signatures">
+            <div class="sig-block">Prepared By</div>
+            <div class="sig-block">Verified By</div>
+            <div class="sig-block">Authorized Seal & Signature</div>
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          <\/script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+    window.printLoanStatement = printLoanStatement;
+
+    // ── Tabs ──────────────────────────────────────────────────
+    document.querySelectorAll('#detailTabs .tab-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#detailTabs .tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        activeTab = this.dataset.tab;
+        renderTab(activeTab);
+      });
+    });
+
+    // ── Init ──────────────────────────────────────────────────
+    renderHero();
+    renderTab(activeTab);
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,4007 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Balance — TE & NTE Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    @page {
+      size: A4 landscape;
+      margin: 10mm 12mm 12mm 12mm;
+    }
+
+    .summary-print-header {
+      display: block;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .summary-print-header h2 {
+      color: var(--text-primary) !important;
+    }
+
+    .summary-print-header p,
+    .summary-print-header div {
+      color: var(--text-muted) !important;
+    }
+
+    .print-only {
+      display: none;
+    }
+
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      }
+
+      .app-layout,
+      .sidebar,
+      .top-header,
+      .main-content,
+      .page-wrapper,
+      .no-print,
+      .orb,
+      .bg-animated,
+      .breadcrumb,
+      .page-header,
+      .grid,
+      .card,
+      #addModal,
+      .modal-backdrop,
+      .toast-container {
+        display: none !important;
+        height: 0 !important;
+        overflow: hidden !important;
+      }
+
+      #balSummaryModal:not(.open),
+      #viewSheetModal:not(.open),
+      #dcStatementModal:not(.open) {
+        display: none !important;
+        height: 0 !important;
+      }
+
+      #balSummaryModal.open,
+      #viewSheetModal.open,
+      #dcStatementModal.open {
+        position: static !important;
+        display: block !important;
+        background: #fff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        z-index: 9999 !important;
+      }
+
+      #balSummaryModal.open .modal,
+      #viewSheetModal.open .modal,
+      #dcStatementModal.open .modal {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        box-shadow: none !important;
+        border: none !important;
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        transform: none !important;
+        display: block !important;
+      }
+
+      .screen-only,
+      .no-print {
+        display: none !important;
+        height: 0 !important;
+        overflow: hidden !important;
+      }
+
+      .summary-print-header {
+        display: block !important;
+        border-bottom: 2px solid #0f172a !important;
+      }
+
+      .summary-print-header h2 {
+        color: #0f172a !important;
+      }
+
+      .summary-print-header p,
+      .summary-print-header div {
+        color: #334155 !important;
+      }
+
+      .summary-report-card {
+        background: #fff !important;
+        border: none !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        overflow: visible !important;
+      }
+
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        table-layout: fixed !important;
+      }
+
+      th,
+      td {
+        border: 1px solid #cbd5e1 !important;
+        padding: 6px 4px !important;
+        font-size: 10.5px !important;
+        color: #0f172a !important;
+      }
+
+      th {
+        background: #f1f5f9 !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+      }
+
+      .audit-sign-wrapper {
+        display: block !important;
+        margin-top: 45px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        width: 100% !important;
+      }
+
+      .audit-sign-table {
+        display: table !important;
+        width: 100% !important;
+        border: none !important;
+        border-collapse: collapse !important;
+        background: transparent !important;
+      }
+
+      .audit-sign-table td {
+        border: none !important;
+        vertical-align: top !important;
+        padding: 0 15px !important;
+      }
+
+      .audit-sign-box {
+        border-top: 1.5px solid #0f172a !important;
+        padding-top: 6px !important;
+        font-size: 11px !important;
+        font-weight: 500 !important;
+        color: #0f172a !important;
+        text-align: center !important;
+        line-height: 1.4 !important;
+      }
+
+      .audit-sign-box strong {
+        color: #0f172a !important;
+        font-weight: 700 !important;
+        font-size: 12px !important;
+      }
+
+      .print-only {
+        display: block !important;
+      }
+    }
+
+    .col-highlight {
+      background: rgba(245, 166, 35, 0.08) !important;
+      color: var(--gold) !important;
+      font-weight: 700;
+    }
+
+    /* Remove up-down arrows from inputs */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    /* Center text in all sheet number inputs and summary inputs */
+    .sheet-table input.pabo-input,
+    .sheet-table input.pabe-input,
+    .sheet-table input.sheet-closing-input,
+    .summary-table input.sheet-input,
+    .addl-summary-input,
+    #entBalance,
+    #totalPaboVal,
+    #totalPabeVal,
+    #summaryTotalVal {
+      text-align: center !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-animated"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="app-layout">
+    <div id="sidebar" class="sidebar"></div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+    <div class="main-content" id="mainContent">
+      <header class="top-header" id="topHeader">
+        <button class="header-toggle" id="sidebarToggle"><i class="ri-menu-line"></i></button>
+        <div class="header-title">
+          <h1 id="headerTitle">Agent Balance</h1>
+          <p id="headerSubtitle">Daily balance records for all agents</p>
+        </div>
+        <div class="header-actions">
+          <div class="header-btn header-btn-settings" id="settingsBtn" title="Settings"><i
+              class="ri-settings-3-line"></i><span class="header-btn-label">Settings</span></div>
+        </div>
+      </header>
+      <div class="page-wrapper">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb animate-in" id="pageBreadcrumb"></nav>
+
+
+        <!-- Page Header -->
+        <div class="page-header animate-in">
+          <div class="page-header-left">
+            <h2><i class="ri-money-dollar-circle-line"></i> Agent Balance</h2>
+            <p>Track daily balance for each agent</p>
+          </div>
+          <div class="flex gap-8">
+            <button class="btn btn-secondary" id="debitCreditBtn" onclick="openDebitCreditModal()"
+              style="display:inline-flex !important; align-items:center; gap:6px; background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important; color:#ffffff !important; border:1px solid #38bdf8 !important; font-weight:700 !important; box-shadow:0 4px 15px rgba(2, 132, 199, 0.4) !important;">
+              <i class="ri-exchange-dollar-line" style="font-size:16px;"></i> Debit & Credit
+            </button>
+            <button class="btn btn-primary" id="balanceSummaryBtn" onclick="openBalanceSummaryModal()"><i
+                class="ri-file-chart-line"></i> Summary</button>
+            <button class="btn btn-primary" id="addBtn" style="display:none"><i class="ri-add-line"></i> Add
+              Entry</button>
+          </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid mb-24 animate-in anim-delay-1" id="summaryCards"
+          style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:16px;">
+          <div class="kpi-card">
+            <div class="kpi-icon"><i class="ri-scales-3-line"></i></div>
+            <div class="kpi-value" id="summaryFinalBal" style="color:var(--gold);">৳0</div>
+            <div class="kpi-label">Final Balance</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon blue"><i class="ri-bank-card-line"></i></div>
+            <div class="kpi-value" id="summaryClosingBal" style="color:#38bdf8;">৳0</div>
+            <div class="kpi-label">Closing Balance =</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon green"><i class="ri-arrow-down-line"></i></div>
+            <div class="kpi-value" id="summaryPabo" style="color:#10b981;">৳0</div>
+            <div class="kpi-label">Pabo (+) (Total)</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon red"><i class="ri-arrow-up-line"></i></div>
+            <div class="kpi-value" id="summaryPabe" style="color:#ef4444;">৳0</div>
+            <div class="kpi-label">Pabe (-) (Total)</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon purple"><i class="ri-hand-coin-line"></i></div>
+            <div class="kpi-value" id="summaryAgw" style="color:#a78bfa;">৳0</div>
+            <div class="kpi-label" title="AG W (For Daily & Monthly Exp.)">AG W (For Exp.)</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(20,184,166,0.15); color:#14b8a6;"><i
+                class="ri-line-chart-line"></i></div>
+            <div class="kpi-value" id="summaryProfit" style="color:#14b8a6;">৳0</div>
+            <div class="kpi-label">Profit</div>
+          </div>
+        </div>
+
+        <!-- Chart + Table -->
+        <div class="grid grid-2-1 animate-in anim-delay-2" style="margin-bottom:24px">
+          <div class="card">
+            <div class="card-header"
+              style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px;">
+              <div class="card-title" id="balChartTitle"><i class="ri-bar-chart-line"></i> Balance by Agent</div>
+              <select class="form-control" id="balChartTypeSel"
+                style="font-size:11px; padding:3px 6px; width:auto; height:30px;" title="Chart Type"
+                onchange="renderChart()">
+                <option value="bar">Bar Chart</option>
+                <option value="line">Line Chart</option>
+                <option value="doughnut">Doughnut Chart</option>
+                <option value="area">Area Chart</option>
+              </select>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" style="position:relative; height:260px; max-height:260px;"><canvas
+                  id="balanceChart"></canvas></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><i class="ri-filter-3-line"></i> Filters</div>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Agent</label>
+                <select class="form-control" id="agentSel">
+                  <option value="">All Agents</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Date From</label>
+                <input type="date" class="form-control" id="dateFrom">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Date To</label>
+                <input type="date" class="form-control" id="dateTo">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Search</label>
+                <div class="search-input-wrap"><i class="ri-search-line"></i><input type="search" class="form-control"
+                    id="searchInp" placeholder="Search..."></div>
+              </div>
+              <button class="btn btn-outline w-full" id="clearFilters"><i class="ri-refresh-line"></i> Clear
+                Filters</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card animate-in anim-delay-3">
+          <div class="card-header">
+            <div class="card-title"><i class="ri-table-line"></i> Balance Records <span id="recordCount"
+                style="font-size:12px;color:var(--text-muted);font-weight:400"></span></div>
+          </div>
+          <div class="table-wrapper" style="border:none;border-radius:0">
+            <table>
+              <thead>
+                <tr>
+                  <th style="min-width:140px;">Agent</th>
+                  <th style="min-width:130px;">Date</th>
+                  <th style="min-width:110px;">User Name</th>
+                  <th style="text-align:right; min-width:95px;">Pabo (+)</th>
+                  <th style="text-align:right; min-width:95px;">Pabe (-)</th>
+                  <th style="text-align:right; min-width:150px;">AG W (For Daily & Monthly Exp.)</th>
+                  <th style="text-align:right; min-width:110px;">Final Balance</th>
+                  <th style="text-align:center; min-width:80px;" id="actHeader">Action</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr>
+                  <td colspan="8" class="text-center text-muted" style="padding:30px">Loading...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Modal -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal" style="max-width:1080px; width:95vw; max-height:92vh; overflow-y:auto;">
+      <div class="modal-header"
+        style="position:sticky; top:0; background:var(--bg-secondary); z-index:10; border-bottom:1px solid var(--border);">
+        <div class="modal-title"><i class="ri-scales-3-line"></i> Add Agent Balance Sheet</div>
+        <div class="modal-close"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body" style="padding:18px 22px;">
+        <!-- Top Info Row -->
+        <div
+          style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:10px; padding:14px 18px; margin-bottom:18px;">
+          <div
+            style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:14px; align-items:flex-end;">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="font-size:12px;font-weight:600"><i class="ri-user-line"></i> Agent
+                *</label>
+              <select id="entAgent" class="form-control">
+                <option value="">Select Agent</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="font-size:12px;font-weight:600"><i class="ri-calendar-line"></i> Date
+                *</label>
+              <input type="date" id="entDate" class="form-control" onchange="syncClosingBalanceFromCashBook()">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label"
+                style="font-size:12px;font-weight:600; display:flex; justify-content:space-between;">
+                <span><i class="ri-money-dollar-circle-line"></i> Final Balance *</span>
+                <span style="color:var(--gold);font-size:11px;font-weight:400"></span>
+              </label>
+              <input type="text" inputmode="decimal" id="entBalance" class="form-control text-center" placeholder="0.00"
+                readonly title="Final Balance (Synced from Agent Balance Summary Total)"
+                style="font-weight:700; color:var(--gold); text-align:center; background:rgba(255,255,255,0.03); cursor:default;">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="font-size:12px;font-weight:600"><i class="ri-sticky-note-line"></i>
+                Note</label>
+              <input type="text" id="entNote" class="form-control" placeholder="Optional remark / note">
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-Card Section: Left = Debit & Credit Table, Right = Agent Balance Summary -->
+        <div class="balance-sheets-grid">
+          <!-- LEFT CARD: Agent Balance's Debit & Credit Table -->
+          <div class="sheet-card">
+            <div class="sheet-card-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <h3 class="sheet-card-title"><i class="ri-exchange-dollar-line"></i> Agent Balance's Debit & Credit Table
+              </h3>
+              <button type="button" class="btn btn-outline btn-xs" onclick="openDebitCreditModal()"
+                title="View Debit & Credit Statement & Payments" style="font-size:11px;">
+                <i class="ri-file-list-3-line"></i> Statement & Payments
+              </button>
+            </div>
+            <div class="sheet-table-wrap">
+              <table class="sheet-table" id="dcTable">
+                <thead>
+                  <tr>
+                    <th style="width:48px;">SL</th>
+                    <th style="text-align:left; padding-left:10px;">Name</th>
+                    <th style="width:115px; text-align:center;">Pabo (+)</th>
+                    <th style="width:115px; text-align:center;">Pabe (-)</th>
+                  </tr>
+                </thead>
+                <tbody id="dcBody">
+                  <!-- Generated SL 1 to 10 -->
+                </tbody>
+                <tfoot>
+                  <!-- TOTAL = Row -->
+                  <tr class="row-total">
+                    <td colspan="2" style="text-align:right; font-weight:800; padding-right:12px; font-size:13px;">TOTAL
+                      =</td>
+                    <td style="text-align:center; font-weight:800; font-size:13px;" id="totalPaboVal">0.00</td>
+                    <td style="text-align:center; font-weight:800; font-size:13px;" id="totalPabeVal">0.00</td>
+                  </tr>
+                  <!-- Closing Balance = Row -->
+                  <tr class="row-closing">
+                    <td colspan="2" style="text-align:right; font-weight:800; padding-right:12px; font-size:13px;">
+                      Closing Balance =
+                      <span id="closingSourceBadge"
+                        style="display:none; font-size:10px; color:#38bdf8; font-weight:600; margin-left:4px;">(from
+                        Cash Book)</span>
+                    </td>
+                    <td style="padding:2px 4px;">
+                      <input type="text" inputmode="decimal" id="closingBalanceInp"
+                        class="sheet-closing-input text-center" placeholder="0.00" readonly
+                        title="Closing Balance (Synced from Cash Book AGENT'S CAPITAL Closing Balance)"
+                        style="text-align:center; background:rgba(255,255,255,0.03); cursor:default;">
+                    </td>
+                    <td class="sheet-empty-cell"></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div
+              style="padding:8px 12px; background:rgba(255,255,255,0.02); border-top:1px solid var(--border); display:flex; justify-content:flex-start; align-items:center;">
+              <button type="button" class="btn btn-ghost btn-xs" id="addRowBtn"><i class="ri-add-line"></i> Add
+                Row</button>
+            </div>
+          </div>
+
+          <!-- RIGHT CARD: Agent Balance Summary -->
+          <div class="sheet-card">
+            <div class="sheet-card-header">
+              <h3 class="sheet-card-title"><i class="ri-file-chart-line"></i> Agent Balance Summary</h3>
+            </div>
+            <div class="sheet-table-wrap">
+              <table class="summary-table">
+                <tbody>
+                  <tr>
+                    <td class="col-val"><input type="text" inputmode="decimal" id="sumPreMonth"
+                        class="sheet-input text-center" placeholder="0.00" style="text-align:center;"></td>
+                    <td class="col-lbl">Pre. Month Balance</td>
+                  </tr>
+                  <tr>
+                    <td class="col-val"><input type="text" inputmode="decimal" id="sumCommission"
+                        class="sheet-input text-center" placeholder="0.00" style="text-align:center;"></td>
+                    <td class="col-lbl" style="padding:4px 6px;">
+                      <div style="display:flex; align-items:center; gap:6px; flex-wrap:nowrap;">
+                        <select id="sumCommissionMonth" class="form-control"
+                          style="height:30px; font-size:11.5px; font-weight:600; padding:2px 6px; width:auto; flex:1; min-width:145px;"
+                          title="Commission Month">
+                        </select>
+                        <select id="sumCommissionYear" class="form-control"
+                          style="height:30px; font-size:11.5px; font-weight:600; padding:2px 6px; width:72px; flex-shrink:0;"
+                          title="Year" onchange="updateCommissionMonthOptions()">
+                          <option value="2024">2024</option>
+                          <option value="2025">2025</option>
+                          <option value="2026" selected>2026</option>
+                          <option value="2027">2027</option>
+                          <option value="2028">2028</option>
+                          <option value="2029">2029</option>
+                          <option value="2030">2030</option>
+                          <option value="2031">2031</option>
+                          <option value="2032">2032</option>
+                          <option value="2033">2033</option>
+                          <option value="2034">2034</option>
+                          <option value="2035">2035</option>
+                          <option value="2036">2036</option>
+                          <option value="2037">2037</option>
+                          <option value="2038">2038</option>
+                          <option value="2039">2039</option>
+                          <option value="2040">2040</option>
+                        </select>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="col-val"><input type="text" inputmode="decimal" id="sumOthers"
+                        class="sheet-input text-center" placeholder="0.00" style="text-align:center;"></td>
+                    <td class="col-lbl">Others Income</td>
+                  </tr>
+                  <tr>
+                    <td class="col-val"><input type="text" inputmode="decimal" id="sumAit"
+                        class="sheet-input text-center" placeholder="0.00" style="text-align:center;"></td>
+                    <td class="col-lbl" style="padding:4px 6px;">
+                      <div style="display:flex; align-items:center; gap:6px; flex-wrap:nowrap;">
+                        <select id="sumAitMonth" class="form-control"
+                          style="height:30px; font-size:11.5px; font-weight:600; padding:2px 6px; width:auto; flex:1; min-width:145px;"
+                          title="Govt AIT Month">
+                        </select>
+                        <select id="sumAitYear" class="form-control"
+                          style="height:30px; font-size:11.5px; font-weight:600; padding:2px 6px; width:72px; flex-shrink:0;"
+                          title="Year" onchange="updateAitMonthOptions()">
+                          <option value="2024">2024</option>
+                          <option value="2025">2025</option>
+                          <option value="2026" selected>2026</option>
+                          <option value="2027">2027</option>
+                          <option value="2028">2028</option>
+                          <option value="2029">2029</option>
+                          <option value="2030">2030</option>
+                          <option value="2031">2031</option>
+                          <option value="2032">2032</option>
+                          <option value="2033">2033</option>
+                          <option value="2034">2034</option>
+                          <option value="2035">2035</option>
+                          <option value="2036">2036</option>
+                          <option value="2037">2037</option>
+                          <option value="2038">2038</option>
+                          <option value="2039">2039</option>
+                          <option value="2040">2040</option>
+                        </select>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="col-val"><input type="text" inputmode="decimal" id="sumAgw"
+                        class="sheet-input text-center" placeholder="0.00" style="text-align:center;"></td>
+                    <td class="col-lbl">AG W (For Daily & Monthly Exp.)</td>
+                  </tr>
+                  <tr class="row-total">
+                    <td class="col-val" id="summaryTotalVal" style="text-align:center;">0.00</td>
+                    <td class="col-lbl">Total</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Summary Section -->
+        <div class="additional-summary-section">
+          <div style="text-align:center; margin-bottom:14px;">
+            <span
+              style="display:inline-block; font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; color:var(--text-primary); text-transform:uppercase; letter-spacing:1px; padding:3px 16px; background:rgba(255,255,255,0.04); border-radius:20px; border:1px solid var(--border);">
+              Additional Summary
+            </span>
+          </div>
+
+          <div class="additional-summary-grid">
+            <!-- 1. Total AG Balance (Gold top border) -->
+            <div class="addl-summary-card card-gold">
+              <div class="addl-summary-title">Total AG Balance</div>
+              <div class="addl-input-wrapper">
+                <input type="text" id="addlTotalAgBalance" class="addl-summary-input text-center" placeholder="0.00"
+                  value="0.00" style="text-align:center;">
+              </div>
+            </div>
+
+            <!-- 2. Due Balance (Green top border) -->
+            <div class="addl-summary-card card-green">
+              <div class="addl-summary-title">Due Balance</div>
+              <div class="addl-input-wrapper">
+                <input type="text" id="addlDueBalance" class="addl-summary-input text-center" placeholder="0.00"
+                  value="0.00" style="text-align:center;">
+              </div>
+            </div>
+
+            <!-- 3. Agent Balance Differ (Red top border) -->
+            <div class="addl-summary-card card-red">
+              <div class="addl-summary-title">Agent Balance Differ</div>
+              <div class="addl-input-wrapper">
+                <input type="text" id="addlAgentBalanceDiffer" class="addl-summary-input text-center" placeholder="0.00"
+                  value="0.00" style="text-align:center;">
+              </div>
+            </div>
+
+            <!-- 4. Profit (Blue top border) -->
+            <div class="addl-summary-card card-blue">
+              <div class="addl-summary-title">Profit</div>
+              <div class="addl-input-wrapper">
+                <input type="text" id="addlProfit" class="addl-summary-input text-center" placeholder="0.00"
+                  value="0.00" style="text-align:center;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer"
+        style="position:sticky; bottom:0; background:var(--bg-secondary); z-index:10; border-top:1px solid var(--border);">
+        <button class="btn btn-ghost modal-close">Cancel</button>
+        <button class="btn btn-outline text-danger" id="resetModalBtn" title="Clear all input data and reset sheet"><i
+            class="ri-delete-bin-line"></i> Clear Data</button>
+        <button class="btn btn-primary" id="saveBtn"><i class="ri-save-line"></i> Save Entry</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Full Sheet Modal -->
+  <div class="modal-overlay" id="viewSheetModal">
+    <div class="modal" style="max-width:1080px; width:95vw; max-height:92vh; overflow-y:auto;">
+      <div class="modal-header"
+        style="position:sticky; top:0; background:var(--bg-secondary); z-index:10; border-bottom:1px solid var(--border);">
+        <div class="modal-title" id="viewSheetTitle"><i class="ri-file-text-line"></i> Agent Balance Sheet Details</div>
+        <div class="flex gap-8 items-center">
+          <button class="btn btn-ghost btn-sm" onclick="window.print()"><i class="ri-printer-line"></i> Print</button>
+          <div class="modal-close"><i class="ri-close-line"></i></div>
+        </div>
+      </div>
+      <div class="modal-body" id="viewSheetBody" style="padding:20px 24px;">
+        <!-- Dynamically rendered read-only sheet -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost modal-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent Balance Summary Modal (Print & Download PDF) -->
+  <div class="modal-overlay" id="balSummaryModal">
+    <div class="modal" style="max-width:1240px; width:96vw; max-height:92vh; display:flex; flex-direction:column;">
+      <div class="modal-header no-print" style="padding:16px 20px; border-bottom:1px solid var(--border)">
+        <div class="modal-title"
+          style="font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+          <i class="ri-file-chart-line" style="color:var(--gold); font-size:20px;"></i>
+          <span id="balSummaryModalTitle">Agent Balance Summary Statement</span>
+        </div>
+        <div class="modal-close" onclick="Modal.close('balSummaryModal')"><i class="ri-close-line"></i></div>
+      </div>
+
+      <!-- Controls Bar (Screen Only) -->
+      <div class="screen-only"
+        style="padding:14px 20px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <!-- Left: Agent & Category Filters -->
+          <div class="flex gap-10 items-center flex-wrap">
+            <div class="flex gap-6 items-center">
+              <label
+                style="font-size:12px; font-weight:600; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-store-2-line" style="color:var(--gold)"></i> Agent:
+              </label>
+              <select id="balSummaryAgent" class="form-control"
+                style="min-width:200px; max-width:320px; width:auto; height:38px; padding:6px 12px; font-size:13px;"
+                onchange="renderBalanceSummary()" title="Select Agent">
+                <option value="">All Agents</option>
+              </select>
+            </div>
+            <div class="flex gap-6 items-center">
+              <label
+                style="font-size:12px; font-weight:600; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-list-check-2" style="color:var(--gold)"></i> Category:
+              </label>
+              <select id="balSummaryCategory" class="form-control"
+                style="min-width:220px; max-width:340px; width:auto; height:38px; padding:6px 12px; font-size:13px;"
+                onchange="renderBalanceSummary()" title="Select Category">
+                <option value="all">All Category</option>
+                <option value="preMonth">Pre. Month Balance</option>
+                <option value="commission">Commission</option>
+                <option value="others">Others Income</option>
+                <option value="ait">Govt AIT</option>
+                <option value="agw">AG W (For Daily & Monthly Exp.)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Date Range Filter & Quick Presets -->
+        <div
+          style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding-top:10px; border-top:1px dashed var(--border);">
+          <div class="flex gap-8 items-center flex-wrap">
+            <span
+              style="font-size:12px; font-weight:600; color:var(--text-primary); display:flex; align-items:center; gap:4px;">
+              <i class="ri-calendar-line" style="color:var(--gold);"></i> Date Range:
+            </span>
+            <div class="flex gap-6 items-center">
+              <input type="date" id="balSummaryDateFrom" class="form-control"
+                style="height:32px; font-size:12px; max-width:145px;" onchange="renderBalanceSummary()">
+              <span style="color:var(--text-muted); font-size:12px;">to</span>
+              <input type="date" id="balSummaryDateTo" class="form-control"
+                style="height:32px; font-size:12px; max-width:145px;" onchange="renderBalanceSummary()">
+            </div>
+          </div>
+          <div class="flex gap-6 items-center flex-wrap">
+            <button class="btn btn-ghost btn-sm" onclick="setBalSummaryDatePreset('30d')"
+              style="height:30px; font-size:11px; padding:0 10px;">Last 30 Days</button>
+            <button class="btn btn-ghost btn-sm" onclick="setBalSummaryDatePreset('6m')"
+              style="height:30px; font-size:11px; padding:0 10px;">Last 6 Months</button>
+            <button class="btn btn-ghost btn-sm" onclick="setBalSummaryDatePreset('fy')"
+              style="height:30px; font-size:11px; padding:0 10px;">This Fiscal Year</button>
+            <button class="btn btn-ghost btn-sm" onclick="setBalSummaryDatePreset('all')"
+              style="height:30px; font-size:11px; padding:0 10px;">All Time</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body (Print & PDF Area) -->
+      <div class="modal-body" id="balSummaryModalBody" style="overflow-y:auto; padding:20px; flex:1;">
+        <!-- Dynamic Summary Statement Content rendered by JS -->
+      </div>
+
+      <!-- Modal Footer (Screen Only) -->
+      <div class="modal-footer no-print"
+        style="justify-content:space-between; padding:12px 20px; border-top:1px solid var(--border);">
+        <div id="balSummaryFooterMeta" style="font-size:12px; color:var(--text-muted);">
+          MS Techno Enterprise • Agent Balance Statement System
+        </div>
+        <div class="flex gap-8">
+          <button class="btn btn-outline btn-sm" onclick="printBalanceSummary()" title="Print Statement">
+            <i class="ri-printer-line"></i> Print
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="downloadBalanceSummaryPDF()" title="Download PDF Report">
+            <i class="ri-file-pdf-line"></i> Download PDF
+          </button>
+          <button class="btn btn-ghost btn-sm modal-close" onclick="Modal.close('balSummaryModal')">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- DEBIT & CREDIT STATEMENT MODAL (PRINT & DOWNLOAD PDF)  -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div class="modal-overlay" id="dcStatementModal">
+    <div class="modal" style="max-width:1300px; width:98vw; max-height:94vh; display:flex; flex-direction:column;">
+      <div class="modal-header no-print" style="padding:16px 20px; border-bottom:1px solid var(--border)">
+        <div class="modal-title"
+          style="font-size:16px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+          <i class="ri-exchange-dollar-line" style="color:var(--gold); font-size:22px;"></i>
+          <span id="dcStatementModalTitle">Debit & Credit Statement</span>
+        </div>
+        <div class="flex gap-8 items-center">
+          <button class="btn btn-primary btn-sm" onclick="openRecordPaymentModal()"
+            style="height:32px; font-size:12px; padding:0 12px;">
+            <i class="ri-hand-coin-line"></i>Payment Option
+          </button>
+          <div class="modal-close" onclick="Modal.close('dcStatementModal')"><i class="ri-close-line"></i></div>
+        </div>
+      </div>
+
+      <!-- Controls Bar (Screen Only) -->
+      <div class="screen-only"
+        style="padding:14px 20px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <!-- Left: Agent, Category (Person/Entity), Type Filters -->
+          <div class="flex gap-10 items-center flex-wrap">
+            <div class="flex gap-6 items-center">
+              <label
+                style="font-size:12px; font-weight:600; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-store-2-line" style="color:var(--gold)"></i> Agent:
+              </label>
+              <select id="dcStatementAgent" class="form-control"
+                style="min-width:200px; max-width:300px; width:auto; height:38px; padding:6px 12px; font-size:13px;"
+                onchange="onDcAgentChange()" title="Select Agent">
+                <option value="">All Agents</option>
+              </select>
+            </div>
+            <div class="flex gap-6 items-center">
+              <label
+                style="font-size:12px; font-weight:600; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-user-star-line" style="color:var(--gold)"></i> Category:
+              </label>
+              <select id="dcStatementCategory" class="form-control"
+                style="min-width:220px; max-width:320px; width:auto; height:38px; padding:6px 12px; font-size:13px;"
+                onchange="renderDebitCreditStatement()" title="Select Person or Entity">
+                <option value="">All Persons /Entities</option>
+              </select>
+            </div>
+            <div class="flex gap-6 items-center">
+              <label
+                style="font-size:12px; font-weight:600; color:var(--text-muted); white-space:nowrap; display:flex; align-items:center; gap:4px;">
+                <i class="ri-filter-3-line" style="color:var(--gold)"></i> Type:
+              </label>
+              <select id="dcStatementType" class="form-control"
+                style="min-width:200px; width:auto; height:38px; padding:6px 12px; font-size:13px;"
+                onchange="renderDebitCreditStatement()">
+                <option value="all">Active Unpaid</option>
+                <option value="pabo">Pabo (+)/Receivable</option>
+                <option value="pabe">Pabe (-)/Payable</option>
+                <option value="settled">Settled / Paid</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Right: Search & Payment History Button -->
+          <div class="flex gap-6 items-center">
+            <div class="search-input-wrap" style="width:200px;">
+              <i class="ri-search-line"></i>
+              <input type="search" class="form-control" id="dcStatementSearch" placeholder="Search person/note..."
+                style="height:38px; font-size:12px;" oninput="renderDebitCreditStatement()">
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="openDcHistoryModal()"
+              style="height:38px; font-size:12px; white-space:nowrap;" title="View all payments history">
+              <i class="ri-history-line"></i> Payment History
+            </button>
+          </div>
+        </div>
+
+        <!-- Date Range Filter & Quick Presets -->
+        <div
+          style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding-top:10px; border-top:1px dashed var(--border);">
+          <div class="flex gap-8 items-center flex-wrap">
+            <span
+              style="font-size:12px; font-weight:600; color:var(--text-primary); display:flex; align-items:center; gap:4px;">
+              <i class="ri-calendar-line" style="color:var(--gold);"></i> Date Range:
+            </span>
+            <div class="flex gap-6 items-center">
+              <input type="date" id="dcStatementDateFrom" class="form-control"
+                style="height:32px; font-size:12px; max-width:145px;" onchange="renderDebitCreditStatement()">
+              <span style="color:var(--text-muted); font-size:12px;">to</span>
+              <input type="date" id="dcStatementDateTo" class="form-control"
+                style="height:32px; font-size:12px; max-width:145px;" onchange="renderDebitCreditStatement()">
+            </div>
+          </div>
+          <div class="flex gap-6 items-center flex-wrap">
+            <button class="btn btn-ghost btn-sm" onclick="setDcDatePreset('30d')"
+              style="height:30px; font-size:11px; padding:0 10px;">Last 30 Days</button>
+            <button class="btn btn-ghost btn-sm" onclick="setDcDatePreset('6m')"
+              style="height:30px; font-size:11px; padding:0 10px;">Last 6 Months</button>
+            <button class="btn btn-ghost btn-sm" onclick="setDcDatePreset('fy')"
+              style="height:30px; font-size:11px; padding:0 10px;">This Fiscal Year</button>
+            <button class="btn btn-ghost btn-sm" onclick="setDcDatePreset('all')"
+              style="height:30px; font-size:11px; padding:0 10px;">All Time</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body (Print & PDF Area) -->
+      <div class="modal-body" id="dcStatementModalBody" style="overflow-y:auto; padding:20px; flex:1;">
+        <!-- Dynamic Statement Content rendered by JS -->
+      </div>
+
+      <!-- Modal Footer (Screen Only) -->
+      <div class="modal-footer no-print"
+        style="justify-content:space-between; padding:12px 20px; border-top:1px solid var(--border);">
+        <div id="dcStatementFooterMeta" style="font-size:12px; color:var(--text-muted);">
+          MS Techno Enterprise • Debit & Credit (Loan & Borrowing) Settlement System
+        </div>
+        <div class="flex gap-8">
+          <button class="btn btn-outline btn-sm" onclick="printDebitCreditSummary()" title="Print Statement">
+            <i class="ri-printer-line"></i> Print
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="downloadDebitCreditPDF()" title="Download PDF Report">
+            <i class="ri-file-pdf-line"></i> Download PDF
+          </button>
+          <button class="btn btn-ghost btn-sm modal-close" onclick="Modal.close('dcStatementModal')">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- RECORD DEBIT & CREDIT PAYMENT / SETTLEMENT MODAL     -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div class="modal-overlay" id="dcPaymentModal">
+    <div class="modal" style="max-width:540px; width:95vw;">
+      <div class="modal-header" style="padding:16px 20px; border-bottom:1px solid var(--border);">
+        <div class="modal-title" style="font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <i class="ri-hand-coin-line" style="color:var(--gold); font-size:22px;"></i>
+          <span id="dcPaymentModalTitle">Record Payment</span>
+        </div>
+        <div class="modal-close" onclick="Modal.close('dcPaymentModal')"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body" style="padding:20px; display:flex; flex-direction:column; gap:16px;">
+        <input type="hidden" id="dcPayTxId" value="">
+
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" style="font-weight:600;"><i class="ri-store-2-line" style="color:var(--gold)"></i>
+            Agent *</label>
+          <select id="dcPayAgent" class="form-control" onchange="onDcPayAgentChange()" required>
+            <option value="">Select Agent</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" style="font-weight:600;"><i class="ri-user-star-line" style="color:var(--gold)"></i>
+            Person / Institution *</label>
+          <div style="display:flex; gap:8px;">
+            <select id="dcPayPersonSel" class="form-control" onchange="onDcPayPersonSelectChange()" style="flex:1;">
+              <option value="">-- Select from list --</option>
+            </select>
+            <input type="text" id="dcPayPersonInp" class="form-control" placeholder="Or type name..." style="flex:1;"
+              oninput="updateDcPayDueBadge()">
+          </div>
+          <small style="color:var(--text-muted); font-size:11px; margin-top:4px; display:block;">Select an entity from
+            the balance sheet or enter a name</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" style="font-weight:600;"><i class="ri-exchange-line" style="color:var(--gold)"></i>
+            Payment Nature *</label>
+          <select id="dcPayType" class="form-control" onchange="updateDcPayDueBadge()">
+            <option value="paid">Debt Repaid to Person —PABE (-)</option>
+            <option value="received">Debt Collected from Person —PABO (+)
+            </option>
+          </select>
+        </div>
+
+        <!-- Live Outstanding Info Banner -->
+        <div id="dcPayDueBanner"
+          style="padding:10px 14px; border-radius:6px; background:rgba(217,119,6,0.1); border:1px solid rgba(217,119,6,0.25); display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-size:11px; color:var(--text-muted);">Current Outstanding Balance:</div>
+            <div id="dcPayDueAmountText" style="font-size:15px; font-weight:800; color:var(--gold);">৳0.00</div>
+          </div>
+          <button type="button" class="btn btn-outline btn-xs" onclick="fillDcPayFullDue()" style="font-size:11px;">
+            <i class="ri-check-double-line"></i> Pay Full Due
+          </button>
+        </div>
+
+        <div class="grid grid-2" style="gap:14px; margin-bottom:0;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" style="font-weight:600;"><i class="ri-calendar-line"
+                style="color:var(--gold)"></i> Payment Date *</label>
+            <input type="date" id="dcPayDate" class="form-control" required>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" style="font-weight:600;"><i class="ri-money-dollar-circle-line"
+                style="color:var(--gold)"></i> Amount (৳) *</label>
+            <input type="text" inputmode="decimal" id="dcPayAmount" class="form-control text-right" placeholder="0.00"
+              required>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="gap:14px; margin-bottom:0;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" style="font-weight:600;"><i class="ri-bank-card-line"
+                style="color:var(--gold)"></i> Payment Method</label>
+            <select id="dcPayMethod" class="form-control">
+              <option value="Cash">Cash</option>
+              <option value="Bank">Bank Transfer</option>
+              <option value="Cheque">Cheque</option>
+              <option value="bKash">bKash</option>
+              <option value="Nagad">Nagad</option>
+              <option value="Rocket">Rocket</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" style="font-weight:600;"><i class="ri-file-text-line"
+                style="color:var(--gold)"></i> Note / Reference</label>
+            <input type="text" id="dcPayNote" class="form-control" placeholder="e.g. 1st installment, Cheque #4920">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer"
+        style="padding:14px 20px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px;">
+        <button type="button" class="btn btn-ghost" onclick="Modal.close('dcPaymentModal')">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveDcPayBtn" onclick="saveDebitCreditPayment()">
+          <i class="ri-save-line"></i> Save Payment
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <!-- DEBIT & CREDIT PAYMENT HISTORY MODAL                 -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div class="modal-overlay" id="dcHistoryModal">
+    <div class="modal" style="max-width:960px; width:95vw; max-height:88vh; display:flex; flex-direction:column;">
+      <div class="modal-header" style="padding:16px 20px; border-bottom:1px solid var(--border);">
+        <div class="modal-title" style="font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px;">
+          <i class="ri-history-line" style="color:var(--gold); font-size:22px;"></i>
+          <span id="dcHistoryModalTitle">Payment & Settlement History</span>
+        </div>
+        <div class="modal-close" onclick="Modal.close('dcHistoryModal')"><i class="ri-close-line"></i></div>
+      </div>
+      <div class="modal-body" id="dcHistoryModalBody" style="overflow-y:auto; padding:20px; flex:1;">
+        <!-- Populated dynamically by JS -->
+      </div>
+      <div class="modal-footer"
+        style="padding:12px 20px; border-top:1px solid var(--border); display:flex; justify-content:flex-end;">
+        <button class="btn btn-ghost btn-sm" onclick="Modal.close('dcHistoryModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const user = App.init('agent-balance', 'Agent Balance', 'Daily balance records');
+    UIEnhancements.setBreadcrumb('pageBreadcrumb', [{ label: 'Agent Balance' }]);
+    if (!user) throw new Error();
+    const isAdmin = user.role === 'admin' || user.role === 'sub-admin';
+    const canEdit = isAdmin || Auth.canEdit('agent-balance'); // Data Entry permission check
+    Chart.defaults.color = '#9ba8cc';
+    Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+    let allData = [], agents = [], filteredData = [];
+    const PER_PAGE = 10;
+    let page = 1;
+    let chart;
+
+    function getFilteredData() { return filteredData; }
+
+    function populateAgentDropdowns(preserveSelected = true) {
+      agents = (window.Auth && Auth.getAccessibleAgents) ? Auth.getAccessibleAgents(DB.getAgents()) : DB.getAgents();
+      ['agentSel', 'entAgent'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const cur = preserveSelected ? el.value : '';
+        let opts = `<option value="">${id === 'agentSel' ? 'All Agents' : 'Select Agent'}</option>`;
+        agents.forEach(a => {
+          opts += `<option value="${a.id}" ${String(a.id) === String(cur) ? 'selected' : ''}>${a.name}</option>`;
+        });
+        el.innerHTML = opts;
+      });
+    }
+
+    function load() {
+      agents = (window.Auth && Auth.getAccessibleAgents) ? Auth.getAccessibleAgents(DB.getAgents()) : DB.getAgents();
+      const agentMap = {};
+      agents.forEach(a => agentMap[a.id] = a);
+
+      allData = DB.getBalances().map(r => {
+        const sd = r.sheetData || {};
+        const computedFinalBal = parseNum(
+          r.finalBalance !== undefined ? r.finalBalance :
+            (r.balance !== undefined ? r.balance :
+              (sd.summary?.total !== undefined ? sd.summary.total : (r.amount || 0)))
+        );
+        return {
+          ...r,
+          finalBalance: computedFinalBal,
+          balance: computedFinalBal,
+          agentName: agentMap[r.agentId]?.name || 'Unknown',
+          agentCode: agentMap[r.agentId]?.code || agentMap[r.agentId]?.outletCode || '—',
+          userName: r.userName || (user && (user.name || user.username)) || 'Admin'
+        };
+      }).sort((a, b) => {
+        // Latest saved entry always at the very top
+        const timeA = new Date(a.createdAt || a.date || 0).getTime();
+        const timeB = new Date(b.createdAt || b.date || 0).getTime();
+        if (timeB !== timeA) return timeB - timeA;
+        const dateA = new Date(a.date || 0).getTime();
+        const dateB = new Date(b.date || 0).getTime();
+        return dateB - dateA;
+      });
+
+      populateAgentDropdowns(true);
+      applyFilters();
+      renderChart();
+      renderSummary();
+    }
+
+    function setKpiValue(el, val) {
+      if (!el) return;
+      const num = parseFloat(val) || 0;
+      if (num < 0) {
+        animateCount(el, Math.abs(num), 800, '-৳');
+      } else {
+        animateCount(el, num, 800, '৳');
+      }
+    }
+
+    function applyFilters() {
+      let data = [...allData];
+      const agent = document.getElementById('agentSel').value;
+      const from = document.getElementById('dateFrom').value;
+      const to = document.getElementById('dateTo').value;
+      const search = document.getElementById('searchInp').value.toLowerCase();
+
+      if (agent) data = data.filter(r => r.agentId === agent);
+      if (from) data = data.filter(r => r.date >= from);
+      if (to) data = data.filter(r => r.date <= to);
+      if (search) data = data.filter(r => r.agentName.toLowerCase().includes(search) || (r.userName || '').toLowerCase().includes(search) || (r.note || '').toLowerCase().includes(search));
+
+      filteredData = data;
+      page = 1;
+      renderTable();
+      renderSummary();
+      renderChart();
+    }
+
+    function renderSummary() {
+      const agentFilter = document.getElementById('agentSel')?.value;
+      const from = document.getElementById('dateFrom')?.value;
+      const to = document.getElementById('dateTo')?.value;
+
+      let src = [...allData];
+      if (agentFilter) src = src.filter(r => String(r.agentId) === String(agentFilter));
+      if (from) src = src.filter(r => r.date >= from);
+      if (to) src = src.filter(r => r.date <= to);
+
+      const latestMap = {};
+      src.forEach(r => {
+        const cur = latestMap[r.agentId];
+        if (!cur || r.date > cur.date || (r.date === cur.date && (r.createdAt || '') > (cur.createdAt || ''))) {
+          latestMap[r.agentId] = r;
+        }
+      });
+
+      let totalFinalBal = 0;
+      let totalClosingBal = 0;
+      let totalPabo = 0;
+      let totalPabe = 0;
+      let totalAgw = 0;
+      let totalProfit = 0;
+
+      Object.values(latestMap).forEach(r => {
+        const sd = r.sheetData || {};
+        const rowsList = sd.rows || [];
+
+        // finalBalance is the Agent Balance Summary Total (saved in DB.addBalance)
+        const fb = parseNum(
+          r.finalBalance !== undefined && r.finalBalance !== null && r.finalBalance !== ''
+            ? r.finalBalance
+            : (r.balance !== undefined ? r.balance : (sd.summary?.total || 0))
+        );
+        const cb = parseNum(sd.closingBalance || 0);
+        const pabo = sd.totalPabo !== undefined ? parseNum(sd.totalPabo) : rowsList.reduce((s, row) => s + parseNum(row.pabo), 0);
+        const pabe = sd.totalPabe !== undefined ? parseNum(sd.totalPabe) : rowsList.reduce((s, row) => s + parseNum(row.pabe), 0);
+        const agw = parseNum(sd.summary?.agw || 0);
+        const profit = parseNum(sd.additionalSummary?.profit !== undefined ? sd.additionalSummary.profit : ((sd.summary?.total || fb) - 2400000));
+
+        totalFinalBal += fb;
+        totalClosingBal += cb;
+        totalPabo += pabo;
+        totalPabe += pabe;
+        totalAgw += agw;
+        totalProfit += profit;
+      });
+
+      setKpiValue(document.getElementById('summaryFinalBal'), totalFinalBal);
+      setKpiValue(document.getElementById('summaryClosingBal'), totalClosingBal);
+      setKpiValue(document.getElementById('summaryPabo'), totalPabo);
+      setKpiValue(document.getElementById('summaryPabe'), totalPabe);
+      setKpiValue(document.getElementById('summaryAgw'), totalAgw);
+      setKpiValue(document.getElementById('summaryProfit'), totalProfit);
+    }
+
+    function renderChart() {
+      const chartType = document.getElementById('balChartTypeSel')?.value || 'bar';
+      const from = document.getElementById('dateFrom')?.value;
+      const to = document.getElementById('dateTo')?.value;
+
+      const agentList = (agents && agents.length) ? agents : DB.getAgents();
+      const labels = [];
+      const finalBalData = [];
+      const agwData = [];
+      const profitData = [];
+
+      agentList.forEach(a => {
+        labels.push(a.name);
+
+        let agentRecords = allData.filter(r => String(r.agentId) === String(a.id));
+        if (from) agentRecords = agentRecords.filter(r => r.date >= from);
+        if (to) agentRecords = agentRecords.filter(r => r.date <= to);
+
+        let latest = null;
+        if (agentRecords.length > 0) {
+          latest = [...agentRecords].sort((x, y) => new Date(y.date || y.createdAt || 0) - new Date(x.date || x.createdAt || 0))[0];
+        }
+
+        if (latest) {
+          const sd = latest.sheetData || {};
+          const fb = parseNum(latest.balance !== undefined ? latest.balance : (sd.summary?.total || 0));
+          const agw = parseNum(sd.summary?.agw || 0);
+          const profit = parseNum(sd.additionalSummary?.profit !== undefined ? sd.additionalSummary.profit : ((sd.summary?.total || fb) - 2400000));
+
+          finalBalData.push(fb);
+          agwData.push(agw);
+          profitData.push(profit);
+        } else {
+          finalBalData.push(0);
+          agwData.push(0);
+          profitData.push(0);
+        }
+      });
+
+      if (chart) chart.destroy();
+      const ctx = document.getElementById('balanceChart')?.getContext('2d');
+      if (!ctx) return;
+
+      const isArea = chartType === 'area';
+      const isDoughnut = chartType === 'doughnut';
+      const isLine = chartType === 'line' || isArea;
+      const chartJsType = isDoughnut ? 'doughnut' : (isArea ? 'line' : chartType);
+
+      // Update title icon
+      const titleEl = document.getElementById('balChartTitle');
+      const iconMap = { bar: 'ri-bar-chart-grouped-line', line: 'ri-line-chart-line', doughnut: 'ri-donut-chart-line', area: 'ri-area-chart-line' };
+      if (titleEl) titleEl.innerHTML = `<i class="${iconMap[chartType] || 'ri-bar-chart-line'}"></i> Balance, AG W & Profit by Agent`;
+
+      if (isDoughnut) {
+        const totalFinal = finalBalData.reduce((a, b) => a + b, 0);
+        const totalAgw = agwData.reduce((a, b) => a + b, 0);
+        const totalProfit = profitData.reduce((a, b) => a + b, 0);
+
+        chart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Final Balance', 'AG W (Exp.)', 'Profit'],
+            datasets: [{
+              data: [totalFinal, totalAgw, Math.max(0, totalProfit)],
+              backgroundColor: ['rgba(245, 166, 35, 0.85)', 'rgba(168, 85, 247, 0.85)', 'rgba(16, 185, 129, 0.85)'],
+              borderColor: ['#f5a623', '#a855f7', '#10b981'],
+              borderWidth: 2,
+              hoverOffset: 12
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            animation: { animateRotate: true, animateScale: true, duration: 1200, easing: 'easeOutQuart' },
+            plugins: {
+              legend: { position: 'bottom', labels: { usePointStyle: true, padding: 14, color: '#9ba8cc', font: { size: 12, weight: '600' } } },
+              tooltip: { callbacks: { label: c => ` ${c.label}: ${fmt(c.raw)}` } }
+            }
+          }
+        });
+        return;
+      }
+
+      const datasets = [
+        {
+          label: 'Final Balance',
+          data: finalBalData,
+          backgroundColor: isLine ? (isArea ? 'rgba(245, 166, 35, 0.22)' : 'transparent') : 'rgba(245, 166, 35, 0.85)',
+          borderColor: '#f5a623',
+          borderWidth: isLine ? 2.5 : 1,
+          borderRadius: chartType === 'bar' ? 6 : undefined,
+          tension: isLine ? 0.3 : undefined,
+          fill: isArea ? 'origin' : false,
+          pointRadius: isLine ? 4 : 0,
+          pointHoverRadius: isLine ? 7 : 0,
+          pointBackgroundColor: '#f5a623',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2
+        },
+        {
+          label: 'AG W (For Daily & Monthly Exp.)',
+          data: agwData,
+          backgroundColor: isLine ? (isArea ? 'rgba(168, 85, 247, 0.22)' : 'transparent') : 'rgba(168, 85, 247, 0.85)',
+          borderColor: '#a855f7',
+          borderWidth: isLine ? 2.5 : 1,
+          borderRadius: chartType === 'bar' ? 6 : undefined,
+          tension: isLine ? 0.3 : undefined,
+          fill: isArea ? 'origin' : false,
+          pointRadius: isLine ? 4 : 0,
+          pointHoverRadius: isLine ? 7 : 0,
+          pointBackgroundColor: '#a855f7',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2
+        },
+        {
+          label: 'Profit',
+          data: profitData,
+          backgroundColor: isLine ? (isArea ? 'rgba(16, 185, 129, 0.22)' : 'transparent') : 'rgba(16, 185, 129, 0.85)',
+          borderColor: '#10b981',
+          borderWidth: isLine ? 2.5 : 1,
+          borderRadius: chartType === 'bar' ? 6 : undefined,
+          tension: isLine ? 0.3 : undefined,
+          fill: isArea ? 'origin' : false,
+          pointRadius: isLine ? 4 : 0,
+          pointHoverRadius: isLine ? 7 : 0,
+          pointBackgroundColor: '#10b981',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2
+        }
+      ];
+
+      chart = new Chart(ctx, {
+        type: chartJsType,
+        data: {
+          labels,
+          datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 1200, easing: 'easeOutQuart' },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                usePointStyle: true,
+                padding: 16,
+                color: '#9ba8cc',
+                font: { size: 11.5, weight: '600' }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: c => ` ${c.dataset.label}: ${fmt(c.raw)}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: '#9ba8cc', font: { size: 11.5, weight: '600' } }
+            },
+            y: {
+              grid: { color: 'rgba(255,255,255,0.06)' },
+              ticks: {
+                color: '#9ba8cc',
+                callback: v => (v < 0 ? '-৳' : '৳') + (Math.abs(v) >= 1000 ? (Math.abs(v) / 1000).toFixed(0) + 'k' : Math.abs(v))
+              }
+            }
+          }
+        }
+      });
+    }
+
+
+    function renderTable() {
+      const from = document.getElementById('dateFrom')?.value;
+      const to = document.getElementById('dateTo')?.value;
+      const isDateFiltered = Boolean(from || to);
+
+      let rows = [];
+      if (isDateFiltered) {
+        // When date filter is used, show all matching records
+        document.getElementById('recordCount').textContent = `(${filteredData.length} records found)`;
+        rows = filteredData;
+      } else {
+        // Default: strictly show latest 10 items, remaining hidden unless searched by date
+        document.getElementById('recordCount').textContent = `(Showing latest ${Math.min(10, filteredData.length)} of ${filteredData.length} records)`;
+        const start = (page - 1) * PER_PAGE;
+        rows = filteredData.slice(start, start + PER_PAGE);
+      }
+
+      const actHeader = document.getElementById('actHeader');
+      if (actHeader) actHeader.style.display = '';
+
+      const tbody = document.getElementById('tableBody');
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted" style="padding:30px">No records found</td></tr>`;
+      } else {
+        tbody.innerHTML = rows.map(r => {
+          const sd = r.sheetData || {};
+          const rowsList = sd.rows || [];
+          const totalPabo = sd.totalPabo !== undefined ? parseFloat(sd.totalPabo) : (rowsList.reduce((s, row) => s + (parseFloat(row.pabo) || 0), 0));
+          const totalPabe = sd.totalPabe !== undefined ? parseFloat(sd.totalPabe) : (rowsList.reduce((s, row) => s + (parseFloat(row.pabe) || 0), 0));
+          const agw = parseNum(sd.summary?.agw || 0);
+          // Use finalBalance (= Agent Balance Summary Total) saved at time of entry
+          const finalBal = parseNum(
+            r.finalBalance !== undefined && r.finalBalance !== null && r.finalBalance !== ''
+              ? r.finalBalance
+              : (r.balance !== undefined ? r.balance : (sd.summary?.total || 0))
+          );
+
+          const rawCode = r.agentCode || (agents.find(a => String(a.id) === String(r.agentId))?.code) || (agents.find(a => String(a.id) === String(r.agentId))?.outletCode) || '—';
+          const code = (rawCode && rawCode !== '—') ? rawCode : 'AG-01';
+
+          let dateObj = null;
+          if (r.createdAt) {
+            const t = new Date(r.createdAt);
+            if (!isNaN(t)) dateObj = t;
+          }
+          if (!dateObj && r.date) {
+            const t = new Date(r.date + 'T12:00:00');
+            if (!isNaN(t)) dateObj = t;
+          }
+          const dateStr = dateObj ? dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : (r.date || '—');
+          const dayStr = dateObj ? dateObj.toLocaleDateString('en-GB', { weekday: 'long' }) : '';
+          const timeStr = (r.createdAt && !isNaN(new Date(r.createdAt)))
+            ? new Date(r.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+            : (r.time || '10:00 AM');
+
+          const userName = r.userName || r.user || (user && (user.name || user.username)) || 'Admin';
+
+          return `
+            <tr>
+              <td>
+                <div style="font-weight:700; color:var(--text-primary); font-size:12.5px;">${r.agentName}</div>
+                <div style="font-size:11px; color:var(--text-muted); font-family:monospace; margin-top:2px;">Code: ${code}</div>
+              </td>
+              <td>
+                <div style="line-height:1.35;">
+                  <div style="font-weight:600; color:var(--text-primary); font-size:12px;">${dateStr}</div>
+                  <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${dayStr ? dayStr + ', ' : ''}${timeStr}</div>
+                </div>
+              </td>
+              <td style="font-size:12px; color:var(--text-secondary); font-weight:500;">
+                <i class="ri-user-line" style="font-size:11px; opacity:0.6; margin-right:3px;"></i>${userName}
+              </td>
+              <td class="text-right" style="font-weight:700; color:#10b981; font-size:12px;">
+                ${fmt(totalPabo)}
+              </td>
+              <td class="text-right" style="font-weight:700; color:#ef4444; font-size:12px;">
+                ${fmt(totalPabe)}
+              </td>
+              <td class="text-right" style="font-weight:600; color:var(--text-secondary); font-size:12px;">
+                ${fmt(agw)}
+              </td>
+              <td class="text-right font-bold" style="color:var(--gold); font-size:13px;">
+                ${fmt(finalBal)}
+              </td>
+              <td class="text-center">
+                <div class="flex gap-4 items-center justify-center">
+                  ${r.sheetData ? `<button class="btn btn-ghost btn-sm btn-icon" title="View Full Sheet" onclick="viewSheet('${r.id}')"><i class="ri-file-text-line"></i></button>` : ''}
+                  ${canEdit ? `<button class="btn btn-danger btn-sm btn-icon" onclick="del('${r.id}')" title="Delete"><i class="ri-delete-bin-line"></i></button>` : ''}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      renderPagination();
+    }
+
+    function renderPagination() {
+      const from = document.getElementById('dateFrom')?.value;
+      const to = document.getElementById('dateTo')?.value;
+      const isDateFiltered = Boolean(from || to);
+      const pag = document.getElementById('pagination');
+      if (!pag) return;
+
+      if (isDateFiltered) {
+        pag.innerHTML = '';
+        return;
+      }
+
+      const total = Math.ceil(filteredData.length / PER_PAGE);
+      if (total <= 1) { pag.innerHTML = ''; return; }
+      let html = '';
+      for (let i = 1; i <= total; i++) {
+        html += `<div class="page-btn${i === page ? ' active' : ''}" onclick="goPage(${i})">${i}</div>`;
+      }
+      pag.innerHTML = html;
+    }
+
+    function goPage(p) { page = p; renderTable(); }
+
+    function del(id) {
+      Confirm.show('Delete this balance entry?', () => {
+        DB.deleteBalance(id);
+        Toast.success('Deleted!');
+        load();
+      });
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // NUMBER FORMATTING & PARSING HELPERS
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function parseNum(v) {
+      if (v === null || v === undefined) return 0;
+      const s = String(v).replace(/,/g, '').replace(/[^\d.\-]/g, '').trim();
+      if (s === '' || s === '-' || s === '.' || s === '-.') return 0;
+      const n = parseFloat(s);
+      return isNaN(n) ? 0 : n;
+    }
+
+    function moneyFormat(n) {
+      const val = parseNum(n);
+      return val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    function updateCommissionMonthOptions(selectedMonth = null) {
+      const yrSel = document.getElementById('sumCommissionYear');
+      const moSel = document.getElementById('sumCommissionMonth');
+      if (!yrSel || !moSel) return;
+      const yrFull = yrSel.value || '2026';
+      const yrShort = yrFull.slice(-2);
+      const curVal = selectedMonth || moSel.dataset.month || 'Jan';
+
+      moSel.innerHTML = MONTHS.map(m => {
+        const isSel = (m.toLowerCase() === curVal.toLowerCase());
+        return `<option value="Commission (${m}/${yrShort})" data-month="${m}" ${isSel ? 'selected' : ''}>Commission (${m}/${yrShort})</option>`;
+      }).join('');
+      moSel.dataset.month = curVal;
+      scheduleBalanceSheetDraftSave();
+    }
+
+    function updateAitMonthOptions(selectedMonth = null) {
+      const yrSel = document.getElementById('sumAitYear');
+      const moSel = document.getElementById('sumAitMonth');
+      if (!yrSel || !moSel) return;
+      const yrFull = yrSel.value || '2026';
+      const yrShort = yrFull.slice(-2);
+      const curVal = selectedMonth || moSel.dataset.month || 'Jan';
+
+      moSel.innerHTML = MONTHS.map(m => {
+        const isSel = (m.toLowerCase() === curVal.toLowerCase());
+        return `<option value="Govt AIT (${m}/${yrShort})" data-month="${m}" ${isSel ? 'selected' : ''}>Govt AIT (${m}/${yrShort})</option>`;
+      }).join('');
+      moSel.dataset.month = curVal;
+      scheduleBalanceSheetDraftSave();
+    }
+
+    function syncMonthYearFromEntDate() {
+      const dateVal = document.getElementById('entDate')?.value;
+      if (!dateVal) return;
+      const d = new Date(dateVal + 'T12:00:00');
+      if (isNaN(d)) return;
+      const m = MONTHS[d.getMonth()];
+      const yr = String(d.getFullYear());
+      const yrNum = parseInt(yr, 10);
+
+      const cy = document.getElementById('sumCommissionYear');
+      const ay = document.getElementById('sumAitYear');
+      if (cy && yrNum >= 2024 && yrNum <= 2040) cy.value = yr;
+      if (ay && yrNum >= 2024 && yrNum <= 2040) ay.value = yr;
+
+      updateCommissionMonthOptions(m);
+      updateAitMonthOptions(m);
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // DEBIT & CREDIT TABLE & SUMMARY CALCULATION
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function renderDcRows(count = 10) {
+      const tbody = document.getElementById('dcBody');
+      if (!tbody) return;
+      let html = '';
+      for (let i = 1; i <= count; i++) {
+        html += `
+          <tr>
+            <td class="text-center font-bold sl-cell" style="font-size:12px; color:var(--text-muted);">${i}</td>
+            <td><input type="text" class="sheet-input name-input" placeholder="Name"></td>
+            <td><input type="text" inputmode="decimal" class="sheet-input pabo-input text-center" placeholder="0.00" style="text-align:center;"></td>
+            <td><input type="text" inputmode="decimal" class="sheet-input pabe-input text-center" placeholder="0.00" style="text-align:center;"></td>
+          </tr>
+        `;
+      }
+      tbody.innerHTML = html;
+      bindSheetInputs();
+    }
+
+    function addDcRow() {
+      const tbody = document.getElementById('dcBody');
+      if (!tbody) return;
+      const count = tbody.querySelectorAll('tr').length + 1;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="text-center font-bold sl-cell" style="font-size:12px; color:var(--text-muted);">${count}</td>
+        <td><input type="text" class="sheet-input name-input" placeholder="Name"></td>
+        <td><input type="text" inputmode="decimal" class="sheet-input pabo-input text-center" placeholder="0.00" style="text-align:center;"></td>
+        <td><input type="text" inputmode="decimal" class="sheet-input pabe-input text-center" placeholder="0.00" style="text-align:center;"></td>
+      `;
+      tbody.appendChild(tr);
+      bindSheetInputs();
+      recalcSheet();
+      scheduleBalanceSheetDraftSave();
+    }
+
+    function onMoneyFocus(e) {
+      const raw = e.target.value.replace(/,/g, '').trim();
+      if (raw === '0.00' || raw === '0') {
+        e.target.value = '';
+      } else {
+        e.target.value = raw;
+      }
+      setTimeout(() => e.target.select(), 50);
+    }
+
+    function onMoneyBlur(e) {
+      const raw = e.target.value.replace(/,/g, '').trim();
+      if (raw !== '') {
+        const n = parseNum(raw);
+        e.target.value = moneyFormat(n);
+      } else {
+        e.target.value = '';
+      }
+      recalcSheet();
+      scheduleBalanceSheetDraftSave();
+    }
+
+    function onMoneyInput() {
+      recalcSheet();
+      scheduleBalanceSheetDraftSave();
+    }
+
+    function onRowNameInput() {
+      scheduleBalanceSheetDraftSave();
+    }
+
+    function bindSheetInputs() {
+      const moneyInputs = document.querySelectorAll('#dcBody input.pabo-input, #dcBody input.pabe-input, .summary-table input.sheet-input');
+      moneyInputs.forEach(inp => {
+        inp.removeEventListener('focus', onMoneyFocus);
+        inp.addEventListener('focus', onMoneyFocus);
+        inp.removeEventListener('blur', onMoneyBlur);
+        inp.addEventListener('blur', onMoneyBlur);
+        inp.removeEventListener('input', onMoneyInput);
+        inp.addEventListener('input', onMoneyInput);
+      });
+
+      document.querySelectorAll('#dcBody input.name-input').forEach(inp => {
+        inp.removeEventListener('input', onRowNameInput);
+        inp.addEventListener('input', onRowNameInput);
+      });
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // CASH BOOK AGENT'S CAPITAL CLOSING BALANCE SYNC
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    function getCashBookAgentCapitalClosing(agentId, date) {
+      if (!agentId) return null;
+
+      const currentAgent = agents?.find(a => String(a.id) === String(agentId));
+      const currentAgentName = currentAgent?.name?.toLowerCase().trim();
+
+      // Helper to extract capital closing from a DB cashbook record
+      function extractCapClosingFromRec(r) {
+        if (!r) return null;
+        if (r.agentCapitalClosing !== undefined && r.agentCapitalClosing !== null && r.agentCapitalClosing !== '') {
+          const v = parseNum(r.agentCapitalClosing);
+          if (!isNaN(v) && v !== 0) return v;
+        }
+        if (r.sheetData?.calculated?.capClosing !== undefined && r.sheetData?.calculated?.capClosing !== null && r.sheetData?.calculated?.capClosing !== '') {
+          const v = parseNum(r.sheetData.calculated.capClosing);
+          if (!isNaN(v) && v !== 0) return v;
+        }
+        if (r.sheetData?.notes || r.sheetData?.fields?.['cb-closing-settlement']) {
+          let tc = 0;
+          if (r.sheetData.notes && Array.isArray(r.sheetData.notes)) {
+            r.sheetData.notes.forEach(n => { tc += parseNum(n.val) * parseNum(n.count); });
+          } else if (r.totalCash !== undefined) {
+            tc = parseNum(r.totalCash);
+          }
+          const cs = parseNum(r.closingSettlement !== undefined ? r.closingSettlement : (r.sheetData.fields?.['cb-closing-settlement'] || 0));
+          if (tc > 0 || cs > 0) return tc + cs;
+        }
+        if (r.totalCash !== undefined && r.closingSettlement !== undefined) {
+          const tot = parseNum(r.totalCash) + parseNum(r.closingSettlement);
+          if (tot > 0) return tot;
+        }
+        if (r.agentCapitalClosing !== undefined && r.agentCapitalClosing !== null && r.agentCapitalClosing !== '') {
+          return parseNum(r.agentCapitalClosing);
+        }
+        return null;
+      }
+
+      // 1. Check Cash Book drafts (active work-in-progress / latest sheet)
+      try {
+        const draftsStore = JSON.parse(localStorage.getItem('teNte_agent_cashbook_drafts_v1') || '{}');
+        const draft = draftsStore.drafts?.[agentId] ||
+          draftsStore.drafts?.[String(agentId)] ||
+          Object.values(draftsStore.drafts || {}).find(d => String(d.agentId) === String(agentId)) ||
+          (draftsStore.lastAgentId && String(draftsStore.lastAgentId) === String(agentId) ? draftsStore.drafts?.[draftsStore.lastAgentId] : null);
+
+        if (draft) {
+          // Calculate cash from Cash Notes table in Cash Book
+          let totalNotesCash = 0;
+          if (draft.notes && Array.isArray(draft.notes)) {
+            draft.notes.forEach(n => {
+              totalNotesCash += parseNum(n.val) * parseNum(n.count);
+            });
+          }
+          const closeSettle = parseNum(draft.fields?.['cb-closing-settlement'] || 0);
+          const computedCapClosing = totalNotesCash + closeSettle;
+
+          if (computedCapClosing > 0) {
+            return computedCapClosing;
+          }
+          if (draft.capClosing !== undefined && !isNaN(parseNum(draft.capClosing)) && parseNum(draft.capClosing) > 0) {
+            return parseNum(draft.capClosing);
+          }
+          if (draft.agentCapitalClosing !== undefined && !isNaN(parseNum(draft.agentCapitalClosing)) && parseNum(draft.agentCapitalClosing) > 0) {
+            return parseNum(draft.agentCapitalClosing);
+          }
+          if (draft.calculated && draft.calculated.capClosing !== undefined) {
+            const v = parseNum(draft.calculated.capClosing);
+            if (!isNaN(v) && v > 0) return v;
+          }
+        }
+      } catch (e) { }
+
+      // 2. Check DB Cashbook records
+      try {
+        const allCb = (window.DB && DB.getCashbook) ? DB.getCashbook() : JSON.parse(localStorage.getItem('mste_cashbook') || '[]');
+        const agentCb = allCb.filter(r =>
+          String(r.agentId) === String(agentId) ||
+          (currentAgentName && r.agentName && r.agentName.toLowerCase().trim() === currentAgentName)
+        );
+
+        if (agentCb && agentCb.length) {
+          if (date) {
+            const match = agentCb.find(c => c.date === date);
+            if (match) {
+              const v = extractCapClosingFromRec(match);
+              if (v !== null) return v;
+            }
+          }
+          const sorted = [...agentCb].sort((a, b) => new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0));
+          for (const rec of sorted) {
+            const v = extractCapClosingFromRec(rec);
+            if (v !== null) return v;
+          }
+        }
+      } catch (e) { }
+
+      // 3. Fallback: Draft even if 0 was explicitly calculated
+      try {
+        const draftsStore = JSON.parse(localStorage.getItem('teNte_agent_cashbook_drafts_v1') || '{}');
+        const draft = draftsStore.drafts?.[agentId] || draftsStore.drafts?.[String(agentId)];
+        if (draft) {
+          if (draft.capClosing !== undefined && !isNaN(parseNum(draft.capClosing))) return parseNum(draft.capClosing);
+          if (draft.agentCapitalClosing !== undefined && !isNaN(parseNum(draft.agentCapitalClosing))) return parseNum(draft.agentCapitalClosing);
+          if (draft.calculated?.capClosing !== undefined && !isNaN(parseNum(draft.calculated.capClosing))) return parseNum(draft.calculated.capClosing);
+        }
+      } catch (e) { }
+
+      return null;
+    }
+
+    function syncClosingBalanceFromCashBook() {
+      let agentId = document.getElementById('entAgent')?.value;
+      const date = document.getElementById('entDate')?.value;
+      const closingInp = document.getElementById('closingBalanceInp');
+      const badge = document.getElementById('closingSourceBadge');
+      if (!closingInp) return;
+
+      if (!agentId) {
+        // Fallback to active filter agent or last active agent
+        const filterAgent = document.getElementById('agentSel')?.value;
+        if (filterAgent && document.querySelector(`#entAgent option[value="${filterAgent}"]`)) {
+          agentId = filterAgent;
+          const entAgent = document.getElementById('entAgent');
+          if (entAgent) entAgent.value = filterAgent;
+        } else {
+          try {
+            const cbStore = JSON.parse(localStorage.getItem('teNte_agent_cashbook_drafts_v1') || '{}');
+            if (cbStore.lastAgentId && document.querySelector(`#entAgent option[value="${cbStore.lastAgentId}"]`)) {
+              agentId = cbStore.lastAgentId;
+              const entAgent = document.getElementById('entAgent');
+              if (entAgent) entAgent.value = cbStore.lastAgentId;
+            }
+          } catch (e) { }
+          if (!agentId) {
+            const firstOpt = Array.from(document.querySelectorAll('#entAgent option')).find(o => o.value);
+            if (firstOpt) {
+              agentId = firstOpt.value;
+              const entAgent = document.getElementById('entAgent');
+              if (entAgent) entAgent.value = firstOpt.value;
+            }
+          }
+        }
+      }
+
+      if (!agentId) {
+        closingInp.value = '';
+        delete closingInp.dataset.fromCashBook;
+        if (badge) badge.style.display = 'none';
+        recalcSheet();
+        scheduleBalanceSheetDraftSave();
+        return;
+      }
+
+      const capClosing = getCashBookAgentCapitalClosing(agentId, date);
+      if (capClosing !== null && !isNaN(capClosing)) {
+        closingInp.value = moneyFormat(capClosing);
+        closingInp.dataset.fromCashBook = 'true';
+        if (badge) {
+          badge.style.display = 'inline';
+          badge.textContent = '(from Cash Book)';
+        }
+      } else {
+        closingInp.value = '';
+        delete closingInp.dataset.fromCashBook;
+        if (badge) badge.style.display = 'none';
+      }
+      recalcSheet();
+      scheduleBalanceSheetDraftSave();
+    }
+
+    function recalcSheet() {
+      // 1. Calculate Pabo (+) and Pabe (-) rows sum
+      let paboSum = 0;
+      let pabeSum = 0;
+      document.querySelectorAll('#dcBody tr').forEach(tr => {
+        const paboVal = parseNum(tr.querySelector('.pabo-input')?.value);
+        const pabeVal = parseNum(tr.querySelector('.pabe-input')?.value);
+        paboSum += paboVal;
+        pabeSum += pabeVal;
+      });
+
+      // 2. Calculate Agent Balance Summary
+      const preMonth = parseNum(document.getElementById('sumPreMonth')?.value);
+      const commission = parseNum(document.getElementById('sumCommission')?.value);
+      const others = parseNum(document.getElementById('sumOthers')?.value);
+      const ait = parseNum(document.getElementById('sumAit')?.value);
+      const agw = parseNum(document.getElementById('sumAgw')?.value);
+      const summaryTotal = preMonth + commission + others - ait - agw;
+
+      const sumEl = document.getElementById('summaryTotalVal');
+      if (sumEl) sumEl.textContent = moneyFormat(summaryTotal);
+
+      // 3. Closing Balance & Totals
+      const closingInp = document.getElementById('closingBalanceInp');
+      let closingVal = parseNum(closingInp?.value);
+
+      // TOTAL = Row: Pabo (+) and Pabe (-)
+      const totalPabo = paboSum;
+      const totalPabe = pabeSum;
+
+      const totalPaboEl = document.getElementById('totalPaboVal');
+      const totalPabeEl = document.getElementById('totalPabeVal');
+      if (totalPaboEl) totalPaboEl.textContent = moneyFormat(totalPabo);
+      if (totalPabeEl) totalPabeEl.textContent = moneyFormat(totalPabe);
+
+      // 4. User Specified Additional Summary Calculations:
+      // Total AG Balance = TOTAL = (Pabo (+)) + Closing Balance =
+      const totalAgBalance = totalPabo + closingVal;
+
+      // Due Balance = TOTAL (Pabo (+) - TOTAL Pabe (-)
+      const dueBalance = totalPabo - totalPabe;
+
+      // Agent Balance Differ = Total AG Balance - TOTAL Pabe (-) - Agent Balance Summary Total
+      const agentBalanceDiffer = totalAgBalance - totalPabe - summaryTotal;
+
+      // Profit = Agent Balance Summary Total - 2400000
+      const profit = summaryTotal - 2400000;
+
+      const addlTotal = document.getElementById('addlTotalAgBalance');
+      const addlDue = document.getElementById('addlDueBalance');
+      const addlDiffer = document.getElementById('addlAgentBalanceDiffer');
+      const addlProfit = document.getElementById('addlProfit');
+
+      if (addlTotal) addlTotal.value = moneyFormat(totalAgBalance);
+      if (addlDue) addlDue.value = moneyFormat(dueBalance);
+      if (addlDiffer) addlDiffer.value = moneyFormat(agentBalanceDiffer);
+      if (addlProfit) addlProfit.value = moneyFormat(profit);
+
+      // 5. Final Balance strictly equals Agent Balance Summary Total
+      const balInp = document.getElementById('entBalance');
+      if (balInp) {
+        balInp.value = moneyFormat(summaryTotal);
+        balInp.readOnly = true;
+      }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // MULTI-AGENT DRAFT PERSISTENCE (AGENT BALANCE SHEET)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const BALANCE_DRAFT_KEY = 'teNte_agent_balance_sheet_drafts_v2';
+    const LEGACY_BALANCE_DRAFT_KEY = 'teNte_agent_balance_sheet_draft_v1';
+    let currentBalanceDraftAgentId = '';
+    let draftSaveTimer = null;
+    let isLoadingDraft = false; // Guard to prevent save during load
+
+    function getAllBalanceSheetDrafts() {
+      try {
+        let store = JSON.parse(localStorage.getItem(BALANCE_DRAFT_KEY) || 'null');
+        if (!store || typeof store !== 'object') {
+          store = { lastAgentId: '', drafts: {} };
+          // Migrate old single-agent draft if present
+          try {
+            const legacy = JSON.parse(localStorage.getItem(LEGACY_BALANCE_DRAFT_KEY) || 'null');
+            if (legacy && legacy.agentId) {
+              store.lastAgentId = legacy.agentId;
+              store.drafts[legacy.agentId] = legacy;
+              localStorage.setItem(BALANCE_DRAFT_KEY, JSON.stringify(store));
+            }
+          } catch (e) { }
+        }
+        if (!store.drafts) store.drafts = {};
+
+        // ── Auto-cleanup: remove drafts whose key doesn't match their own agentId ──
+        // This fixes corrupted cross-agent data from older buggy implementations
+        let needsSave = false;
+        Object.keys(store.drafts).forEach(key => {
+          const d = store.drafts[key];
+          if (d && d.agentId !== undefined && String(d.agentId) !== String(key)) {
+            delete store.drafts[key];
+            needsSave = true;
+          }
+        });
+        if (needsSave) {
+          try { localStorage.setItem(BALANCE_DRAFT_KEY, JSON.stringify(store)); } catch (e) { }
+        }
+
+        return store;
+      } catch (e) {
+        return { lastAgentId: '', drafts: {} };
+      }
+    }
+
+    function saveBalanceSheetDraft(targetAgentId = null) {
+      const agentId = targetAgentId || document.getElementById('entAgent')?.value || currentBalanceDraftAgentId;
+      if (!agentId) return;
+
+      try {
+        const rows = [];
+        document.querySelectorAll('#dcBody tr').forEach(tr => {
+          const sl = tr.querySelector('.sl-cell')?.textContent.trim() || '';
+          const name = tr.querySelector('.name-input')?.value || '';
+          const pabo = tr.querySelector('.pabo-input')?.value || '';
+          const pabe = tr.querySelector('.pabe-input')?.value || '';
+          if (name || pabo || pabe) {
+            rows.push({ sl, name, pabo, pabe });
+          }
+        });
+
+        const store = getAllBalanceSheetDrafts();
+        store.lastAgentId = agentId;
+        store.drafts[agentId] = {
+          agentId: agentId,
+          date: document.getElementById('entDate')?.value || '',
+          note: document.getElementById('entNote')?.value || '',
+          summary: {
+            preMonth: document.getElementById('sumPreMonth')?.value || '',
+            commission: document.getElementById('sumCommission')?.value || '',
+            commissionLabel: document.getElementById('sumCommissionMonth')?.value || '',
+            commissionMonth: document.getElementById('sumCommissionMonth')?.dataset.month || '',
+            commissionYear: document.getElementById('sumCommissionYear')?.value || '',
+            others: document.getElementById('sumOthers')?.value || '',
+            ait: document.getElementById('sumAit')?.value || '',
+            aitLabel: document.getElementById('sumAitMonth')?.value || '',
+            aitMonth: document.getElementById('sumAitMonth')?.dataset.month || '',
+            aitYear: document.getElementById('sumAitYear')?.value || '',
+            agw: document.getElementById('sumAgw')?.value || '',
+          },
+          rows: rows,
+          updatedAt: new Date().toISOString()
+        };
+
+        localStorage.setItem(BALANCE_DRAFT_KEY, JSON.stringify(store));
+      } catch (e) {
+        console.warn('Failed to save balance draft:', e);
+      }
+    }
+
+    function scheduleBalanceSheetDraftSave() {
+      // Do not save while a draft is actively being loaded
+      if (isLoadingDraft) return;
+      if (draftSaveTimer) clearTimeout(draftSaveTimer);
+      draftSaveTimer = setTimeout(() => {
+        if (isLoadingDraft) return;
+        const agId = document.getElementById('entAgent')?.value || currentBalanceDraftAgentId;
+        if (agId) saveBalanceSheetDraft(agId);
+      }, 200);
+    }
+
+    function loadBalanceSheetDraftForAgent(agentId) {
+      if (!agentId) {
+        resetSheetForm(false);
+        return false;
+      }
+
+      isLoadingDraft = true; // Prevent auto-save while restoring
+      if (draftSaveTimer) { clearTimeout(draftSaveTimer); draftSaveTimer = null; }
+
+      currentBalanceDraftAgentId = agentId;
+
+      const store = getAllBalanceSheetDrafts();
+      // CRITICAL: Only use a draft if its agentId strictly matches the requested agentId
+      // This prevents stale/corrupted cross-agent data from being shown
+      const rawDraft = store.drafts?.[agentId] || store.drafts?.[String(agentId)];
+      const draft = (rawDraft && (
+        String(rawDraft.agentId) === String(agentId)
+      )) ? rawDraft : null;
+
+      if (draft) {
+        // ── Restore Date & Note ──
+        if (draft.date && document.getElementById('entDate')) {
+          document.getElementById('entDate').value = draft.date;
+        }
+        if (draft.note !== undefined && document.getElementById('entNote')) {
+          document.getElementById('entNote').value = draft.note;
+        }
+
+        // ── Restore Debit & Credit Rows ──
+        const rows = draft.rows || [];
+        const count = Math.max(10, rows.length);
+        renderDcRows(count);
+
+        const trs = document.querySelectorAll('#dcBody tr');
+        rows.forEach((r, idx) => {
+          if (trs[idx]) {
+            const nameInp = trs[idx].querySelector('.name-input');
+            const paboInp = trs[idx].querySelector('.pabo-input');
+            const pabeInp = trs[idx].querySelector('.pabe-input');
+            if (nameInp) nameInp.value = r.name || '';
+            if (paboInp) paboInp.value = r.pabo ? (isNaN(parseNum(r.pabo)) ? r.pabo : moneyFormat(r.pabo)) : '';
+            if (pabeInp) pabeInp.value = r.pabe ? (isNaN(parseNum(r.pabe)) ? r.pabe : moneyFormat(r.pabe)) : '';
+          }
+        });
+
+        // ── Restore Summary ──
+        const s = draft.summary || {};
+        const setVal = (id, v) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = v ? (isNaN(parseNum(v)) ? v : moneyFormat(v)) : '';
+        };
+        setVal('sumPreMonth', s.preMonth);
+        setVal('sumCommission', s.commission);
+        setVal('sumOthers', s.others);
+        setVal('sumAit', s.ait);
+        setVal('sumAgw', s.agw);
+
+        if (s.commissionYear && document.getElementById('sumCommissionYear')) {
+          document.getElementById('sumCommissionYear').value = s.commissionYear;
+        }
+        updateCommissionMonthOptions(s.commissionMonth || null);
+
+        if (s.aitYear && document.getElementById('sumAitYear')) {
+          document.getElementById('sumAitYear').value = s.aitYear;
+        }
+        updateAitMonthOptions(s.aitMonth || null);
+      } else {
+        // No valid draft for this agent: show completely empty form
+        renderDcRows(10);
+        ['sumPreMonth', 'sumCommission', 'sumOthers', 'sumAit', 'sumAgw', 'entNote'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        const cy = document.getElementById('sumCommissionYear');
+        if (cy) cy.value = '2026';
+        updateCommissionMonthOptions('Jan');
+        const ay = document.getElementById('sumAitYear');
+        if (ay) ay.value = '2026';
+        updateAitMonthOptions('Jan');
+
+        // Also remove any stale draft entry stored under this agent key (data mismatch)
+        if (rawDraft && String(rawDraft.agentId) !== String(agentId)) {
+          try {
+            delete store.drafts[agentId];
+            delete store.drafts[String(agentId)];
+            localStorage.setItem(BALANCE_DRAFT_KEY, JSON.stringify(store));
+          } catch (e) { }
+        }
+      }
+
+      // Sync Closing Balance from Cash Book AGENT'S CAPITAL for this agent
+      syncClosingBalanceFromCashBook();
+      recalcSheet();
+
+      // Re-enable auto-save after a short delay (let recalc/sync settle)
+      setTimeout(() => { isLoadingDraft = false; }, 350);
+      return Boolean(draft);
+    }
+
+    function onBalanceAgentSelectChange() {
+      const newAgentId = document.getElementById('entAgent')?.value;
+
+      // Save current agent's draft BEFORE switching (if different agent)
+      if (currentBalanceDraftAgentId && currentBalanceDraftAgentId !== newAgentId) {
+        // Only save if isLoadingDraft is NOT active (prevents saving wrong data)
+        if (!isLoadingDraft) {
+          saveBalanceSheetDraft(currentBalanceDraftAgentId);
+        }
+      }
+
+      currentBalanceDraftAgentId = newAgentId || '';
+
+      if (newAgentId) {
+        // Ensure the dropdown shows the correct agent
+        const entAgent = document.getElementById('entAgent');
+        if (entAgent && entAgent.value !== newAgentId) {
+          entAgent.value = newAgentId;
+        }
+        loadBalanceSheetDraftForAgent(newAgentId);
+      } else {
+        resetSheetForm(false);
+      }
+    }
+    window.onBalanceAgentSelectChange = onBalanceAgentSelectChange;
+
+    function clearBalanceSheetDraft() {
+      Confirm.show('Are you sure you want to clear input data for the selected agent?', () => {
+        const agId = document.getElementById('entAgent')?.value || currentBalanceDraftAgentId;
+        if (agId) {
+          const store = getAllBalanceSheetDrafts();
+          if (store.drafts) delete store.drafts[agId];
+          localStorage.setItem(BALANCE_DRAFT_KEY, JSON.stringify(store));
+        }
+        resetSheetForm(false);
+        if (agId) {
+          document.getElementById('entAgent').value = agId;
+          currentBalanceDraftAgentId = agId;
+          syncClosingBalanceFromCashBook();
+        }
+        Toast.info('Agent balance sheet input data has been cleared.');
+      });
+    }
+
+    function resetSheetForm(clearAgent = true) {
+      renderDcRows(10);
+      ['sumPreMonth', 'sumCommission', 'sumOthers', 'sumAit', 'sumAgw', 'closingBalanceInp', 'entNote'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      if (clearAgent) {
+        const entAgent = document.getElementById('entAgent');
+        if (entAgent) entAgent.value = '';
+        currentBalanceDraftAgentId = '';
+      }
+      const cy = document.getElementById('sumCommissionYear');
+      if (cy) cy.value = '2026';
+      updateCommissionMonthOptions('Jan');
+      const ay = document.getElementById('sumAitYear');
+      if (ay) ay.value = '2026';
+      updateAitMonthOptions('Jan');
+
+      ['addlTotalAgBalance', 'addlDueBalance', 'addlAgentBalanceDiffer', 'addlProfit'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.value = '0.00';
+          delete el.dataset.manual;
+        }
+      });
+      const badge = document.getElementById('closingSourceBadge');
+      if (badge) badge.style.display = 'none';
+      const closingInp = document.getElementById('closingBalanceInp');
+      if (closingInp) delete closingInp.dataset.fromCashBook;
+
+      const balInp = document.getElementById('entBalance');
+      if (balInp) {
+        balInp.value = '0.00';
+        delete balInp.dataset.manualEdit;
+      }
+      syncClosingBalanceFromCashBook();
+    }
+
+    // View full sheet modal
+    window.viewSheet = function (id) {
+      const rec = allData.find(r => r.id === id);
+      if (!rec) return;
+
+      const titleEl = document.getElementById('viewSheetTitle');
+      if (titleEl) titleEl.innerHTML = `<i class="ri-file-text-line"></i> Balance Sheet: ${rec.agentName} (${fmtDate(rec.date)})`;
+
+      const sd = rec.sheetData || {};
+      const rows = sd.rows || [];
+      const summary = sd.summary || {};
+      const totalPabo = sd.totalPabo !== undefined ? parseFloat(sd.totalPabo) : (rows.reduce((s, r) => s + (parseFloat(r.pabo) || 0), 0));
+      const totalPabe = sd.totalPabe !== undefined ? parseFloat(sd.totalPabe) : (rows.reduce((s, r) => s + (parseFloat(r.pabe) || 0), 0));
+      const closingVal = sd.closingBalance !== undefined ? parseFloat(sd.closingBalance) : (parseFloat(rec.balance) || 0);
+      const summaryTotal = summary.total !== undefined ? parseFloat(summary.total) : 0;
+
+      const calcTotalAgBalance = totalPabo + closingVal;
+      const calcDueBalance = totalPabo - totalPabe;
+      const calcDiffer = calcTotalAgBalance - totalPabe - summaryTotal;
+      const calcProfit = summaryTotal - 2400000;
+
+      const addl = sd.additionalSummary || {
+        totalAgBalance: calcTotalAgBalance,
+        dueBalance: calcDueBalance,
+        agentBalanceDiffer: calcDiffer,
+        profit: calcProfit
+      };
+
+      let rowsHtml = '';
+      if (rows.length) {
+        rows.forEach(r => {
+          rowsHtml += `
+            <tr>
+              <td class="text-center font-bold" style="color:var(--text-muted);">${r.sl}</td>
+              <td>${r.name || '—'}</td>
+              <td class="text-right">${fmt(r.pabo || 0)}</td>
+              <td class="text-right">${fmt(r.pabe || 0)}</td>
+            </tr>
+          `;
+        });
+      } else {
+        rowsHtml = `<tr><td colspan="4" class="text-center text-muted" style="padding:15px">No debit/credit row items</td></tr>`;
+      }
+
+      const body = document.getElementById('viewSheetBody');
+      body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:12px 18px; margin-bottom:18px;">
+          <div>
+            <div style="font-size:18px; font-weight:700; color:var(--text-primary);">${rec.agentName}</div>
+            <div style="font-size:13px; color:var(--text-muted);">Date: ${fmtDate(rec.date)} ${rec.note ? `• Note: ${rec.note}` : ''}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Closing Balance</div>
+            <div style="font-size:22px; font-weight:800; color:var(--gold);">${fmt(rec.balance)}</div>
+          </div>
+        </div>
+
+        <div class="balance-sheets-grid">
+          <!-- Left Table -->
+          <div class="sheet-card">
+            <div class="sheet-card-header">
+              <h3 class="sheet-card-title"><i class="ri-exchange-dollar-line"></i> Agent Balance's Debit & Credit Table</h3>
+            </div>
+            <div class="sheet-table-wrap">
+              <table class="sheet-table">
+                <thead>
+                  <tr>
+                    <th style="width:48px;">SL</th>
+                    <th style="text-align:left; padding-left:10px;">Name</th>
+                    <th style="width:115px;">Pabo (+)</th>
+                    <th style="width:115px;">Pabe (-)</th>
+                  </tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+                <tfoot>
+                  <tr class="row-total">
+                    <td colspan="2" style="text-align:right; font-weight:800; padding-right:12px;">TOTAL =</td>
+                    <td style="text-align:right; font-weight:800;">${fmt(sd.totalPabo || 0)}</td>
+                    <td style="text-align:right; font-weight:800;">${fmt(sd.totalPabe || 0)}</td>
+                  </tr>
+                  <tr class="row-closing">
+                    <td colspan="2" style="text-align:right; font-weight:800; padding-right:12px;">Closing Balance =</td>
+                    <td style="text-align:right; font-weight:800; color:#0284c7;">${fmt(sd.closingBalance || 0)}</td>
+                    <td class="sheet-empty-cell"></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right Summary Table -->
+          <div class="sheet-card">
+            <div class="sheet-card-header">
+              <h3 class="sheet-card-title"><i class="ri-file-chart-line"></i> Agent Balance Summary</h3>
+            </div>
+            <div class="sheet-table-wrap">
+              <table class="summary-table">
+                <tbody>
+                  <tr><td class="col-val text-right font-bold">${fmt(summary.preMonth || 0)}</td><td class="col-lbl">Pre. Month Balance</td></tr>
+                  <tr><td class="col-val text-right font-bold">${fmt(summary.commission || 0)}</td><td class="col-lbl">${summary.commissionLabel || 'Commission (Jan/26)'}</td></tr>
+                  <tr><td class="col-val text-right font-bold">${fmt(summary.othersIncome || 0)}</td><td class="col-lbl">Others Income</td></tr>
+                  <tr><td class="col-val text-right font-bold text-danger">${fmt(summary.govtAit || 0)}</td><td class="col-lbl">${summary.aitLabel || 'Govt AIT (Jan/26)'}</td></tr>
+                  <tr><td class="col-val text-right font-bold text-danger">${fmt(summary.agw || 0)}</td><td class="col-lbl">AG W (For Daily & Monthly Exp.)</td></tr>
+                  <tr class="row-total"><td class="col-val text-right" style="color:#f5a623; font-size:16px;">${fmt(summary.total || 0)}</td><td class="col-lbl">Total</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Summary Section -->
+        <div class="additional-summary-section" style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
+          <div style="text-align:center; margin-bottom:14px;">
+            <span style="display:inline-block; font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; color:var(--text-primary); text-transform:uppercase; letter-spacing:1px; padding:3px 16px; background:rgba(255,255,255,0.04); border-radius:20px; border:1px solid var(--border);">
+              Additional Summary
+            </span>
+          </div>
+
+          <div class="additional-summary-grid">
+            <div class="addl-summary-card card-gold">
+              <div class="addl-summary-title">Total AG Balance</div>
+              <div class="addl-input-wrapper">
+                <div class="addl-summary-input" style="line-height:42px;">${fmt(addl.totalAgBalance || 0)}</div>
+              </div>
+            </div>
+
+            <div class="addl-summary-card card-green">
+              <div class="addl-summary-title">Due Balance</div>
+              <div class="addl-input-wrapper">
+                <div class="addl-summary-input" style="line-height:42px;">${fmt(addl.dueBalance || 0)}</div>
+              </div>
+            </div>
+
+            <div class="addl-summary-card card-red">
+              <div class="addl-summary-title">Agent Balance Differ</div>
+              <div class="addl-input-wrapper">
+                <div class="addl-summary-input" style="line-height:42px; color:${addl.agentBalanceDiffer !== 0 ? 'var(--danger)' : 'var(--text-primary)'};">${fmt(addl.agentBalanceDiffer || 0)}</div>
+              </div>
+            </div>
+
+            <div class="addl-summary-card card-blue">
+              <div class="addl-summary-title">Profit</div>
+              <div class="addl-input-wrapper">
+                <div class="addl-summary-input" style="line-height:42px; color:${addl.profit < 0 ? 'var(--danger)' : (addl.profit > 0 ? 'var(--success)' : 'var(--text-primary)')};">${fmt(addl.profit || 0)}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      Modal.open('viewSheetModal');
+    };
+
+    // Events
+    ['agentSel', 'dateFrom', 'dateTo'].forEach(id => document.getElementById(id)?.addEventListener('change', applyFilters));
+    document.getElementById('searchInp')?.addEventListener('input', applyFilters);
+    document.getElementById('clearFilters')?.addEventListener('click', () => {
+      ['agentSel', 'dateFrom', 'dateTo'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('searchInp').value = '';
+      applyFilters();
+    });
+
+    ['entDate', 'entNote'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', scheduleBalanceSheetDraftSave);
+      document.getElementById(id)?.addEventListener('change', scheduleBalanceSheetDraftSave);
+    });
+
+    // Agent dropdown: save current agent's draft THEN load selected agent's draft
+    // Using ONLY addEventListener (no inline onchange) to avoid double-firing
+    document.getElementById('entAgent')?.addEventListener('change', onBalanceAgentSelectChange);
+    document.getElementById('entDate')?.addEventListener('change', () => {
+      saveBalanceSheetDraft();
+      syncClosingBalanceFromCashBook();
+    });
+    document.getElementById('entDate')?.addEventListener('input', () => {
+      saveBalanceSheetDraft();
+      syncClosingBalanceFromCashBook();
+    });
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'teNte_agent_cashbook_drafts_v1' || e.key === 'mste_cashbook') {
+        syncClosingBalanceFromCashBook();
+      }
+    });
+    window.addEventListener('focus', () => {
+      syncClosingBalanceFromCashBook();
+    });
+
+    if (canEdit) {
+      document.getElementById('addBtn').style.display = '';
+      document.getElementById('addBtn').addEventListener('click', () => {
+        populateAgentDropdowns(true);
+
+        const currentFilterAgent = document.getElementById('agentSel')?.value;
+        const store = getAllBalanceSheetDrafts();
+        let targetAgent = currentFilterAgent || store.lastAgentId;
+
+        // Fallback to Cash Book last agent if not present
+        if (!targetAgent) {
+          try {
+            const cbStore = JSON.parse(localStorage.getItem('teNte_agent_cashbook_drafts_v1') || '{}');
+            if (cbStore.lastAgentId) targetAgent = cbStore.lastAgentId;
+          } catch (e) { }
+        }
+
+        // Fallback to first available agent option
+        if (!targetAgent) {
+          const firstOpt = Array.from(document.querySelectorAll('#entAgent option')).find(o => o.value);
+          if (firstOpt) targetAgent = firstOpt.value;
+        }
+
+        const entAgent = document.getElementById('entAgent');
+        if (entAgent && targetAgent && document.querySelector(`#entAgent option[value="${targetAgent}"]`)) {
+          entAgent.value = targetAgent;
+          currentBalanceDraftAgentId = targetAgent;
+          loadBalanceSheetDraftForAgent(targetAgent);
+        } else {
+          resetSheetForm();
+        }
+
+        if (!document.getElementById('entDate').value) {
+          document.getElementById('entDate').value = new Date().toISOString().slice(0, 10);
+        }
+
+        syncClosingBalanceFromCashBook();
+        Modal.open('addModal');
+      });
+
+      document.getElementById('addRowBtn')?.addEventListener('click', addDcRow);
+      document.getElementById('resetModalBtn')?.addEventListener('click', clearBalanceSheetDraft);
+
+      document.getElementById('saveBtn').addEventListener('click', () => {
+        const agentId = document.getElementById('entAgent').value;
+        const date = document.getElementById('entDate').value;
+        const summaryTotal = parseNum(document.getElementById('summaryTotalVal')?.textContent || 0);
+        const finalBalance = summaryTotal;
+
+        if (!agentId) { Toast.error('Select an agent.'); return; }
+
+        // Collect Debit & Credit rows
+        const rows = [];
+        document.querySelectorAll('#dcBody tr').forEach(tr => {
+          const sl = tr.querySelector('.sl-cell')?.textContent.trim();
+          const name = tr.querySelector('.name-input')?.value.trim() || '';
+          const pabo = parseNum(tr.querySelector('.pabo-input')?.value);
+          const pabe = parseNum(tr.querySelector('.pabe-input')?.value);
+          if (name || pabo || pabe) {
+            rows.push({ sl, name, pabo, pabe });
+          }
+        });
+
+        const closingInp = document.getElementById('closingBalanceInp');
+        const closingBalance = parseNum(closingInp?.value || 0);
+        const totalPabo = parseNum(document.getElementById('totalPaboVal')?.textContent || 0);
+        const totalPabe = parseNum(document.getElementById('totalPabeVal')?.textContent || 0);
+
+        const summary = {
+          preMonth: parseNum(document.getElementById('sumPreMonth')?.value),
+          commission: parseNum(document.getElementById('sumCommission')?.value),
+          commissionLabel: document.getElementById('sumCommissionMonth')?.value || 'Commission (Jan/26)',
+          commissionMonth: document.getElementById('sumCommissionMonth')?.dataset.month || 'Jan',
+          commissionYear: document.getElementById('sumCommissionYear')?.value || '2026',
+          othersIncome: parseNum(document.getElementById('sumOthers')?.value),
+          govtAit: parseNum(document.getElementById('sumAit')?.value),
+          aitLabel: document.getElementById('sumAitMonth')?.value || 'Govt AIT (Jan/26)',
+          aitMonth: document.getElementById('sumAitMonth')?.dataset.month || 'Jan',
+          aitYear: document.getElementById('sumAitYear')?.value || '2026',
+          agw: parseNum(document.getElementById('sumAgw')?.value),
+          total: summaryTotal
+        };
+
+        const additionalSummary = {
+          totalAgBalance: parseNum(document.getElementById('addlTotalAgBalance')?.value),
+          dueBalance: parseNum(document.getElementById('addlDueBalance')?.value),
+          agentBalanceDiffer: parseNum(document.getElementById('addlAgentBalanceDiffer')?.value),
+          profit: parseNum(document.getElementById('addlProfit')?.value)
+        };
+
+        DB.addBalance({
+          agentId,
+          date,
+          balance: finalBalance.toFixed(2),
+          finalBalance: finalBalance.toFixed(2),
+          userName: (user && (user.name || user.username)) || 'Admin',
+          note: document.getElementById('entNote').value.trim(),
+          sheetData: {
+            rows,
+            closingBalance,
+            totalPabo,
+            totalPabe,
+            summary,
+            additionalSummary
+          }
+        });
+
+        saveBalanceSheetDraft(agentId);
+        Modal.close('addModal');
+        Toast.success('Agent Balance sheet entry saved successfully!');
+        load();
+      });
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // AGENT BALANCE SUMMARY STATEMENT (MODAL, PRINT & PDF)
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    let balSummaryDateFrom = '', balSummaryDateTo = '';
+
+    function initBalSummaryDateRange() {
+      const d = new Date();
+      balSummaryDateTo = d.toISOString().slice(0, 10);
+      const fromD = new Date();
+      fromD.setDate(fromD.getDate() - 30);
+      balSummaryDateFrom = fromD.toISOString().slice(0, 10);
+      const df = document.getElementById('balSummaryDateFrom');
+      const dt = document.getElementById('balSummaryDateTo');
+      if (df) df.value = balSummaryDateFrom;
+      if (dt) dt.value = balSummaryDateTo;
+    }
+
+    window.setBalSummaryDatePreset = function (preset) {
+      const now = new Date();
+      balSummaryDateTo = now.toISOString().slice(0, 10);
+      if (preset === '30d') {
+        const d = new Date(); d.setDate(d.getDate() - 30);
+        balSummaryDateFrom = d.toISOString().slice(0, 10);
+      } else if (preset === '6m') {
+        const d = new Date(); d.setMonth(d.getMonth() - 6);
+        balSummaryDateFrom = d.toISOString().slice(0, 10);
+      } else if (preset === 'fy') {
+        const curYr = now.getFullYear();
+        balSummaryDateFrom = `${curYr}-01-01`;
+        balSummaryDateTo = `${curYr}-12-31`;
+      } else if (preset === 'all') {
+        balSummaryDateFrom = '2020-01-01';
+      }
+      const df = document.getElementById('balSummaryDateFrom');
+      const dt = document.getElementById('balSummaryDateTo');
+      if (df) df.value = balSummaryDateFrom;
+      if (dt) dt.value = balSummaryDateTo;
+      renderBalanceSummary();
+    };
+
+    window.openBalanceSummaryModal = function () {
+      if (!balSummaryDateFrom || !balSummaryDateTo) {
+        initBalSummaryDateRange();
+      }
+      const agentSel = document.getElementById('balSummaryAgent');
+      if (agentSel) {
+        const curAg = document.getElementById('agentSel')?.value || '';
+        agentSel.innerHTML = '<option value="">All Agents</option>' +
+          agents.map(a => `<option value="${a.id}" ${String(a.id) === String(curAg) ? 'selected' : ''}>${a.name} (${a.code || a.outletCode || '—'})</option>`).join('');
+      }
+      renderBalanceSummary();
+      Modal.open('balSummaryModal');
+    };
+
+    function getBalRecCategoryValue(r, catKey) {
+      if (!r) return 0;
+      const s = r.sheetData?.summary || {};
+      if (catKey === 'preMonth') return parseNum(s.preMonth || 0);
+      if (catKey === 'commission') return parseNum(s.commission || 0);
+      if (catKey === 'others') return parseNum(s.othersIncome || s.others || 0);
+      if (catKey === 'ait') return parseNum(s.govtAit || s.ait || 0);
+      if (catKey === 'agw') return parseNum(s.agw || 0);
+      return parseNum(r.balance || 0);
+    }
+
+    function formatBalDate(r) {
+      let dateObj = null;
+      if (r.createdAt) {
+        const t = new Date(r.createdAt);
+        if (!isNaN(t)) dateObj = t;
+      }
+      if (!dateObj && r.date) {
+        const t = new Date(r.date + 'T12:00:00');
+        if (!isNaN(t)) dateObj = t;
+      }
+      const dateStr = dateObj ? dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : (r.date || '—');
+      const dayStr = dateObj ? dateObj.toLocaleDateString('en-GB', { weekday: 'long' }) : '';
+      const timeStr = (r.createdAt && !isNaN(new Date(r.createdAt)))
+        ? new Date(r.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+        : (r.time || '10:00 AM');
+
+      return `
+        <div style="line-height:1.35;">
+          <div style="font-weight:600; color:var(--text-primary); font-size:12px;">${dateStr}</div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${dayStr ? dayStr + ', ' : ''}${timeStr}</div>
+        </div>
+      `;
+    }
+
+    function getBalAgentCodeStr(r) {
+      const rawCode = r.agentCode || (agents.find(a => String(a.id) === String(r.agentId))?.code) || (agents.find(a => String(a.id) === String(r.agentId))?.outletCode) || '—';
+      const code = (rawCode && rawCode !== '—') ? rawCode : 'AG-01';
+      return `
+        <div>
+          <div style="font-weight:600; color:var(--text-primary); font-size:12px;">${r.agentName}</div>
+          <div style="font-size:11px; color:var(--text-muted); font-family:monospace; margin-top:2px;">Code (${code})</div>
+        </div>
+      `;
+    }
+
+    function renderBalanceSummary() {
+      const agentId = document.getElementById('balSummaryAgent')?.value || '';
+      const category = document.getElementById('balSummaryCategory')?.value || 'all';
+      const from = document.getElementById('balSummaryDateFrom')?.value || balSummaryDateFrom;
+      const to = document.getElementById('balSummaryDateTo')?.value || balSummaryDateTo;
+
+      let list = allData.filter(r => {
+        if (agentId && String(r.agentId) !== String(agentId)) return false;
+        const d = r.date || (r.createdAt ? r.createdAt.slice(0, 10) : '');
+        if (from && d && d < from) return false;
+        if (to && d && d > to) return false;
+        return true;
+      });
+
+      const selAgent = agents.find(a => String(a.id) === String(agentId));
+      const allAgentsListStr = (agents || []).map(a => `${a.name} (${a.code || a.outletCode || '—'})`).join(', ');
+
+      const headerTitle = selAgent
+        ? `${selAgent.name} (${selAgent.code || selAgent.outletCode || 'AG-01'})`
+        : `All Agents (${allAgentsListStr || '—'})`;
+
+      const agentLabel = selAgent
+        ? `${selAgent.name} (${selAgent.code || selAgent.outletCode || '—'})`
+        : 'All Agents';
+
+      const catLabels = {
+        'all': 'All Category',
+        'preMonth': 'Pre. Month Balance',
+        'commission': 'Commission',
+        'others': 'Others Income',
+        'ait': 'Govt AIT',
+        'agw': 'AG W (For Daily & Monthly Exp.)'
+      };
+
+      const isSingleCategory = category !== 'all' && Boolean(catLabels[category]);
+      const catLabel = catLabels[category] || 'All Category';
+
+      const generatedAt = new Date().toLocaleString('en-BD', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+      document.getElementById('balSummaryModalTitle').textContent = `Agent Balance Summary: ${isSingleCategory ? catLabel : 'All Metrics'} — ${agentLabel}`;
+      document.getElementById('balSummaryFooterMeta').textContent = `Period: ${fmtDate(from)} to ${fmtDate(to)} • Records: ${list.length} • Generated: ${generatedAt}`;
+
+      const body = document.getElementById('balSummaryModalBody');
+      if (!body) return;
+
+      let contentHtml = `
+        <!-- Print Header (Company Letterhead) -->
+        <div class="summary-print-header" style="border-bottom:2px solid #0f172a; padding-bottom:12px; margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <h2 style="margin:0; font-size:18px; font-weight:900; font-family:'Outfit',sans-serif; color:#0f172a; letter-spacing:0.5px; text-transform:uppercase;">${headerTitle}</h2>
+              <div style="font-size:13px; font-weight:700; color:#b45309; margin-top:3px; letter-spacing:0.3px;">AGENT BALANCE STATEMENT &amp; FINANCIAL AUDIT REPORT</div>
+              <p style="margin:4px 0 0 0; font-size:11px; color:#475569;">
+                Agent: <strong>${headerTitle}</strong> &nbsp;|&nbsp; Category: <strong>${catLabel}</strong> &nbsp;|&nbsp; Total Records: <strong>${list.length}</strong>
+              </p>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:12px; font-weight:800; color:#0f172a; text-transform:uppercase; letter-spacing:0.5px;">${isSingleCategory ? catLabel.toUpperCase() : 'AGENT BALANCE'} STATEMENT</div>
+              <div style="font-size:11px; color:#475569; margin-top:3px;">Period: <strong>${fmtDate(from)}</strong> ~ <strong>${fmtDate(to)}</strong></div>
+              <div style="font-size:11px; color:#64748b; margin-top:2px;">Generated: ${generatedAt}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      if (isSingleCategory) {
+        // ── SINGLE CATEGORY VIEW (3 COLUMNS: Agent, Date, Category Name) ──
+        // No bottom Total row as requested
+        contentHtml += `
+          <!-- Screen KPI Row -->
+          <div class="summary-kpi-row screen-only" style="margin-bottom:16px;">
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--blue-bright);">${list.length}</div>
+              <div class="summary-kpi-lbl">Total Records</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--success); font-size:13px;">${selAgent ? selAgent.name : 'All Agents'}</div>
+              <div class="summary-kpi-lbl">Selected Agent</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--gold); font-size:13px;">${catLabel}</div>
+              <div class="summary-kpi-lbl">Selected Category</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--text-muted); font-size:12px;">${fmtDate(from)} ~ ${fmtDate(to)}</div>
+              <div class="summary-kpi-lbl">Date Range</div>
+            </div>
+          </div>
+
+          <!-- Single Category Table (3 Columns - No bottom Total row) -->
+          <div class="summary-report-card">
+            <div class="summary-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <i class="ri-file-list-3-line" style="color:var(--gold);"></i>
+                <span style="font-weight:700;">${catLabel} Statement</span>
+              </div>
+              <span style="font-size:11px; color:var(--text-muted);">${list.length} Records Found</span>
+            </div>
+            <div class="table-wrapper" style="overflow-x:auto;">
+              <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                <thead>
+                  <tr style="background:rgba(255,255,255,0.03);">
+                    <th style="padding:10px 14px; text-align:left; width:35%;">Agent</th>
+                    <th style="padding:10px 14px; text-align:left; width:35%;">Date</th>
+                    <th style="padding:10px 14px; text-align:right; width:30%;" class="col-highlight">${catLabel}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${list.length > 0 ? list.map(r => {
+          const val = getBalRecCategoryValue(r, category);
+          let labelExtra = '';
+          if (category === 'commission') {
+            labelExtra = `<div style="font-size:11px; color:var(--gold); font-weight:600; margin-top:2px;">${r.sheetData?.summary?.commissionLabel || 'Commission (Jan/26)'}</div>`;
+          } else if (category === 'ait') {
+            labelExtra = `<div style="font-size:11px; color:var(--gold); font-weight:600; margin-top:2px;">${r.sheetData?.summary?.aitLabel || 'Govt AIT (Jan/26)'}</div>`;
+          }
+          return `
+                      <tr>
+                        <td style="padding:8px 14px; font-weight:600; color:var(--text-primary);">${getBalAgentCodeStr(r)}</td>
+                        <td style="padding:8px 14px;">${formatBalDate(r)}</td>
+                        <td style="padding:8px 14px; text-align:right; font-weight:700;" class="col-highlight">
+                          ${fmt(val)}
+                          ${labelExtra}
+                        </td>
+                      </tr>
+                    `;
+        }).join('') : `
+                    <tr>
+                      <td colspan="3" style="text-align:center; padding:30px; color:var(--text-muted);">
+                        <i class="ri-inbox-line" style="font-size:24px; display:block; margin-bottom:6px;"></i>
+                        No records found for ${catLabel} in the selected range.
+                      </td>
+                    </tr>
+                  `}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      } else {
+        // ── ALL CATEGORY VIEW (8 COLUMNS: Agent, Date, Pre. Month, Commission, Others Income, Govt AIT, AG W, Closing Balance =) ──
+        // No bottom Total row as requested
+        contentHtml += `
+          <!-- Screen KPI Row -->
+          <div class="summary-kpi-row screen-only" style="margin-bottom:16px;">
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--blue-bright);">${list.length}</div>
+              <div class="summary-kpi-lbl">Total Records</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--success); font-size:13px;">${selAgent ? selAgent.name : 'All Agents'}</div>
+              <div class="summary-kpi-lbl">Selected Agent</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--gold); font-size:13px;">All Metrics</div>
+              <div class="summary-kpi-lbl">Category Scope</div>
+            </div>
+            <div class="summary-kpi-box">
+              <div class="summary-kpi-val" style="color:var(--text-muted); font-size:12px;">${fmtDate(from)} ~ ${fmtDate(to)}</div>
+              <div class="summary-kpi-lbl">Date Range</div>
+            </div>
+          </div>
+
+          <!-- All Category Table (8 Columns, NO bottom total row) -->
+          <div class="summary-report-card">
+            <div class="summary-card-header" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--border);">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <i class="ri-scales-3-line" style="color:var(--gold);"></i>
+                <span style="font-weight:700;">Agent Balance All Metrics Summary Statement</span>
+              </div>
+              <span style="font-size:11px; color:var(--text-muted);">${list.length} Records</span>
+            </div>
+            <div class="table-wrapper" style="overflow-x:auto; width:100%;">
+              <table style="width:100%; border-collapse:collapse; font-size:10px; table-layout:fixed;">
+                <thead>
+                  <tr style="background:rgba(255,255,255,0.03);">
+                    <th style="width:16%; padding:8px 4px; text-align:left;">Agent</th>
+                    <th style="width:14%; padding:8px 4px; text-align:left;">Date</th>
+                    <th style="width:11%; padding:8px 4px; text-align:right;">Pre. Month Bal</th>
+                    <th style="width:12%; padding:8px 4px; text-align:right;">Commission</th>
+                    <th style="width:10.5%; padding:8px 4px; text-align:right;">Others Income</th>
+                    <th style="width:11.5%; padding:8px 4px; text-align:right;">Govt AIT</th>
+                    <th style="width:11%; padding:8px 4px; text-align:right;">AG W (Exp.)</th>
+                    <th style="width:14%; padding:8px 4px; text-align:right; color:#f5a623;">Closing Balance =</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${list.length > 0 ? list.map(r => {
+          const commVal = getBalRecCategoryValue(r, 'commission');
+          const aitVal = getBalRecCategoryValue(r, 'ait');
+          const commMonthLabel = r.sheetData?.summary?.commissionLabel ? r.sheetData.summary.commissionLabel.replace('Commission ', '') : '(Jan/26)';
+          const aitMonthLabel = r.sheetData?.summary?.aitLabel ? r.sheetData.summary.aitLabel.replace('Govt AIT ', '') : '(Jan/26)';
+
+          return `
+                      <tr>
+                        <td style="width:16%; padding:6px 4px; font-weight:600; color:var(--text-primary); word-break:break-word;">${getBalAgentCodeStr(r)}</td>
+                        <td style="width:14%; padding:6px 4px; word-break:break-word;">${formatBalDate(r)}</td>
+                        <td style="width:11%; padding:6px 4px; text-align:right; font-size:10px;">${fmt(getBalRecCategoryValue(r, 'preMonth'))}</td>
+                        <td style="width:12%; padding:6px 4px; text-align:right; font-weight:600; color:var(--success); font-size:10px;">
+                          ${fmt(commVal)}
+                          <div style="font-size:9.5px; color:var(--text-muted); font-weight:normal;">${commMonthLabel}</div>
+                        </td>
+                        <td style="width:10.5%; padding:6px 4px; text-align:right; font-size:10px;">${fmt(getBalRecCategoryValue(r, 'others'))}</td>
+                        <td style="width:11.5%; padding:6px 4px; text-align:right; font-weight:600; color:#e11d48; font-size:10px;">
+                          ${fmt(aitVal)}
+                          <div style="font-size:9.5px; color:var(--text-muted); font-weight:normal;">${aitMonthLabel}</div>
+                        </td>
+                        <td style="width:11%; padding:6px 4px; text-align:right; font-size:10px;">${fmt(getBalRecCategoryValue(r, 'agw'))}</td>
+                        <td style="width:14%; padding:6px 4px; text-align:right; font-weight:700; color:#f5a623; font-size:10px;">${fmt(r.balance)}</td>
+                      </tr>
+                    `;
+        }).join('') : `
+                    <tr>
+                      <td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">
+                        <i class="ri-inbox-line" style="font-size:24px; display:block; margin-bottom:6px;"></i>
+                        No balance records found in the selected range.
+                      </td>
+                    </tr>
+                  `}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      // Print Signatures Section (Table Layout for 100% Horizontal Alignment in Print and PDF)
+      contentHtml += `
+        <div class="audit-sign-wrapper" style="margin-top:45px; padding-top:10px; page-break-inside:avoid; break-inside:avoid; width:100%;">
+          <table class="audit-sign-table" style="width:100%; border:none; border-collapse:collapse; background:transparent;">
+            <tr>
+              <td style="width:25%; padding:0 12px; vertical-align:top;">
+                <div class="audit-sign-box" style="border-top:1.5px solid #0f172a; padding-top:6px; font-size:11px; text-align:center; color:#0f172a; line-height:1.4;">
+                  <strong>Prepared By</strong><br>
+                  <span style="font-size:10px; color:#475569;">Accountant / Operator</span>
+                </div>
+              </td>
+              <td style="width:25%; padding:0 12px; vertical-align:top;">
+                <div class="audit-sign-box" style="border-top:1.5px solid #0f172a; padding-top:6px; font-size:11px; text-align:center; color:#0f172a; line-height:1.4;">
+                  <strong>Verified By</strong><br>
+                  <span style="font-size:10px; color:#475569;">Internal Auditor</span>
+                </div>
+              </td>
+              <td style="width:25%; padding:0 12px; vertical-align:top;">
+                <div class="audit-sign-box" style="border-top:1.5px solid #0f172a; padding-top:6px; font-size:11px; text-align:center; color:#0f172a; line-height:1.4;">
+                  <strong>Approved By</strong><br>
+                  <span style="font-size:10px; color:#475569;">In-Charge</span>
+                </div>
+              </td>
+              <td style="width:25%; padding:0 12px; vertical-align:top;">
+                <div class="audit-sign-box" style="border-top:1.5px solid #0f172a; padding-top:6px; font-size:11px; text-align:center; color:#0f172a; line-height:1.4;">
+                  <strong>Agent / Client</strong><br>
+                  <span style="font-size:10px; color:#475569;">Authorization &amp; Seal</span>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      `;
+
+      body.innerHTML = contentHtml;
+    }
+
+    window.printBalanceSummary = function () {
+      const content = document.getElementById('balSummaryModalBody');
+      if (!content) return;
+
+      const printIframe = document.createElement('iframe');
+      printIframe.style.position = 'fixed';
+      printIframe.style.right = '0';
+      printIframe.style.bottom = '0';
+      printIframe.style.width = '0';
+      printIframe.style.height = '0';
+      printIframe.style.border = 'none';
+      document.body.appendChild(printIframe);
+
+      const doc = printIframe.contentWindow.document;
+      doc.open();
+      doc.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Agent Balance Statement — Print</title>
+          <style>
+            @page { size: A4 landscape; margin: 10mm 12mm 12mm 12mm; }
+            * { box-sizing: border-box; }
+            body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; color: #0f172a; background: #ffffff; }
+            .screen-only { display: none !important; }
+            .summary-print-header { display: block !important; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #0f172a !important; }
+            .summary-report-card { border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; margin-bottom: 20px; page-break-inside: avoid; }
+            .summary-card-header { padding: 8px 12px; background: #f8fafc; border-bottom: 1px solid #cbd5e1; font-weight: 700; font-size: 12px; display: flex; justify-content: space-between; }
+            table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+            th, td { border: 1px solid #cbd5e1; padding: 6px 4px; font-size: 10px; color: #0f172a; }
+            th { background: #f1f5f9; font-weight: 700; color: #0f172a; }
+            .audit-sign-wrapper { margin-top: 45px !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+            .audit-sign-table { width: 100% !important; border: none !important; border-collapse: collapse !important; background: transparent !important; }
+            .audit-sign-table td { border: none !important; padding: 0 15px !important; vertical-align: top !important; }
+            .audit-sign-box { border-top: 1.5px solid #0f172a !important; padding-top: 6px; font-size: 11px; color: #0f172a !important; text-align: center; line-height: 1.4; }
+            .audit-sign-box strong { font-size: 12px; font-weight: 700; color: #0f172a !important; }
+          </style>
+        </head>
+        <body>
+          ${content.innerHTML}
+        </body>
+        </html>
+      `);
+      doc.close();
+
+      setTimeout(() => {
+        printIframe.contentWindow.focus();
+        printIframe.contentWindow.print();
+        setTimeout(() => {
+          if (document.body.contains(printIframe)) {
+            document.body.removeChild(printIframe);
+          }
+        }, 1500);
+      }, 250);
+    };
+
+    window.downloadBalanceSummaryPDF = function () {
+      const element = document.getElementById('balSummaryModalBody');
+      if (!element) return;
+      const agentSel = document.getElementById('balSummaryAgent');
+      const agentText = agentSel && agentSel.value ? (agents.find(a => String(a.id) === String(agentSel.value))?.name || 'Agent').replace(/\s+/g, '_') : 'All_Agents';
+      const catSel = document.getElementById('balSummaryCategory');
+      const catText = catSel && catSel.value && catSel.value !== 'all' ? catSel.value : 'All_Category';
+      const filename = `AgentBalance_Summary_${agentText}_${catText}.pdf`;
+
+      if (window.html2pdf) {
+        const opt = {
+          margin: [8, 8, 8, 8],
+          filename: filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            backgroundColor: '#ffffff',
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: 1200,
+            onclone: (clonedDoc) => {
+              // Hide screen-only elements in PDF
+              clonedDoc.querySelectorAll('.screen-only').forEach(el => el.remove());
+
+              // Unconstrain cloned container for full A4 landscape rendering
+              const clonedBody = clonedDoc.getElementById('balSummaryModalBody');
+              if (clonedBody) {
+                clonedBody.style.width = '1060px';
+                clonedBody.style.maxWidth = '1060px';
+                clonedBody.style.color = '#0f172a';
+                clonedBody.style.background = '#ffffff';
+                clonedBody.style.padding = '0';
+                clonedBody.style.overflow = 'visible';
+                clonedBody.style.maxHeight = 'none';
+                clonedBody.querySelectorAll('h1, h2, h3, h4, th, strong').forEach(el => {
+                  el.style.color = '#0f172a';
+                });
+              }
+
+              // Ensure table-wrapper and report card do not cut off columns
+              clonedDoc.querySelectorAll('.table-wrapper').forEach(w => {
+                w.style.overflow = 'visible';
+                w.style.width = '100%';
+              });
+              clonedDoc.querySelectorAll('.summary-report-card').forEach(c => {
+                c.style.overflow = 'visible';
+                c.style.width = '100%';
+                c.style.borderColor = '#cbd5e1';
+                c.style.background = '#ffffff';
+              });
+
+              // Style data tables
+              clonedDoc.querySelectorAll('table').forEach(tbl => {
+                tbl.style.width = '100%';
+                tbl.style.tableLayout = 'fixed';
+                tbl.style.borderCollapse = 'collapse';
+              });
+              clonedDoc.querySelectorAll('th, td').forEach(cell => {
+                cell.style.borderColor = '#cbd5e1';
+                if (cell.tagName === 'TH') {
+                  cell.style.background = '#f1f5f9';
+                  cell.style.color = '#0f172a';
+                }
+              });
+
+              // Format company letterhead for PDF
+              const printHeader = clonedDoc.querySelector('.summary-print-header');
+              if (printHeader) {
+                printHeader.style.display = 'block';
+                printHeader.style.visibility = 'visible';
+                printHeader.style.borderBottom = '2px solid #0f172a';
+                printHeader.style.paddingBottom = '12px';
+                printHeader.style.marginBottom = '16px';
+                printHeader.querySelectorAll('*').forEach(el => {
+                  if (el.tagName === 'H2') el.style.color = '#0f172a';
+                  else if (el.style && (el.style.color === 'rgb(180, 83, 9)' || el.style.color === '#b45309')) el.style.color = '#b45309';
+                  else el.style.color = '#334155';
+                });
+              }
+
+              // Format Audit Signatures Table for PDF
+              const signWrapper = clonedDoc.querySelector('.audit-sign-wrapper');
+              if (signWrapper) {
+                signWrapper.style.display = 'block';
+                signWrapper.style.visibility = 'visible';
+                signWrapper.style.marginTop = '45px';
+                signWrapper.style.paddingTop = '10px';
+                signWrapper.style.width = '100%';
+              }
+              const signTable = clonedDoc.querySelector('.audit-sign-table');
+              if (signTable) {
+                signTable.style.width = '100%';
+                signTable.style.border = 'none';
+                signTable.style.borderCollapse = 'collapse';
+                signTable.style.background = 'transparent';
+                signTable.querySelectorAll('td').forEach(td => {
+                  td.style.border = 'none';
+                  td.style.verticalAlign = 'top';
+                });
+                signTable.querySelectorAll('.audit-sign-box').forEach(box => {
+                  box.style.borderTop = '1.5px solid #0f172a';
+                  box.style.paddingTop = '6px';
+                  box.style.color = '#0f172a';
+                  box.style.textAlign = 'center';
+                  box.querySelectorAll('strong').forEach(s => {
+                    s.style.color = '#0f172a';
+                    s.style.fontSize = '12px';
+                    s.style.fontWeight = '700';
+                  });
+                });
+              }
+            }
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(element).save().then(() => {
+          Toast.success('PDF downloaded successfully!');
+        }).catch(err => {
+          console.warn('html2pdf failed, falling back to print', err);
+          window.printBalanceSummary();
+        });
+      } else {
+        window.printBalanceSummary();
+      }
+    };
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // DEBIT & CREDIT STATEMENT, PAYMENTS & AUDIT REPORTING
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    let dcDateFrom = '', dcDateTo = '';
+
+    function initDcDateRange() {
+      const d = new Date();
+      dcDateTo = d.toISOString().slice(0, 10);
+      const fromD = new Date();
+      fromD.setDate(fromD.getDate() - 30);
+      dcDateFrom = fromD.toISOString().slice(0, 10);
+      const df = document.getElementById('dcStatementDateFrom');
+      const dt = document.getElementById('dcStatementDateTo');
+      if (df) df.value = dcDateFrom;
+      if (dt) dt.value = dcDateTo;
+    }
+
+    window.setDcDatePreset = function (preset) {
+      const d = new Date();
+      const toStr = d.toISOString().slice(0, 10);
+      let fromStr = '';
+      if (preset === '30d') {
+        const fd = new Date();
+        fd.setDate(fd.getDate() - 30);
+        fromStr = fd.toISOString().slice(0, 10);
+      } else if (preset === '6m') {
+        const fd = new Date();
+        fd.setMonth(fd.getMonth() - 6);
+        fromStr = fd.toISOString().slice(0, 10);
+      } else if (preset === 'fy') {
+        const year = d.getMonth() >= 6 ? d.getFullYear() : d.getFullYear() - 1;
+        fromStr = `${year}-07-01`;
+      } else if (preset === 'all') {
+        fromStr = '2020-01-01';
+      }
+      dcDateFrom = fromStr;
+      dcDateTo = toStr;
+      const df = document.getElementById('dcStatementDateFrom');
+      const dt = document.getElementById('dcStatementDateTo');
+      if (df) df.value = fromStr;
+      if (dt) dt.value = toStr;
+      renderDebitCreditStatement();
+    };
+
+    function getAllDcTransactions() {
+      const txList = [];
+      const balances = (typeof DB !== 'undefined' && DB.getBalances) ? DB.getBalances() : (allData || []);
+
+      // Group balances by agentId and take ONLY the latest sheet per agent
+      // to ensure historical sheets never duplicate or multiply loan/borrowing amounts
+      const latestSheetPerAgent = {};
+      balances.forEach(sheet => {
+        const agId = String(sheet.agentId);
+        const cur = latestSheetPerAgent[agId];
+        if (!cur || (sheet.date > cur.date) || (sheet.date === cur.date && (sheet.createdAt || '') > (cur.createdAt || ''))) {
+          latestSheetPerAgent[agId] = sheet;
+        }
+      });
+
+      // Also check drafts from Add Agent Balance Sheet: if active drafts have rows for an agent,
+      // it reflects the latest input state of Add Agent Balance Sheet for that agent
+      try {
+        const rawDraft = localStorage.getItem('teNte_agent_balance_sheet_draft_v1');
+        if (rawDraft) {
+          const draft = JSON.parse(rawDraft);
+          const draftAgentId = String(draft.agentId || '');
+          const draftRows = (draft.rows || []).filter(r => (r.name || '').trim() && (parseNum(r.pabo) > 0 || parseNum(r.pabe) > 0));
+          if (draftAgentId && draftRows.length > 0) {
+            latestSheetPerAgent[draftAgentId] = {
+              id: 'draft_' + draftAgentId,
+              agentId: draftAgentId,
+              date: draft.date || new Date().toISOString().slice(0, 10),
+              createdAt: draft.date || new Date().toISOString().slice(0, 10),
+              time: '10:00 AM',
+              sheetData: {
+                rows: draftRows
+              }
+            };
+          }
+        }
+      } catch (e) { }
+
+      // Iterate through each agent's latest sheet ONLY
+      Object.values(latestSheetPerAgent).forEach(sheet => {
+        const sheetId = sheet.id;
+        const date = sheet.date;
+        const createdAt = sheet.createdAt || date;
+        const agentId = String(sheet.agentId);
+        const agentObj = agents.find(a => String(a.id) === agentId) || {};
+        const agentName = agentObj.name || sheet.agentName || 'Agent';
+        const agentCode = agentObj.code || agentObj.outletCode || sheet.agentCode || 'AG-01';
+
+        const rows = sheet.sheetData?.rows || [];
+        rows.forEach((r, idx) => {
+          const name = (r.name || '').trim();
+          const pabo = parseFloat(r.pabo) || 0;
+          const pabe = parseFloat(r.pabe) || 0;
+          if (!name || (pabo === 0 && pabe === 0)) return;
+
+          txList.push({
+            id: `${sheetId}_${idx}`,
+            sheetId,
+            rowIndex: idx,
+            date,
+            createdAt,
+            time: sheet.time || '10:00 AM',
+            agentId,
+            agentName,
+            agentCode,
+            personName: name,
+            pabo,
+            pabe,
+            nature: pabo > 0 ? 'pabo' : (pabe > 0 ? 'pabe' : 'both')
+          });
+        });
+      });
+
+      return txList;
+    }
+
+    function getDecoratedDcTransactions() {
+      const allTx = getAllDcTransactions();
+      const allPayments = (typeof DB !== 'undefined' && DB.getDcPayments) ? DB.getDcPayments() : [];
+
+      // Sort chronologically asc (oldest first) to apply payments in FIFO order
+      allTx.sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.createdAt || '').localeCompare(b.createdAt || ''));
+
+      // Total payments per (agentId, personName, type)
+      const payPoolMap = {};
+      const paymentsMap = {};
+      allPayments.forEach(p => {
+        const ag = String(p.agentId || '');
+        const pName = (p.personName || '').trim().toLowerCase();
+        const pType = p.type || 'received';
+        const key = `${ag}_${pName}_${pType}`;
+        payPoolMap[key] = (payPoolMap[key] || 0) + (parseFloat(p.amount) || 0);
+        if (!paymentsMap[key]) paymentsMap[key] = [];
+        paymentsMap[key].push(p);
+      });
+
+      const remainingPool = { ...payPoolMap };
+
+      allTx.forEach(tx => {
+        const isPabo = tx.pabo > 0;
+        const isPabe = tx.pabe > 0;
+        const principal = isPabo ? tx.pabo : (isPabe ? tx.pabe : 0);
+        const pKey = isPabo
+          ? `${tx.agentId}_${(tx.personName || '').trim().toLowerCase()}_received`
+          : `${tx.agentId}_${(tx.personName || '').trim().toLowerCase()}_paid`;
+
+        const pool = remainingPool[pKey] || 0;
+        const applied = Math.min(principal, pool);
+        remainingPool[pKey] = Math.max(0, pool - applied);
+
+        tx.principal = principal;
+        tx.repaidAmount = applied;
+        tx.dueBalance = Math.max(0, principal - applied);
+        tx.isSettled = (tx.dueBalance <= 0 && principal > 0);
+        tx.relatedPayments = paymentsMap[pKey] || [];
+      });
+
+      return { allTx, allPayments, paymentsMap };
+    }
+
+    function populateDcCategoryDropdown(selectedAgentId = '') {
+      const catSel = document.getElementById('dcStatementCategory');
+      if (!catSel) return;
+      const curVal = catSel.value;
+
+      const { allTx } = getDecoratedDcTransactions();
+
+      // Aggregate dueBalance per person
+      const personDueMap = {};
+      const personDisplayMap = {};
+
+      allTx.forEach(tx => {
+        if (selectedAgentId && String(tx.agentId) !== String(selectedAgentId)) return;
+        const rawName = (tx.personName || '').trim();
+        if (!rawName || rawName === 'Unnamed Entity') return;
+        const lowerName = rawName.toLowerCase();
+
+        if (!personDisplayMap[lowerName]) {
+          personDisplayMap[lowerName] = rawName;
+          personDueMap[lowerName] = 0;
+        }
+        personDueMap[lowerName] += tx.dueBalance;
+      });
+
+      // Filter active entities: only include persons where dueBalance > 0
+      // If paid/settled or removed from sheet, they automatically do not appear
+      const activePersons = Object.keys(personDueMap)
+        .filter(k => personDueMap[k] > 0.001)
+        .map(k => personDisplayMap[k])
+        .sort((a, b) => a.localeCompare(b));
+
+      let opts = '<option value="">All Persons / Entities</option>';
+      activePersons.forEach(n => {
+        const escaped = n.replace(/"/g, '&quot;');
+        opts += `<option value="${escaped}" ${curVal.toLowerCase() === n.toLowerCase() ? 'selected' : ''}>${n}</option>`;
+      });
+      catSel.innerHTML = opts;
+
+      // If the previously selected person is no longer active, reset selection
+      if (curVal && !activePersons.some(n => n.toLowerCase() === curVal.toLowerCase())) {
+        catSel.value = '';
+      }
+    }
+
+    window.openDebitCreditModal = function () {
+      if (!dcDateFrom || !dcDateTo) {
+        initDcDateRange();
+      }
+      const agentSel = document.getElementById('dcStatementAgent');
+      if (agentSel) {
+        const curAg = document.getElementById('agentSel')?.value || '';
+        agentSel.innerHTML = '<option value="">All Agents</option>' +
+          agents.map(a => `<option value="${a.id}" ${String(a.id) === String(curAg) ? 'selected' : ''}>${a.name} (${a.code || a.outletCode || '—'})</option>`).join('');
+      }
+      populateDcCategoryDropdown(document.getElementById('dcStatementAgent')?.value || '');
+      renderDebitCreditStatement();
+      Modal.open('dcStatementModal');
+    };
+
+    window.onDcAgentChange = function () {
+      const agId = document.getElementById('dcStatementAgent')?.value || '';
+      populateDcCategoryDropdown(agId);
+      renderDebitCreditStatement();
+    };
+
+    window.renderDebitCreditStatement = function () {
+      const body = document.getElementById('dcStatementModalBody');
+      if (!body) return;
+
+      const agentId = document.getElementById('dcStatementAgent')?.value || '';
+      const categoryPerson = document.getElementById('dcStatementCategory')?.value || '';
+      const typeFilter = document.getElementById('dcStatementType')?.value || 'all';
+      const search = (document.getElementById('dcStatementSearch')?.value || '').trim().toLowerCase();
+      const from = document.getElementById('dcStatementDateFrom')?.value || dcDateFrom;
+      const to = document.getElementById('dcStatementDateTo')?.value || dcDateTo;
+
+      const { allTx } = getDecoratedDcTransactions();
+
+      // Filter transactions
+      const filtered = allTx.filter(tx => {
+        if (agentId && String(tx.agentId) !== String(agentId)) return false;
+        if (categoryPerson && tx.personName.toLowerCase() !== categoryPerson.toLowerCase()) return false;
+        if (from && tx.date && tx.date < from) return false;
+        if (to && tx.date && tx.date > to) return false;
+        if (search) {
+          const term = `${tx.personName} ${tx.agentName} ${tx.agentCode}`.toLowerCase();
+          if (!term.includes(search)) return false;
+        }
+
+        // Active vs Settled filtering:
+        // When settled, it auto-disappears from the active statement into Payment & Settlement History
+        if (typeFilter === 'settled') {
+          return tx.isSettled;
+        } else if (typeFilter === 'pabo') {
+          return tx.pabo > 0 && !tx.isSettled;
+        } else if (typeFilter === 'pabe') {
+          return tx.pabe > 0 && !tx.isSettled;
+        } else {
+          // 'all' = Active Unpaid loans (settled are hidden)
+          return !tx.isSettled;
+        }
+      });
+
+      // Sort by date desc for statement viewing
+      filtered.sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || ''));
+
+      // Aggregate totals
+      let totalPaboSum = 0;
+      let totalPabeSum = 0;
+      let totalRepaidSum = 0;
+      let totalDueSum = 0;
+
+      // Prepare Rows HTML
+      let rowsHtml = '';
+      if (filtered.length === 0) {
+        const emptyMsg = typeFilter === 'settled'
+          ? 'No settled or paid records found.'
+          : 'No active debit or credit records found.';
+        rowsHtml = `
+          <tr>
+            <td colspan="12" style="text-align:center; padding:32px; color:var(--text-muted);">
+              <i class="ri-inbox-line" style="font-size:28px; display:block; margin-bottom:8px; opacity:0.5;"></i>
+              ${emptyMsg}<br>
+              <span style="font-size:11px;">(All settled transactions are archived in Payment History)</span>
+            </td>
+          </tr>
+        `;
+      } else {
+        filtered.forEach((tx, idx) => {
+          const isPabo = tx.pabo > 0;
+          const isPabe = tx.pabe > 0;
+          const repaidAmount = tx.repaidAmount || 0;
+          const dueBalance = tx.dueBalance !== undefined ? tx.dueBalance : Math.max(0, tx.principal - repaidAmount);
+
+          totalPaboSum += tx.pabo;
+          totalPabeSum += tx.pabe;
+          totalRepaidSum += repaidAmount;
+          totalDueSum += dueBalance;
+
+          // Status Badge
+          let statusBadge = '';
+          if (tx.isSettled) {
+            statusBadge = `<span class="badge" style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); font-weight:700;"><i class="ri-checkbox-circle-line"></i> Paid</span>`;
+          } else if (repaidAmount > 0) {
+            statusBadge = `<span class="badge" style="background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); font-weight:700;"><i class="ri-time-line"></i> Partial</span>`;
+          } else {
+            statusBadge = `<span class="badge" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); font-weight:700;"><i class="ri-error-warning-line"></i> Unpaid</span>`;
+          }
+
+          // Nature Badge
+          let natureBadge = '';
+          if (isPabo) {
+            natureBadge = `<span class="badge" style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); font-weight:600;"><i class="ri-arrow-right-up-line"></i> Pabo (+)</span>`;
+          } else if (isPabe) {
+            natureBadge = `<span class="badge" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); font-weight:600;"><i class="ri-arrow-left-down-line"></i> Pabe (-)</span>`;
+          } else {
+            natureBadge = `<span class="badge" style="color:var(--text-muted);">—</span>`;
+          }
+
+          // Payment History summary
+          let payHistoryHtml = '';
+          const relatedPayments = tx.relatedPayments || [];
+          if (relatedPayments.length > 0) {
+            const lastPay = relatedPayments[relatedPayments.length - 1];
+            const payCount = relatedPayments.length;
+            payHistoryHtml = `
+              <div style="font-size:11px; line-height:1.3;">
+                <div style="font-weight:600; color:var(--text-primary);">${lastPay.date} (${fmt(lastPay.amount)})</div>
+                <div style="font-size:10px; color:var(--text-muted);">${lastPay.method || 'Cash'}${payCount > 1 ? ` • Total ${payCount} times` : ''}</div>
+              </div>
+            `;
+          } else {
+            payHistoryHtml = `<span style="font-size:11px; color:var(--text-muted);">Unpaid</span>`;
+          }
+
+          const escapedName = tx.personName.replace(/'/g, "\\'");
+          const payTypeArg = isPabo ? 'received' : 'paid';
+
+          rowsHtml += `
+            <tr>
+              <td class="text-center" style="font-weight:700; color:var(--text-muted); font-size:11px;">${idx + 1}</td>
+              <td>${formatBalDate(tx)}</td>
+              <td>${getBalAgentCodeStr(tx)}</td>
+              <td style="font-weight:700; color:var(--text-primary); font-size:12px;">${tx.personName}</td>
+              <td class="text-center">${natureBadge}</td>
+              <td class="text-right" style="font-weight:600; color:#ef4444;">${tx.pabe > 0 ? fmt(tx.pabe) : '—'}</td>
+              <td class="text-right" style="font-weight:600; color:#10b981;">${tx.pabo > 0 ? fmt(tx.pabo) : '—'}</td>
+              <td class="text-right" style="font-weight:600; color:var(--gold);">${repaidAmount > 0 ? fmt(repaidAmount) : '—'}</td>
+              <td class="text-right" style="font-weight:800; color:${dueBalance > 0 ? '#ef4444' : '#10b981'}; font-size:12px;">${fmt(dueBalance)}</td>
+              <td>${payHistoryHtml}</td>
+              <td class="text-center">${statusBadge}</td>
+              <td class="text-center screen-only" style="white-space:nowrap;">
+                <div class="flex gap-4 justify-center" style="display:inline-flex; align-items:center; gap:6px;">
+                  ${dueBalance > 0 ? `
+                  <button type="button" class="btn btn-primary btn-xs" onclick="openRecordPaymentModal({ agentId: '${tx.agentId}', personName: '${escapedName}', type: '${payTypeArg}', due: ${dueBalance} })" title="Record Payment">
+                    <i class="ri-money-dollar-circle-line"></i> Pay
+                  </button>
+                  ` : ''}
+                  <button type="button" class="btn btn-outline btn-xs" onclick="openDcHistoryModal('${escapedName}')" title="View Payment History">
+                    <i class="ri-history-line"></i> History
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // Selected Agent info text:
+      // Requirement: When All Agents is selected, display all agents' names in heading.
+      // When a single agent is selected, display only that agent's name & code.
+      const selectedAgObj = agentId ? agents.find(a => String(a.id) === String(agentId)) : null;
+      let agentText = '';
+      if (selectedAgObj) {
+        agentText = `${selectedAgObj.name} (${selectedAgObj.code || selectedAgObj.outletCode || 'AG-01'})`;
+      } else {
+        const allNames = (agents || []).map(a => `${a.name} (${a.code || a.outletCode || '—'})`).join(', ');
+        agentText = `All Agents (${allNames || '—'})`;
+      }
+
+      const entityText = categoryPerson ? categoryPerson : 'All Persons / Entities';
+      const dateRangeText = (from || to) ? `${from || '—'} to ${to || '—'}` : 'All Time';
+      const genTime = new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+
+      const titleSpan = document.getElementById('dcStatementModalTitle');
+      if (titleSpan) {
+        titleSpan.textContent = selectedAgObj
+          ? `Debit & Credit Statement — ${selectedAgObj.name} (${selectedAgObj.code || selectedAgObj.outletCode || 'AG-01'})`
+          : 'Debit & Credit Statement — All Agents';
+      }
+
+      let contentHtml = `
+        <!-- SCREEN-ONLY KPI STATS -->
+        <div class="screen-only" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:18px;">
+          <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:8px; padding:12px 16px;">
+            <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Total Lent (Pabo + / Receivable)</div>
+            <div style="font-size:18px; font-weight:800; color:#10b981; margin-top:4px;">${fmt(totalPaboSum)}</div>
+          </div>
+          <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:8px; padding:12px 16px;">
+            <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Total Borrowed (Pabe - / Payable)</div>
+            <div style="font-size:18px; font-weight:800; color:#ef4444; margin-top:4px;">${fmt(totalPabeSum)}</div>
+          </div>
+          <div style="background:rgba(217,119,6,0.08); border:1px solid rgba(217,119,6,0.25); border-radius:8px; padding:12px 16px;">
+            <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Total Settled / Repaid</div>
+            <div style="font-size:18px; font-weight:800; color:var(--gold); margin-top:4px;">${fmt(totalRepaidSum)}</div>
+          </div>
+          <div style="background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.25); border-radius:8px; padding:12px 16px;">
+            <div style="font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase;">Net Due Balance</div>
+            <div style="font-size:18px; font-weight:800; color:#3b82f6; margin-top:4px;">${fmt(totalDueSum)}</div>
+          </div>
+        </div>
+
+        <!-- PRINT HEADER (OFFICIAL LETTERHEAD) -->
+        <div class="summary-print-header" style="text-align:center; margin-bottom:14px; padding-bottom:10px; border-bottom:2px solid #0f172a;">
+          <h2 style="font-size:18px; font-weight:900; margin:0 0 4px 0; color:#0f172a; text-transform:uppercase; letter-spacing:0.5px;">${agentText}</h2>
+          <div style="font-size:11px; font-weight:700; color:#b45309; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">
+            Agent Debit & Credit (Loan & Borrowing) Statement
+          </div>
+          <div style="font-size:11px; color:#475569; display:flex; justify-content:center; gap:16px; flex-wrap:wrap; font-weight:600; line-height:1.5;">
+            <span><strong>Agent:</strong> ${agentText}</span>
+            <span>•</span>
+            <span><strong>Entity / Category:</strong> ${entityText}</span>
+            <span>•</span>
+            <span><strong>Date Range:</strong> ${dateRangeText}</span>
+            <span>•</span>
+            <span><strong>Generated:</strong> ${genTime}</span>
+          </div>
+        </div>
+
+        <!-- STATEMENT TABLE -->
+        <div class="summary-report-card" style="border:1px solid var(--border); border-radius:6px; overflow:hidden; background:var(--surface);">
+          <div class="table-wrapper" style="overflow-x:auto;">
+            <table class="data-table" style="width:100%; border-collapse:collapse; font-size:11px;">
+              <thead>
+                <tr style="background:rgba(255,255,255,0.03);">
+                  <th style="width:40px; text-align:center;">SL</th>
+                  <th style="width:115px; text-align:left;">Date & Time</th>
+                  <th style="width:140px; text-align:left;">Agent</th>
+                  <th style="text-align:left;">Person / Entity</th>
+                  <th style="width:120px; text-align:center;">Nature</th>
+                  <th style="width:95px; text-align:right;">Pabe (-)</th>
+                  <th style="width:95px; text-align:right;">Pabo (+)</th>
+                  <th style="width:95px; text-align:right;">Paid/Settled</th>
+                  <th style="width:100px; text-align:right;">Balance / Due</th>
+                  <th style="width:140px; text-align:left;">Payment History</th>
+                  <th style="width:110px; text-align:center;">Status</th>
+                  <th style="width:115px; text-align:center;" class="screen-only">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 4 HORIZONTAL AUDIT SIGNATURES IN TABLE (NO FLEX/GRID) -->
+        <div class="audit-sign-wrapper" style="margin-top:40px; width:100%; page-break-inside:avoid;">
+          <table class="audit-sign-table" style="width:100%; border-collapse:collapse; border:none; background:transparent;">
+            <tr>
+              <td style="width:25%; border:none; text-align:center; vertical-align:top; padding:0 12px;">
+                <div class="audit-sign-box" style="border-top:1.5px solid #0f172a; padding-top:6px; font-size:11px; color:#0f172a; line-height:1.35;">
+                  <strong>Prepared By</strong><br>
+                  <span style="font-size:10px; color:#64748b;">Accounts Officer</span>
+                </div>
+              </td>
+              <td style="width:25%; border:none; text-align:center; vertical-align:top; padding:0 12px;">
+                <div class="audit-sign-box" style="border-top:1.5px solid #0f172a; padding-top:6px; font-size:11px; color:#0f172a; line-height:1.35;">
+                  <strong>Verified By</strong><br>
+                  <span style="font-size:10px; color:#64748b;">Internal Auditor</span>
+                </div>
+              </td>
+              <td style="width:25%; border:none; text-align:center; vertical-align:top; padding:0 12px;">
+                <div class="audit-sign-box" style="border-top:1.5px solid #0f172a; padding-top:6px; font-size:11px; color:#0f172a; line-height:1.35;">
+                  <strong>Approved By</strong><br>
+                  <span style="font-size:10px; color:#64748b;">In-Charge</span>
+                </div>
+              </td>
+              <td style="width:25%; border:none; text-align:center; vertical-align:top; padding:0 12px;">
+                <div class="audit-sign-box" style="border-top:1.5px solid #0f172a; padding-top:6px; font-size:11px; color:#0f172a; line-height:1.35;">
+                  <strong>Agent Authorization</strong><br>
+                  <span style="font-size:10px; color:#64748b;">Signature & Official Seal</span>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      `;
+
+      body.innerHTML = contentHtml;
+    };
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // RECORD PAYMENT MODAL HANDLERS
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    window.openRecordPaymentModal = function (prefill = null) {
+      const agentSel = document.getElementById('dcPayAgent');
+      const curAg = prefill?.agentId || document.getElementById('dcStatementAgent')?.value || document.getElementById('agentSel')?.value || '';
+
+      if (agentSel) {
+        agentSel.innerHTML = '<option value="">Select Agent</option>' +
+          agents.map(a => `<option value="${a.id}" ${String(a.id) === String(curAg) ? 'selected' : ''}>${a.name} (${a.code || a.outletCode || '—'})</option>`).join('');
+      }
+
+      populateDcPayPersonSelect(curAg);
+
+      const d = new Date();
+      const dateInp = document.getElementById('dcPayDate');
+      if (dateInp) dateInp.value = d.toISOString().slice(0, 10);
+
+      const typeSel = document.getElementById('dcPayType');
+      if (typeSel && prefill?.type) {
+        typeSel.value = prefill.type;
+      }
+
+      const pInp = document.getElementById('dcPayPersonInp');
+      const pSel = document.getElementById('dcPayPersonSel');
+      if (prefill?.personName) {
+        if (pInp) pInp.value = prefill.personName;
+        if (pSel) pSel.value = prefill.personName;
+      }
+
+      const amtInp = document.getElementById('dcPayAmount');
+      if (amtInp) {
+        amtInp.value = prefill?.due ? moneyFormat(prefill.due) : '';
+      }
+
+      const noteInp = document.getElementById('dcPayNote');
+      if (noteInp) noteInp.value = '';
+
+      updateDcPayDueBadge();
+      Modal.open('dcPaymentModal');
+    };
+
+    function populateDcPayPersonSelect(agentId = '') {
+      const pSel = document.getElementById('dcPayPersonSel');
+      if (!pSel) return;
+      const { allTx } = getDecoratedDcTransactions();
+      const personDueMap = {};
+      const personDisplayMap = {};
+
+      allTx.forEach(tx => {
+        if (agentId && String(tx.agentId) !== String(agentId)) return;
+        const rawName = (tx.personName || '').trim();
+        if (!rawName || rawName === 'Unnamed Entity') return;
+        const lowerName = rawName.toLowerCase();
+        if (!personDisplayMap[lowerName]) {
+          personDisplayMap[lowerName] = rawName;
+          personDueMap[lowerName] = 0;
+        }
+        personDueMap[lowerName] += tx.dueBalance;
+      });
+
+      const names = Object.keys(personDueMap)
+        .filter(k => personDueMap[k] > 0.001)
+        .map(k => personDisplayMap[k])
+        .sort((a, b) => a.localeCompare(b));
+
+      let opts = '<option value="">-- Select from list --</option>';
+      names.forEach(n => {
+        const due = personDueMap[n.toLowerCase()] || 0;
+        opts += `<option value="${n.replace(/"/g, '&quot;')}">${n} (Due: ${moneyFormat(due)})</option>`;
+      });
+      pSel.innerHTML = opts;
+    }
+
+    window.onDcPayAgentChange = function () {
+      const agId = document.getElementById('dcPayAgent')?.value || '';
+      populateDcPayPersonSelect(agId);
+      updateDcPayDueBadge();
+    };
+
+    window.onDcPayPersonSelectChange = function () {
+      const pSel = document.getElementById('dcPayPersonSel');
+      const pInp = document.getElementById('dcPayPersonInp');
+      if (pSel && pInp && pSel.value) {
+        pInp.value = pSel.value;
+      }
+      updateDcPayDueBadge();
+    };
+
+    window.updateDcPayDueBadge = function () {
+      const agentId = document.getElementById('dcPayAgent')?.value || '';
+      const personName = (document.getElementById('dcPayPersonInp')?.value || '').trim();
+      const payType = document.getElementById('dcPayType')?.value || 'paid';
+      const dueEl = document.getElementById('dcPayDueAmountText');
+      if (!dueEl) return;
+
+      if (!personName) {
+        dueEl.textContent = '0.00';
+        dueEl.dataset.due = '0';
+        return;
+      }
+
+      // Calculate total original principal for this agent + person
+      let totalPrincipal = 0;
+      const allTx = getAllDcTransactions();
+      allTx.forEach(tx => {
+        if (agentId && String(tx.agentId) !== String(agentId)) return;
+        if (tx.personName.toLowerCase() !== personName.toLowerCase()) return;
+        if (payType === 'paid') {
+          // Repaying Pabe (-) debt
+          totalPrincipal += tx.pabe;
+        } else {
+          // Collecting Pabo (+) debt
+          totalPrincipal += tx.pabo;
+        }
+      });
+
+      // Calculate previous payments
+      const payments = (typeof DB !== 'undefined' && DB.getDcPayments) ? DB.getDcPayments(agentId || null, personName) : [];
+      const repaid = payments
+        .filter(p => p.type === payType)
+        .reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+
+      const due = Math.max(0, totalPrincipal - repaid);
+      dueEl.textContent = fmt(due);
+      dueEl.dataset.due = due;
+    };
+
+    window.fillDcPayFullDue = function () {
+      const dueEl = document.getElementById('dcPayDueAmountText');
+      const amtInp = document.getElementById('dcPayAmount');
+      if (dueEl && amtInp) {
+        const d = parseFloat(dueEl.dataset.due || 0);
+        amtInp.value = moneyFormat(d);
+      }
+    };
+
+    window.saveDebitCreditPayment = function () {
+      const agentId = document.getElementById('dcPayAgent')?.value;
+      const personName = (document.getElementById('dcPayPersonInp')?.value || '').trim();
+      const type = document.getElementById('dcPayType')?.value;
+      const date = document.getElementById('dcPayDate')?.value;
+      const amount = parseNum(document.getElementById('dcPayAmount')?.value);
+      const method = document.getElementById('dcPayMethod')?.value || 'Cash';
+      const note = (document.getElementById('dcPayNote')?.value || '').trim();
+
+      if (!agentId) { Toast.error('Please select an Agent.'); return; }
+      if (!personName) { Toast.error('Please enter or select a Person / Institution name.'); return; }
+      if (isNaN(amount) || amount <= 0) { Toast.error('Please enter a valid payment amount.'); return; }
+      if (!date) { Toast.error('Please select a payment date.'); return; }
+
+      const agObj = agents.find(a => String(a.id) === String(agentId));
+      const agentName = agObj ? agObj.name : 'Agent';
+
+      if (typeof DB !== 'undefined' && DB.addDcPayment) {
+        DB.addDcPayment({
+          agentId,
+          agentName,
+          personName,
+          type,
+          date,
+          amount,
+          method,
+          note
+        });
+      }
+
+      Modal.close('dcPaymentModal');
+      Toast.success('Payment recorded successfully!');
+      populateDcCategoryDropdown(document.getElementById('dcStatementAgent')?.value || '');
+      renderDebitCreditStatement();
+    };
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // DEBIT & CREDIT PAYMENT HISTORY MODAL
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    window.openDcHistoryModal = function (personFilter = '') {
+      const body = document.getElementById('dcHistoryModalBody');
+      if (!body) return;
+
+      const payments = (typeof DB !== 'undefined' && DB.getDcPayments) ? DB.getDcPayments() : [];
+      let list = payments;
+      if (personFilter) {
+        list = list.filter(p => (p.personName || '').toLowerCase() === personFilter.toLowerCase());
+      }
+      list.sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || ''));
+
+      let rowsHtml = '';
+      if (list.length === 0) {
+        rowsHtml = `
+          <tr>
+            <td colspan="8" style="text-align:center; padding:28px; color:var(--text-muted);">
+              No payment history records found.
+            </td>
+          </tr>
+        `;
+      } else {
+        list.forEach((p, idx) => {
+          const isPaid = p.type === 'paid';
+          const typeBadge = isPaid
+            ? `<span class="badge" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); font-weight:600;"><i class="ri-arrow-up-circle-line"></i>Repaid</span>`
+            : `<span class="badge" style="background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); font-weight:600;"><i class="ri-arrow-down-circle-line"></i>Received</span>`;
+
+          rowsHtml += `
+            <tr>
+              <td class="text-center" style="font-weight:700; color:var(--text-muted); font-size:11px;">${idx + 1}</td>
+              <td style="font-weight:600; color:var(--text-primary); font-size:12px;">${p.date}</td>
+              <td style="font-size:12px;">${p.agentName || 'Agent'}</td>
+              <td style="font-weight:700; color:var(--text-primary); font-size:12px;">${p.personName}</td>
+              <td class="text-center">${typeBadge}</td>
+              <td class="text-right" style="font-weight:800; color:var(--gold); font-size:13px;">${fmt(p.amount)}</td>
+              <td style="font-size:11px;"><span class="badge badge-outline">${p.method || 'Cash'}</span> ${p.note ? `<span style="color:var(--text-muted);">• ${p.note}</span>` : ''}</td>
+              <td class="text-center" style="white-space:nowrap; padding:6px 10px;">
+                <button type="button" class="btn btn-danger btn-xs" onclick="deleteDebitCreditPayment('${p.id || ''}', '${personFilter.replace(/'/g, "\\'")}', ${idx})" title="Delete Payment Record" style="padding:4px 10px; font-weight:700; display:inline-flex; align-items:center; gap:4px; font-size:11px;">
+                  <i class="ri-delete-bin-line"></i> Delete
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      body.innerHTML = `
+        <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-size:13px; color:var(--text-muted);">
+            ${personFilter ? `Filtered by Entity: <strong style="color:var(--gold);">${personFilter}</strong>` : 'Showing all recorded repayments and settlements'}
+          </div>
+          <button class="btn btn-primary btn-xs" onclick="openRecordPaymentModal({ personName: '${personFilter.replace(/'/g, "\\'")}' })">
+            <i class="ri-add-line"></i> + Add Payment
+          </button>
+        </div>
+        <div class="table-wrapper" style="border:1px solid var(--border); border-radius:6px; overflow:hidden;">
+          <table class="data-table" style="width:100%; border-collapse:collapse; font-size:11px;">
+            <thead>
+              <tr style="background:rgba(255,255,255,0.03);">
+                <th style="width:40px; text-align:center;">SL</th>
+                <th style="width:110px;">Payment Date</th>
+                <th>Agent</th>
+                <th>Person / Entity</th>
+                <th style="width:140px; text-align:center;">Type</th>
+                <th style="width:110px; text-align:right;">Amount</th>
+                <th>Method & Note</th>
+                <th style="width:100px; text-align:center;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      Modal.open('dcHistoryModal');
+    };
+
+    window.deleteDebitCreditPayment = function (paymentId, personFilter = '', idx = -1) {
+      if (!confirm('Are you sure you want to permanently delete this payment history record? This record will be deleted permanently and will not return.')) return;
+
+      try {
+        const key = (typeof DB !== 'undefined' && DB.KEYS && DB.KEYS.DC_PAYMENTS) ? DB.KEYS.DC_PAYMENTS : 'mste_dc_payments';
+        let all = JSON.parse(localStorage.getItem(key) || '[]');
+        if (Array.isArray(all)) {
+          all = all.filter((r, i) => {
+            if (paymentId && r.id && String(r.id) === String(paymentId)) return false;
+            if (idx >= 0 && i === idx) return false;
+            return true;
+          });
+          localStorage.setItem(key, JSON.stringify(all));
+        }
+      } catch (e) {
+        console.error('Error deleting DC payment:', e);
+      }
+
+      Toast.success('Payment record permanently deleted.');
+      openDcHistoryModal(personFilter);
+      populateDcCategoryDropdown(document.getElementById('dcStatementAgent')?.value || '');
+      renderDebitCreditStatement();
+    };
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // PRINT & PDF DOWNLOAD FOR DEBIT & CREDIT STATEMENT
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    window.printDebitCreditSummary = function () {
+      const content = document.getElementById('dcStatementModalBody');
+      if (!content) return;
+
+      const printIframe = document.createElement('iframe');
+      printIframe.style.position = 'fixed';
+      printIframe.style.right = '0';
+      printIframe.style.bottom = '0';
+      printIframe.style.width = '0';
+      printIframe.style.height = '0';
+      printIframe.style.border = 'none';
+      document.body.appendChild(printIframe);
+
+      const doc = printIframe.contentWindow.document;
+      doc.open();
+      doc.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Agent Debit & Credit Statement — Print</title>
+          <style>
+            @page { size: A4 landscape; margin: 10mm 12mm 12mm 12mm; }
+            * { box-sizing: border-box; }
+            body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; color: #0f172a; background: #ffffff; }
+            .screen-only { display: none !important; }
+            .summary-print-header { display: block !important; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #0f172a !important; }
+            .summary-report-card { border: 1px solid #cbd5e1; border-radius: 4px; overflow: hidden; margin-bottom: 20px; page-break-inside: avoid; }
+            table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+            th, td { border: 1px solid #cbd5e1; padding: 6px 4px; font-size: 10px; color: #0f172a; }
+            th { background: #f1f5f9; font-weight: 700; color: #0f172a; }
+            .audit-sign-wrapper { margin-top: 45px !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+            .audit-sign-table { width: 100% !important; border: none !important; border-collapse: collapse !important; background: transparent !important; }
+            .audit-sign-table td { border: none !important; padding: 0 15px !important; vertical-align: top !important; }
+            .audit-sign-box { border-top: 1.5px solid #0f172a !important; padding-top: 6px; font-size: 11px; color: #0f172a !important; text-align: center; line-height: 1.4; }
+            .audit-sign-box strong { font-size: 12px; font-weight: 700; color: #0f172a !important; }
+          </style>
+        </head>
+        <body>
+          ${content.innerHTML}
+        </body>
+        </html>
+      `);
+      doc.close();
+
+      setTimeout(() => {
+        printIframe.contentWindow.focus();
+        printIframe.contentWindow.print();
+        setTimeout(() => {
+          if (document.body.contains(printIframe)) {
+            document.body.removeChild(printIframe);
+          }
+        }, 1500);
+      }, 250);
+    };
+
+    window.downloadDebitCreditPDF = function () {
+      const element = document.getElementById('dcStatementModalBody');
+      if (!element) return;
+      const agentSel = document.getElementById('dcStatementAgent');
+      const agentText = agentSel && agentSel.value ? (agents.find(a => String(a.id) === String(agentSel.value))?.name || 'Agent').replace(/\s+/g, '_') : 'All_Agents';
+      const catSel = document.getElementById('dcStatementCategory');
+      const catText = catSel && catSel.value ? catSel.value.replace(/\s+/g, '_') : 'All_Entities';
+      const filename = `DebitCredit_Statement_${agentText}_${catText}.pdf`;
+
+      if (window.html2pdf) {
+        const opt = {
+          margin: [8, 8, 8, 8],
+          filename: filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            backgroundColor: '#ffffff',
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: 1200,
+            onclone: (clonedDoc) => {
+              clonedDoc.querySelectorAll('.screen-only').forEach(el => el.remove());
+
+              const clonedBody = clonedDoc.getElementById('dcStatementModalBody');
+              if (clonedBody) {
+                clonedBody.style.width = '1060px';
+                clonedBody.style.maxWidth = '1060px';
+                clonedBody.style.color = '#0f172a';
+                clonedBody.style.background = '#ffffff';
+                clonedBody.style.padding = '0';
+                clonedBody.style.overflow = 'visible';
+                clonedBody.style.maxHeight = 'none';
+                clonedBody.querySelectorAll('h1, h2, h3, h4, th, strong').forEach(el => {
+                  el.style.color = '#0f172a';
+                });
+              }
+
+              clonedDoc.querySelectorAll('.table-wrapper').forEach(w => {
+                w.style.overflow = 'visible';
+                w.style.width = '100%';
+              });
+              clonedDoc.querySelectorAll('.summary-report-card').forEach(c => {
+                c.style.overflow = 'visible';
+                c.style.width = '100%';
+                c.style.borderColor = '#cbd5e1';
+                c.style.background = '#ffffff';
+              });
+
+              clonedDoc.querySelectorAll('table').forEach(tbl => {
+                tbl.style.width = '100%';
+                tbl.style.tableLayout = 'fixed';
+                tbl.style.borderCollapse = 'collapse';
+              });
+              clonedDoc.querySelectorAll('th, td').forEach(cell => {
+                cell.style.borderColor = '#cbd5e1';
+                if (cell.tagName === 'TH') {
+                  cell.style.background = '#f1f5f9';
+                  cell.style.color = '#0f172a';
+                }
+              });
+
+              const printHeader = clonedDoc.querySelector('.summary-print-header');
+              if (printHeader) {
+                printHeader.style.display = 'block';
+                printHeader.style.visibility = 'visible';
+                printHeader.style.borderBottom = '2px solid #0f172a';
+                printHeader.style.paddingBottom = '12px';
+                printHeader.style.marginBottom = '16px';
+                printHeader.querySelectorAll('*').forEach(el => {
+                  if (el.tagName === 'H2') el.style.color = '#0f172a';
+                  else if (el.style && (el.style.color === 'rgb(180, 83, 9)' || el.style.color === '#b45309')) el.style.color = '#b45309';
+                  else el.style.color = '#334155';
+                });
+              }
+
+              const signWrapper = clonedDoc.querySelector('.audit-sign-wrapper');
+              if (signWrapper) {
+                signWrapper.style.display = 'block';
+                signWrapper.style.visibility = 'visible';
+                signWrapper.style.marginTop = '45px';
+                signWrapper.style.paddingTop = '10px';
+                signWrapper.style.width = '100%';
+              }
+              const signTable = clonedDoc.querySelector('.audit-sign-table');
+              if (signTable) {
+                signTable.style.width = '100%';
+                signTable.style.border = 'none';
+                signTable.style.borderCollapse = 'collapse';
+                signTable.style.background = 'transparent';
+                signTable.querySelectorAll('td').forEach(td => {
+                  td.style.border = 'none';
+                  td.style.verticalAlign = 'top';
+                });
+                signTable.querySelectorAll('.audit-sign-box').forEach(box => {
+                  box.style.borderTop = '1.5px solid #0f172a';
+                  box.style.paddingTop = '6px';
+                  box.style.color = '#0f172a';
+                  box.style.textAlign = 'center';
+                  box.querySelectorAll('strong').forEach(s => {
+                    s.style.color = '#0f172a';
+                    s.style.fontSize = '12px';
+                    s.style.fontWeight = '700';
+                  });
+                });
+              }
+            }
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(element).save().then(() => {
+          Toast.success('PDF downloaded successfully!');
+        }).catch(err => {
+          console.warn('html2pdf failed, falling back to print', err);
+          window.printDebitCreditSummary();
+        });
+      } else {
+        window.printDebitCreditSummary();
+      }
+    };
+
+    // Event listeners for month/year dropdowns & date sync
+    document.getElementById('sumCommissionMonth')?.addEventListener('change', function () {
+      const selOpt = this.options[this.selectedIndex];
+      if (selOpt && selOpt.dataset.month) {
+        this.dataset.month = selOpt.dataset.month;
+      }
+      scheduleBalanceSheetDraftSave();
+    });
+
+    document.getElementById('sumAitMonth')?.addEventListener('change', function () {
+      const selOpt = this.options[this.selectedIndex];
+      if (selOpt && selOpt.dataset.month) {
+        this.dataset.month = selOpt.dataset.month;
+      }
+      scheduleBalanceSheetDraftSave();
+    });
+
+    document.getElementById('entDate')?.addEventListener('change', syncMonthYearFromEntDate);
+
+    renderDcRows(10);
+    load();
+    const initStore = getAllBalanceSheetDrafts();
+    const initAgent = initStore.lastAgentId || (agents && agents.length ? agents[0].id : '');
+    if (initAgent) {
+      const entAgent = document.getElementById('entAgent');
+      if (entAgent) entAgent.value = initAgent;
+      loadBalanceSheetDraftForAgent(initAgent);
+    } else {
+      updateCommissionMonthOptions('Jan');
+      updateAitMonthOptions('Jan');
+    }
+  </script>
+</body>
+
+</html>
