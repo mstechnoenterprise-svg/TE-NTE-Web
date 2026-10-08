@@ -11,7 +11,7 @@
  *  এই ব্রাউজারে (localStorage) থাকে।
  */
 const APP_CONFIG = {
-  /** উদাহরণ: 'https://script.google.com/macros/s/AKfycb.../exec' */
+  /** উদাহরণ: 'https://script.google.com/macros/s/AKfycbz_TVyF8qUuk0h3PUOlZvmgKUmzntdoL1UjhsNDooBmwzarY5wrMrmVQo9_pwRMbEeM/exec' */
   APPS_SCRIPT_URL: '',
 
   /** Code.gs এর CONFIG.API_TOKEN এর সাথে মিলতে হবে */
